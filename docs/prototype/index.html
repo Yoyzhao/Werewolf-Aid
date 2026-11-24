@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<title>狼人杀助手 · 5A 可交互原型</title>
+<style>
+  :root{
+    --bg:#0a0c10;
+    --surface:#12161d;
+    --surface-2:#181d26;
+    --surface-3:#1e2430;
+    --line:#252c38;
+    --line-strong:#333c4b;
+    --text:#eef1f6;
+    --muted:#98a2b3;
+    --faint:#6b7688;
+    --accent:#e8b44a;
+    --accent-ink:#1a1408;
+    --danger:#e5484d;
+    --good:#46b98a;
+    --radius:16px;
+    --radius-sm:10px;
+    --shadow:0 18px 40px rgba(0,0,0,.45);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(720px 420px at 78% -8%, rgba(232,180,74,.10), transparent 62%),
+      radial-gradient(560px 360px at 8% 4%, rgba(70,185,138,.05), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font);
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    min-height:100dvh;
+  }
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  ::selection{background:rgba(232,180,74,.28)}
+
+  .shell{max-width:1200px;margin:0 auto;padding:0 16px}
+  .layout{display:block;padding-bottom:120px}
+  @media (min-width:1024px){
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start;padding-bottom:32px}
+  }
+
+  /* ---------- header ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:30;
+    background:linear-gradient(180deg,rgba(10,12,16,.94),rgba(10,12,16,.78));
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-in{display:flex;align-items:center;gap:12px;min-height:56px;padding-top:env(safe-area-inset-top)}
+  .brand{display:flex;align-items:center;gap:9px;min-width:0}
+  .brand-mark{width:26px;height:26px;flex:none;color:var(--accent)}
+  .brand-name{font-weight:650;letter-spacing:.02em;font-size:15px;white-space:nowrap}
+  .brand-sub{font-size:11px;color:var(--faint);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+  .phase-chip{
+    margin-left:auto;display:flex;align-items:center;gap:8px;
+    padding:6px 10px;border:1px solid var(--line-strong);border-radius:999px;
+    background:var(--surface);font-size:12px;color:var(--muted);white-space:nowrap
+  }
+  .phase-chip b{color:var(--text);font-weight:600}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(232,180,74,.16)}
+  .icon-btn{
+    width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;
+    border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);flex:none
+  }
+  .icon-btn:hover{color:var(--text);border-color:var(--line-strong)}
+  @media (min-width:1024px){ .only-mobile{display:none!important} }
+  @media (max-width:1023px){ .only-desktop{display:none!important} }
+
+  /* ---------- generic ---------- */
+  .screen{display:none;padding-top:18px;animation:rise .22s ease-out}
+  .screen.on{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){ .screen{animation:none} *{transition:none!important} }
+
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 6px}
+  h1{font-size:26px;line-height:1.24;margin:0 0 8px;letter-spacing:-.01em;font-weight:680}
+  h2{font-size:18px;margin:0 0 4px;letter-spacing:-.005em;font-weight:650}
+  h3{font-size:14px;margin:0;font-weight:650}
+  .lead{color:var(--muted);margin:0 0 20px;font-size:14px;max-width:46ch}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;
+  }
+  .card + .card{margin-top:12px}
+  .card-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+  .card-head .hint{margin-left:auto;font-size:12px;color:var(--faint)}
+  .divider{height:1px;background:var(--line);margin:16px 0;border:0}
+  .muted{color:var(--muted)}
+  .faint{color:var(--faint)}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:4px 9px;border-radius:999px;border:1px solid var(--line-strong);
+    font-size:11.5px;color:var(--muted);background:var(--surface-2);white-space:nowrap
+  }
+  .chip.ac{color:#d9c79a;border-color:#4a4028;background:rgba(232,180,74,.08)}
+  .chip.priv{color:#f0a8aa;border-color:#4a2a2c;background:rgba(229,72,77,.09)}
+  .chip.ok{color:#9fe0c4;border-color:#27503f;background:rgba(70,185,138,.09)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:48px;padding:0 18px;border-radius:12px;font-weight:640;font-size:15px;
+    border:1px solid var(--line-strong);background:var(--surface-2);color:var(--text);
+    transition:background .15s,border-color .15s,transform .06s;white-space:nowrap
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn:hover{background:var(--surface-3);border-color:#3d4757}
+  .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .btn.primary:hover{background:#f2c163;border-color:#f2c163}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted);min-height:44px;padding:0 10px}
+  .btn.ghost:hover{color:var(--text);background:var(--surface-2)}
+  .btn.danger{color:#ffd9da;border-color:#5a2b2e;background:rgba(229,72,77,.12)}
+  .btn.danger:hover{background:rgba(229,72,77,.2)}
+  .btn[disabled]{opacity:.42;pointer-events:none}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn-row > .btn{flex:1 1 auto}
+
+  .actionbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(10,12,16,0),rgba(10,12,16,.92) 34%);
+    display:flex;gap:10px;align-items:center
+  }
+  .actionbar .bar-in{display:flex;gap:10px;width:100%;max-width:1200px;margin:0 auto}
+  .actionbar .btn.primary{flex:1}
+  @media (min-width:1024px){
+    .actionbar{position:static;padding:16px 0 8px;background:none}
+    .actionbar .bar-in{
+      justify-content:flex-end;gap:10px;padding:10px 12px;
+      border:1px solid var(--line);border-radius:14px;background:var(--surface)
+    }
+    .actionbar .bar-in .btn{flex:0 0 auto}
+    .actionbar .btn.primary{min-width:200px;flex:0 0 auto}
+    .actionbar .btn.ghost{min-width:96px}
+  }
+
+  /* ---------- home ---------- */
+  .hero{padding:12px 0 22px}
+  .hero h1{font-size:30px;max-width:20ch}
+  .entry-list{display:grid;gap:10px;margin-top:18px}
+  @media (min-width:720px){ .entry-list{grid-template-columns:1fr 1fr} .entry-list .entry:first-child{grid-column:1 / -1} }
+  .entry{
+    display:flex;align-items:center;gap:14px;text-align:left;width:100%;
+    padding:16px;border-radius:var(--radius);border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--surface-2),var(--surface));
+    transition:border-color .15s,transform .08s
+  }
+  .entry:hover{border-color:var(--line-strong)}
+  .entry:active{transform:translateY(1px)}
+  .entry-mark{
+    width:44px;height:44px;border-radius:12px;flex:none;display:grid;place-items:center;
+    background:rgba(232,180,74,.1);color:var(--accent);border:1px solid rgba(232,180,74,.22)
+  }
+  .entry-mark.green{background:rgba(70,185,138,.09);color:var(--good);border-color:rgba(70,185,138,.22)}
+  .entry-mark.grey{background:var(--surface-3);color:var(--muted);border-color:var(--line-strong)}
+  .entry-body{min-width:0}
+  .entry-title{display:block;font-weight:650;font-size:16px}
+  .entry-desc{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+  .entry-chev{margin-left:auto;color:var(--faint);flex:none}
+
+  .preflight{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+  .preflight li{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted)}
+  .preflight svg{flex:none;margin-top:3px;color:var(--good)}
+
+  /* ---------- setup ---------- */
+  .board-grid{display:grid;gap:10px}
+  @media (min-width:640px){ .board-grid{grid-template-columns:1fr 1fr} }
+  .board-opt{
+    text-align:left;padding:14px;border-radius:var(--radius-sm);border:1px solid var(--line);
+    background:var(--surface-2);display:block
+  }
+  .board-opt[aria-pressed="true"]{border-color:var(--accent);background:rgba(232,180,74,.07);box-shadow:inset 0 0 0 1px var(--accent)}
+  .board-opt .t{font-weight:650;font-size:15px}
+  .board-opt .d{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .seg{display:flex;gap:6px;padding:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .seg button{flex:1 1 84px;min-height:44px;border-radius:9px;font-size:14px;color:var(--muted);font-weight:600;padding:0 8px;white-space:nowrap}
+  .seg button[aria-pressed="true"]{background:var(--surface-3);color:var(--text);box-shadow:0 1px 0 rgba(255,255,255,.04) inset}
+  .field{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .field:last-child{border-bottom:0}
+  .field .lab{font-size:14px}
+  .field .sub{font-size:12px;color:var(--faint);display:block}
+  .field .ctl{margin-left:auto;flex:none}
+  .switch{width:50px;height:30px;border-radius:999px;background:var(--surface-3);border:1px solid var(--line-strong);position:relative;transition:background .15s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:transform .16s,background .16s}
+  .switch[aria-checked="true"]{background:rgba(232,180,74,.24);border-color:var(--accent)}
+  .switch[aria-checked="true"]::after{transform:translateX(20px);background:var(--accent)}
+
+  /* ---------- seats ---------- */
+  .seat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  @media (min-width:560px){ .seat-grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+  @media (min-width:1024px){ .rail .seat-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .seat{
+    position:relative;min-height:56px;padding:8px 6px;border-radius:12px;
+    border:1px solid var(--line);background:var(--surface-2);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    transition:border-color .12s,background .12s
+  }
+  .seat:hover{border-color:var(--line-strong)}
+  .seat .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:17px;font-weight:600;line-height:1.1}
+  .seat .r{font-size:10.5px;color:var(--faint);letter-spacing:.04em}
+  .seat[aria-pressed="true"]{border-color:var(--accent);background:rgba(232,180,74,.12)}
+  .seat.sel{border-color:var(--accent);background:rgba(232,180,74,.12)}
+  .seat.dead{opacity:.42;text-decoration:line-through}
+  .seat .badge{position:absolute;top:-6px;right:-4px;font-size:10px;padding:1px 5px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:700}
+  .seat .badge.dead-b{background:var(--danger);color:#fff}
+  .seat .vote{position:absolute;bottom:3px;right:6px;font-size:11px;color:var(--accent);font-weight:700;font-family:var(--mono)}
+  .seat-grid.compact .seat{min-height:48px}
+  .seat-grid.compact .seat .r{display:none}
+
+  /* ---------- step card / night ---------- */
+  .step{
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface)
+  }
+  .step-top{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);font-size:12px;color:var(--muted)}
+  .step-body{padding:18px 16px 16px}
+  .role-line{
+    font-size:21px;line-height:1.45;font-weight:650;margin:2px 0 6px;letter-spacing:-.01em
+  }
+  .role-line .q{color:var(--accent)}
+  .sub-line{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+  .priv-line{
+    display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
+    background:rgba(229,72,77,.08);border:1px solid rgba(229,72,77,.22);
+    color:#ffc9cb;font-size:13px;margin-bottom:14px
+  }
+  .step-progress{display:flex;gap:4px;margin-left:auto}
+  .step-progress i{width:16px;height:3px;border-radius:2px;background:var(--line-strong)}
+  .step-progress i.on{background:var(--accent)}
+
+  /* ---------- deal cover ---------- */
+  .cover{
+    position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+    padding:24px;background:rgba(6,8,11,.92);backdrop-filter:blur(6px)
+  }
+  .cover.on{display:flex}
+  .cover-card{width:100%;max-width:400px;text-align:center;padding:28px 20px;border-radius:20px;border:1px solid var(--line-strong);background:linear-gradient(180deg,#141925,#0e1219);box-shadow:var(--shadow)}
+  .cover-card .lock{color:var(--accent);margin-bottom:14px}
+  .cover-card h2{font-size:20px;margin-bottom:6px}
+  .cover-card p{color:var(--muted);font-size:13.5px;margin:0 0 20px}
+  .idcard{
+    border-radius:16px;padding:22px 18px;border:1px solid rgba(232,180,74,.3);
+    background:radial-gradient(120% 120% at 50% 0%,rgba(232,180,74,.16),rgba(20,25,37,.9));
+    margin-bottom:18px
+  }
+  .idcard .camp{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+  .idcard .role{font-size:28px;font-weight:700;margin:4px 0 6px;letter-spacing:.02em}
+  .idcard .skill{font-size:13px;color:#cfd6e2}
+  .idcard.wolf{border-color:rgba(229,72,77,.34);background:radial-gradient(120% 120% at 50% 0%,rgba(229,72,77,.16),rgba(20,25,37,.9))}
+  .idcard.wolf .camp{color:#ff9a9d}
+
+  /* ---------- log / rail ---------- */
+  .rail{display:none}
+  @media (min-width:1024px){ .rail{display:block;position:sticky;top:72px} }
+  .rail-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:14px}
+  .rail-card + .rail-card{margin-top:12px}
+  .rail-title{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  .log{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:260px;overflow:auto}
+  .log li{display:flex;gap:8px;font-size:12.5px;color:var(--muted);line-height:1.4}
+  .log .r{font-family:var(--mono);color:var(--faint);flex:none;font-size:11.5px;padding-top:1px}
+  .log li[data-kind="death"]{color:#ffb4b6}
+  .log li[data-kind="win"]{color:#a7e6cb}
+
+  /* ---------- sheet (mobile rail) ---------- */
+  .sheet{position:fixed;inset:0;z-index:70;display:none}
+  .sheet.on{display:block}
+  .sheet-bg{position:absolute;inset:0;background:rgba(4,6,9,.6)}
+  .sheet-panel{
+    position:absolute;left:0;right:0;bottom:0;max-height:82dvh;overflow:auto;
+    background:var(--surface);border-top:1px solid var(--line-strong);
+    border-radius:20px 20px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom))
+  }
+  .sheet-grab{width:38px;height:4px;border-radius:2px;background:var(--line-strong);margin:6px auto 12px}
+
+  /* ---------- assistant ---------- */
+  .two{display:grid;gap:12px}
+  @media (min-width:1024px){ .two{grid-template-columns:280px minmax(0,1fr);align-items:start} }
+  .prow{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:12px;margin-bottom:8px}
+  .prow-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .prow-no{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--surface-3);font-family:var(--mono);font-weight:600;font-size:14px;flex:none}
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{
+    min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-strong);
+    font-size:13px;color:var(--muted);background:var(--surface)
+  }
+  @media (min-width:1024px){ .tag{min-height:36px;padding:0 12px} }
+  .tag[aria-pressed="true"]{border-color:var(--accent);color:#f4dcae;background:rgba(232,180,74,.12)}
+  .tag.hot[aria-pressed="true"]{border-color:#7a3b3e;color:#ffc9cb;background:rgba(229,72,77,.14)}
+  .ta{
+    width:100%;margin-top:8px;min-height:52px;resize:vertical;padding:10px 12px;border-radius:10px;
+    border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;font-size:14px
+  }
+  .ta:focus{border-color:var(--line-strong);outline:none;box-shadow:0 0 0 3px rgba(232,180,74,.12)}
+  .ai-out{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:14px}
+  .ai-sec + .ai-sec{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .ai-sec h4{margin:0 0 4px;font-size:13px;letter-spacing:.04em;color:var(--accent);font-weight:650}
+  .ai-sec p{margin:0;font-size:13.5px;color:#d3dae6}
+  .ai-note{margin-top:12px;font-size:11.5px;color:var(--faint);display:flex;gap:6px}
+
+  /* ---------- rules ---------- */
+  details.acc{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:8px;overflow:hidden}
+  details.acc summary{
+    list-style:none;cursor:pointer;padding:14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:14.5px
+  }
+  details.acc summary::-webkit-details-marker{display:none}
+  details.acc summary .chev{margin-left:auto;color:var(--faint);transition:transform .16s}
+  details.acc[open] summary{border-bottom:1px solid var(--line);background:var(--surface-2)}
+  details.acc[open] summary .chev{transform:rotate(90deg)}
+  .acc-body{padding:14px;font-size:13.5px;color:var(--muted)}
+  .acc-body b{color:var(--text)}
+  .acc-body ul{margin:6px 0 0;padding-left:18px}
+  .acc-body li{margin:3px 0}
+  .rule-foot{font-size:11.5px;color:var(--faint);border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+
+  /* ---------- modal ---------- */
+  .modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(4,6,9,.7)}
+  .modal.on{display:flex}
+  .modal-card{width:100%;max-width:380px;border-radius:18px;border:1px solid var(--line-strong);background:var(--surface);padding:20px;box-shadow:var(--shadow)}
+  .modal-card h3{font-size:17px;margin-bottom:6px}
+  .modal-card p{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+  .modal-card .btn-row .btn{flex:1}
+
+  /* ---------- misc ---------- */
+  .notice{display:flex;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);font-size:13px;color:var(--muted);margin-bottom:12px}
+  .notice svg{flex:none;margin-top:2px;color:var(--accent)}
+  .kv{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .kv:last-child{border-bottom:0}
+  .kv .k{color:var(--faint)}
+  .result-banner{
+    border-radius:16px;padding:20px;text-align:center;border:1px solid rgba(232,180,74,.3);
+    background:radial-gradient(120% 140% at 50% 0%,rgba(232,180,74,.14),rgba(18,22,29,.96));margin-bottom:14px
+  }
+  .result-banner .w{font-size:24px;font-weight:700;letter-spacing:.02em}
+  .result-banner .why{color:var(--muted);font-size:13px;margin-top:4px}
+  .reveal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  @media (min-width:560px){ .reveal{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .rv{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:13px}
+  .rv .n{font-family:var(--mono);color:var(--faint);font-size:12px}
+  .rv .camp-dot{width:7px;height:7px;border-radius:50%;margin-left:auto}
+  .camp-dot.good{background:var(--good)}
+  .camp-dot.wolf{background:var(--danger)}
+  .toast{
+    position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(8px);
+    background:var(--surface-3);border:1px solid var(--line-strong);color:var(--text);
+    padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:90;max-width:88vw;text-align:center
+  }
+  .toast.on{opacity:1;transform:translateX(-50%)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-in">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 3c4.2 0 7 2.9 7 6.8 0 3.2-1.9 5.6-4.2 6.9l.8 3.3H8.4l.8-3.3C6.9 15.4 5 13 5 9.8 5 5.9 7.8 3 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="9.4" cy="10" r="1.1" fill="currentColor"/><circle cx="14.6" cy="10" r="1.1" fill="currentColor"/>
+      </svg>
+      <div>
+        <div class="brand-name">狼人杀助手</div>
+        <div class="brand-sub">5A prototype</div>
+      </div>
+    </div>
+    <div class="phase-chip" id="phaseChip"><span class="dot"></span><span id="phaseText">首页</span></div>
+    <button class="icon-btn only-mobile" id="railBtn" aria-label="打开座位与事件">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="shell">
+  <div class="layout">
+    <div class="main" id="main">
+
+      <!-- ======== HOME ======== -->
+      <section class="screen on" id="v-home">
+        <div class="hero">
+          <p class="eyebrow">线下面杀 · 移动优先 / PC 响应式</p>
+          <h1>不用会玩，也能当好上帝</h1>
+          <p class="lead">一台手机走完 12 人整局；每位玩家还能用自己的设备记录身份与发言，只看自己该看的。</p>
+        </div>
+
+        <div class="entry-list">
+          <button class="entry" data-go="setup">
+            <span class="entry-mark">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v3M12 18v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M3 12h3M18 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/><circle cx="12" cy="12" r="3.4"/></svg>
+            </span>
+            <span class="entry-body">
+              <span class="entry-title">我来主持</span>
+              <span class="entry-desc">选板子 → 发牌 → 按卡片逐步主持到结算</span>
+            </span>
+            <svg class="entry-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+
+          <button class="entry" data-go="assistant">
+            <span class="entry-mark green">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h14v11H9l-4 3.5v-14Z"/><path d="M9 9h6M9 12h4"/></svg>
+            </span>
+            <span class="entry-body">
+              <span class="entry-title">我的助手</span>
+              <span class="entry-desc">标记身份、打标签、记发言要点，AI 帮你整理</span>
+            </span>
+            <svg class="entry-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+
+          <button class="entry" data-go="rules">
+            <span class="entry-mark grey">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M8 7h8M8 10.5h6"/></svg>
+            </span>
+            <span class="entry-body">
+              <span class="entry-title">规则与攻略</span>
+              <span class="entry-desc">板子、角色、流程，临场速查</span>
+            </span>
+            <svg class="entry-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><h3>赛前 30 秒</h3><span class="hint">AC-5 / AC-16</span></div>
+          <ul class="preflight">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 13 4 4L19 7"/></svg><span>先打开页面并保持不关闭；页面加载后断网仍可继续主持。</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 13 4 4L19 7"/></svg><span>游戏中不要清理浏览器数据；每步已自动保存在本机。</span></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 13 4 4L19 7"/></svg><span id="capLine">能力检测：屏幕常亮 <b id="capWake">检测中</b> · 实时同步 <b id="capWs">检测中</b></span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ======== SETUP ======== -->
+      <section class="screen" id="v-setup">
+        <p class="eyebrow">主持 · 第 1 步 / 共 4 步</p>
+        <h1>开局设置</h1>
+        <p class="lead">确认板子和 12 位玩家编号。缺号或重号会被拦截。</p>
+
+        <div class="card">
+          <div class="card-head"><h3>选择板子</h3><span class="hint">AC-4</span></div>
+          <div class="board-grid" role="group" aria-label="板子">
+            <button class="board-opt" data-board="guard" aria-pressed="true">
+              <div class="t">预女猎守</div>
+              <div class="d">预言家 · 女巫 · 猎人 · 守卫 + 4 民 / 4 狼</div>
+            </button>
+            <button class="board-opt" data-board="idiot" aria-pressed="false">
+              <div class="t">预女猎白</div>
+              <div class="d">预言家 · 女巫 · 猎人 · 白痴 + 4 民 / 3 狼 + 白狼王</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>12 位玩家</h3><span class="hint">编号 1–12</span></div>
+          <div class="seat-grid compact" id="setupSeats"></div>
+          <p class="faint" style="font-size:12px;margin:10px 0 0">编号固定 1–12；昵称 P1。点座位置为缺号/重号以查看拦截提示。</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>发牌模式</h3><span class="hint">AC-2 / AC-6</span></div>
+          <div class="seg" role="group" aria-label="发牌模式">
+            <button data-deal="A" aria-pressed="true">接力查看</button>
+            <button data-deal="B" aria-pressed="false">线下逐步确认</button>
+          </div>
+          <p class="faint" style="font-size:12.5px;margin:10px 0 0" id="dealHint">接力查看：全屏遮罩，玩家自己点开身份，看完回遮罩。</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>设置项</h3><span class="hint">默认按附录 A</span></div>
+          <div class="field">
+            <div><span class="lab">首夜警长竞选</span><span class="sub">关闭后首日直接公布死讯</span></div>
+            <button class="switch ctl" id="optSheriff" role="switch" aria-checked="true" aria-label="首夜警长竞选"><span class="sr">首夜警长竞选</span></button>
+          </div>
+          <div class="field">
+            <div><span class="lab">女巫首夜可自救</span><span class="sub">默认开启</span></div>
+            <button class="switch ctl" id="optSelfSave" role="switch" aria-checked="true" aria-label="女巫首夜可自救"><span class="sr">女巫首夜可自救</span></button>
+          </div>
+        </div>
+
+        <div class="actionbar"><div class="bar-in">
+          <button class="btn ghost" data-go="home">返回</button>
+          <button class="btn primary" id="btnStartDeal">开始发牌</button>
+        </div></div>
+      </section>
+
+      <!-- ======== DEAL ======== -->
+      <section class="screen" id="v-deal">
+        <p class="eyebrow">主持 · 第 2 步 / 共 4 步</p>
+        <h1 id="dealTitle">发牌 · 接力查看</h1>
+        <p class="lead" id="dealLead">全屏遮罩 → 玩家查看身份 → 交回下一位。</p>
+
+        <div class="card">
+          <div class="card-head"><h3>发牌进度</h3><span class="hint" id="dealCount">0 / 12</span></div>
+          <div class="seat-grid compact" id="dealSeats"></div>
+          <div class="divider"></div>
+          <div class="btn-row">
+            <button class="btn" id="btnNextSeat">下一位</button>
+            <button class="btn primary" id="btnShowId">显示身份</button>
+          </div>
+          <p class="faint" style="font-size:12px;margin:10px 0 0" id="dealNote">遮罩中不显示身份；需二次操作才展示。</p>
+        </div>
+
+        <div class="actionbar"><div class="bar-in">
+          <button class="btn ghost" id="btnDealBack">回退一步</button>
+          <button class="btn primary" id="btnDealDone" disabled>完成发牌，进入天黑</button>
+        </div></div>
+      </section>
+
+      <!-- ======== NIGHT ======== -->
+      <section class="screen" id="v-night">
+        <p class="eyebrow" id="nightEyebrow">第 1 夜</p>
+        <h1>天黑请闭眼</h1>
+        <p class="lead">按顺序唤醒，主持人逐项记录；私密信息仅主持端可见。</p>
+
+        <div class="step" id="nightStep"></div>
+
+        <div class="actionbar"><div class="bar-in">
+          <button class="btn ghost" id="btnNightBack">回退</button>
+          <button class="btn primary" id="btnNightNext">确认，下一位</button>
+        </div></div>
+      </section>
+
+      <!-- ======== SHERIFF ======== -->
+      <section class="screen" id="v-sheriff">
+        <p class="eyebrow">首日 · 警长竞选</p>
+        <h1>警长竞选</h1>
+        <p class="lead">报名 → 发言 → 退水 → 警下投票 → 平票 PK；再平则本局无警长。</p>
+
+        <div class="card">
+          <div class="card-head"><h3>上警玩家</h3><span class="hint">AC-3</span></div>
+          <div class="seat-grid compact" id="sheriffSeats"></div>
+          <p class="faint" style="font-size:12px;margin:10px 0 0">首夜死者系统内部排除，不参与竞选。</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>当选结果</h3><span class="hint">主持人录入</span></div>
+          <div class="btn-row">
+            <button class="btn" id="btnSheriffNone">本局无警长</button>
+            <button class="btn primary" id="btnSheriffElect" disabled>当选</button>
+          </div>
+        </div>
+
+        <div class="actionbar"><div class="bar-in">
+          <button class="btn ghost" id="btnSheriffBack">回退</button>
+          <button class="btn primary" id="btnSheriffNext" disabled>公布死讯</button>
+        </div></div>
+      </section>
+
+      <!-- ======== DAWN ======== -->
+      <section class="screen" id="v-dawn">
+        <p class="eyebrow" id="dawnEyebrow">第 1 天 · 天亮</p>
+        <h1>公布死讯</h1>
+        <p class="lead">先公布昨夜结果，再进入遗言与发言。</p>
+
+        <div class="card">
+          <div class="card-head"><h3>昨夜结果</h3><span class="hint">公开信息</span></div>
+          <div id="dawnResult"></div>
+          <div class="divider"></div>
+          <div class="field">
+            <div><span class="lab">猎人被刀，此刻开枪</span><span class="sub">被毒/被白狼王带走不可开枪</span></div>
+            <button class="switch ctl" id="optHunter" role="switch" aria-checked="false" aria-label="猎人开枪"><span class="sr">猎人开枪</span></button>
+          </div>
+          <div class="field">
+            <div><span class="lab">警长死亡，处理警徽</span><span class="sub">移交或撕毁</span></div>
+            <button class="switch ctl" id="optBadge" role="switch" aria-checked="false" aria-label="警徽流转"><span class="sr">警徽流转</span></button>
+          </div>
+        </div>
+
+        <div class="actionbar"><div class="bar-in">
+          <button class="btn ghost" id="btnDawnBack">回退</button>
+          <button class="btn primary" id="btnDawnNext">进入发言</button>
+        </div></div>
+      </section>
+
+      <!-- ======== SPEECH ======== -->
+      <section class="screen" id="v-speech">
+        <p class="eyebrow" id="speechEyebrow">第 1 天 · 发言</p>
+        <h1>依次发言</h1>
+        <p class="lead">警长指定顺序，或按死左/死右；自爆可随时打断。</p>
+
+        <div class="card">
+          <div class="card-head"><h3>发言顺序</h3><span class="hint" id="speechCount">0 / 0</span></div>
+          <ol id="speechList" style="margin:0;padding-left:20px;color:var(--muted);font-size:14px"></ol>
+        </div>
+
+        <div class="actionbar"><div class="bar-in">
+          <button class="btn ghost" id="btnSpeechBack">回退</button>
+          <button class="btn" id="btnExplode">自爆</button>
+          <button class="btn primary" id="btnSpeechNext">进入投票</button>
+        </div></div>
+      </section>
+
+      <!-- ======== VOTE ======== -->
+      <section class="screen" id="v-vote">
+        <p class="eyebrow" id="voteEyebrow">第 1 天 · 投票</p>
+        <h1>放逐投票</h1>
+        <p class="lead">点编号记为投给该玩家；警长 1.5 票；白痴翻牌后无票；平票进入 PK。</p>
+
+        <div class="card">
+          <div class="card-head"><h3>投票录入</h3><span class="hint" id="voteSum">0 票</span></div>
+          <div class="seat-grid" id="voteSeats"></div>
+          <div class="divider"></div>
+          <div class="btn-row">
+            <button class="btn" id="btnVoteAbstain">+ 弃票</button>
+            <button class="btn" id="btnVoteClear">清空</button>
+            <button class="btn primary" id="btnVoteTally">统计</button>
+          </div>
+        </div>
+
+        <div class="actionbar"><div class="bar-in">
+          <button class="btn ghost" id="btnVoteBack">回退</button>
+          <button class="btn primary" id="btnExile" disabled>放逐并进入结算</button>
+        </div></div>
+      </section>
+
+      <!-- ======== SETTLE / RESULT ======== -->
+      <section class="screen" id="v-result">
+        <p class="eyebrow">结算 · 揭晓</p>
+        <h1>本局结束</h1>
+        <p class="lead">胜负原因 → 全部身份 → 关键事件。结算后不可回退。</p>
+
+        <div class="result-banner" id="resultBanner"></div>
+
+        <div class="card">
+          <div class="card-head"><h3>身份揭晓</h3><span class="hint">12 人</span></div>
+          <div class="reveal" id="revealSeats"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>关键事件</h3><span class="hint">复盘 · P1 时间线</span></div>
+          <ul class="log" id="resultLog" style="max-height:none"></ul>
+        </div>
+
+        <div class="actionbar"><div class="bar-in">
+          <button class="btn ghost" id="btnWipe">清除本局</button>
+          <button class="btn primary" id="btnAgain">再来一局</button>
+        </div></div>
+      </section>
+
+      <!-- ======== ASSISTANT ======== -->
+      <section class="screen" id="v-assistant">
+        <p class="eyebrow">我的助手 · 独立模式</p>
+        <h1>个人记录</h1>
+        <p class="lead">只存在本机；不加入房间也能用。切换页面或刷新后仍保留。</p>
+
+        <div class="two">
+          <div>
+            <div class="card">
+              <div class="card-head"><h3>我的身份</h3><span class="hint">可自选</span></div>
+              <div class="seg" style="flex-wrap:wrap">
+                <button class="as-role" data-role="SEER" aria-pressed="true">预言家</button>
+                <button class="as-role" data-role="WITCH" aria-pressed="false">女巫</button>
+                <button class="as-role" data-role="HUNTER" aria-pressed="false">猎人</button>
+                <button class="as-role" data-role="GUARD" aria-pressed="false">守卫</button>
+                <button class="as-role" data-role="VILLAGER" aria-pressed="false">平民</button>
+                <button class="as-role" data-role="WOLF" aria-pressed="false">狼人</button>
+              </div>
+              <div class="divider"></div>
+              <div class="kv"><span class="k">阵营</span><span id="asCamp">好人</span></div>
+              <div class="kv"><span class="k">玩法要点</span><span id="asTip" style="text-align:right;max-width:62%">白天报查验，带队归票</span></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>局势</h3><span class="hint">手动录入</span></div>
+              <div class="kv"><span class="k">轮次</span><span class="mono" id="asRound">第 1 天</span></div>
+              <div class="kv"><span class="k">存活</span><span id="asAlive">12 / 12</span></div>
+              <div class="kv"><span class="k">公开事件</span><span id="asEvents" style="text-align:right;max-width:62%">昨夜平安夜</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-head"><h3>玩家标签与发言要点</h3><span class="hint">AC-8</span></div>
+              <div id="asPlayers"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>AI 整理</h3><span class="hint">AC-9 / AC-10</span></div>
+              <div class="btn-row" style="margin-bottom:12px">
+                <button class="btn primary" id="btnAi">AI 整理（示意）</button>
+                <button class="btn" id="btnAiFail">模拟失败</button>
+              </div>
+              <div class="ai-out" id="aiOut">
+                <div class="ai-sec"><h4>信息整理</h4><p>2 号发言前后矛盾；7 号与 9 号互保；5 号（你）首夜查杀 3 号后，3 号未再发言。</p></div>
+                <div class="ai-sec"><h4>可疑对象与依据</h4><p>3 号：被查杀后沉默，且与 7 号无互动（基于「查杀」标签）。7 号：两次改口，动机不明（基于发言要点第 1 轮）。</p></div>
+                <div class="ai-sec"><h4>下一步建议</h4><p>优先让 3 号自证；若 3 号跳守卫需与 4 号对锁；警徽流建议压 9 号。</p></div>
+                <div class="ai-note">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>
+                  <span>AI 分析仅供参考，可能出错，请自行判断。上下文将发往你自配的第三方模型。</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== RULES ======== -->
+      <section class="screen" id="v-rules">
+        <p class="eyebrow">规则与攻略 · 只读</p>
+        <h1>临场速查</h1>
+        <p class="lead">板子、角色、流程；冲突判定以开局约定为准。</p>
+
+        <div class="two" style="grid-template-columns:1fr">
+          <div>
+            <h3 style="margin:6px 0 10px;color:var(--faint);font-size:12px;letter-spacing:.14em;text-transform:uppercase">板子</h3>
+            <details class="acc" open>
+              <summary>预女猎守（12 人）<span class="chev">›</span></summary>
+              <div class="acc-body">
+                <b>好人 8</b>：预言家 1 · 女巫 1 · 猎人 1 · 守卫 1 · 平民 4<br>
+                <b>狼人 4</b>：普通狼人 4<br>
+                <b>夜间顺序</b>：守卫 → 预言家 → 狼人 → 女巫<br>
+                <b>胜负</b>：屠边 —— 狼全灭好人胜；神全灭或民全灭狼胜。
+              </div>
+            </details>
+            <details class="acc">
+              <summary>预女猎白（12 人）<span class="chev">›</span></summary>
+              <div class="acc-body">
+                <b>好人 8</b>：预言家 1 · 女巫 1 · 猎人 1 · 白痴 1 · 平民 4<br>
+                <b>狼人 4</b>：普通狼人 3 · 白狼王 1<br>
+                <b>夜间顺序</b>：预言家 → 狼人 → 女巫（白痴无夜间行动）<br>
+                <b>胜负</b>：屠边。
+              </div>
+            </details>
+
+            <h3 style="margin:20px 0 10px;color:var(--faint);font-size:12px;letter-spacing:.14em;text-transform:uppercase">角色</h3>
+            <details class="acc">
+              <summary>预言家 / 女巫<span class="chev">›</span></summary>
+              <div class="acc-body">
+                <b>预言家</b>：每夜查验一人「好人/狼人」，不知具体身份；仅查验者可见。<br>
+                <b>女巫</b>：每夜至多一瓶；解药仅救当夜被刀者，首夜可自救（可关）；同守同救目标死亡；空刀不可解药。
+              </div>
+            </details>
+            <details class="acc">
+              <summary>守卫 / 猎人 / 白痴<span class="chev">›</span></summary>
+              <div class="acc-body">
+                <b>守卫</b>：每夜守一人免疫狼刀；不可连守；可自守；不防毒。<br>
+                <b>猎人</b>：被刀/被放逐可开枪；被毒/被白狼王带走不可开枪。<br>
+                <b>白痴</b>：被放逐翻牌免死，保留发言，失去投票权，不再成为放逐目标。
+              </div>
+            </details>
+            <details class="acc">
+              <summary>白狼王 / 普通狼<span class="chev">›</span></summary>
+              <div class="acc-body">
+                <b>白狼王</b>：白天自爆时带走一人；非自爆出局不可发动；若为最后一狼，自爆不带人。<br>
+                <b>普通狼</b>：共同击杀一人；可空刀/自刀；意见不一致按空刀。
+              </div>
+            </details>
+
+            <h3 style="margin:20px 0 10px;color:var(--faint);font-size:12px;letter-spacing:.14em;text-transform:uppercase">流程</h3>
+            <details class="acc">
+              <summary>一夜 / 一天<span class="chev">›</span></summary>
+              <div class="acc-body">
+                <ul>
+                  <li>夜：守卫 → 预言家 → 狼人 → 女巫 → 天亮结算</li>
+                  <li>首日：警长竞选（可关）→ 公布死讯 → 遗言 → 发言 → 投票 → 放逐后技能 → 胜负检查</li>
+                  <li>自爆：竞选/发言阶段可；中止流程 → 带人 → 警徽 → 胜负检查 → 入夜/结算</li>
+                </ul>
+              </div>
+            </details>
+
+            <div class="rule-foot">依据规则资料整理，以开局约定为准。术语表与搜索为 P1。</div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /main -->
+
+    <!-- ======== PC RAIL ======== -->
+    <aside class="rail" aria-label="座位与事件">
+      <div class="rail-card">
+        <div class="rail-title"><span>座位 · 上帝视图</span><span class="chip" id="railRound" style="margin-left:auto">第 1 夜</span></div>
+        <div class="seat-grid" id="railSeats"></div>
+      </div>
+      <div class="rail-card">
+        <div class="rail-title"><span>事件流</span></div>
+        <ul class="log" id="railLog"><li><span class="r">—</span><span>尚未开始对局</span></li></ul>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<!-- ======== overlays ======== -->
+<div class="cover" id="cover" role="dialog" aria-modal="true" aria-labelledby="coverTitle">
+  <div class="cover-card">
+    <div class="lock">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="10" width="14" height="10" rx="2.5"/><path d="M8 10V8a4 4 0 0 1 8 0v2"/></svg>
+    </div>
+    <div id="coverFront">
+      <h2 id="coverTitle">请把手机交给 1 号</h2>
+      <p>其他玩家请勿观看。点击后仅显示该玩家身份。</p>
+      <button class="btn primary" id="coverReveal" style="width:100%">查看我的身份</button>
+    </div>
+    <div id="coverBack" hidden>
+      <div class="idcard" id="coverIdCard">
+        <div class="camp" id="coverCamp">好人阵营</div>
+        <div class="role" id="coverRole">预言家</div>
+        <div class="skill" id="coverSkill">每夜查验一人阵营，仅自己可见。</div>
+      </div>
+      <button class="btn primary" id="coverDone" style="width:100%">我已记住，交给下一位</button>
+      <button class="btn ghost" id="coverHide" style="width:100%;margin-top:6px">重新遮罩</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <h3 id="modalTitle">确认操作</h3>
+    <p id="modalText">此操作需要二次确认。</p>
+    <div class="btn-row">
+      <button class="btn" id="modalCancel">取消</button>
+      <button class="btn primary" id="modalOk">确认</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" aria-label="座位与事件">
+  <div class="sheet-bg" data-close-sheet></div>
+  <div class="sheet-panel">
+    <div class="sheet-grab"></div>
+    <div class="rail-title"><span>座位 · 上帝视图</span><span class="chip" id="sheetRound" style="margin-left:auto">第 1 夜</span></div>
+    <div class="seat-grid" id="sheetSeats" style="margin-bottom:14px"></div>
+    <div class="rail-title"><span>事件流</span></div>
+    <ul class="log" id="sheetLog" style="max-height:none;padding-bottom:8px"><li><span class="r">—</span><span>尚未开始对局</span></li></ul>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   狼人杀助手 · 5A 原型
+   范围：主持闭环 + 助手 + 规则；移动优先，PC ≥1024 双栏
+   说明：原型只验证页面结构/交互/状态，不含真实规则引擎与后端
+   ========================================================= */
+
+const ROLES = {
+  SEER:      { name:'预言家', camp:'good', skill:'每夜查验一人阵营，仅自己可见。' },
+  WITCH:     { name:'女巫',   camp:'good', skill:'每夜至多一瓶；解药仅救当夜被刀者。' },
+  HUNTER:    { name:'猎人',   camp:'good', skill:'被刀/被放逐可开枪；被毒不可。' },
+  GUARD:     { name:'守卫',   camp:'good', skill:'每夜守一人免疫狼刀；不可连守。' },
+  IDIOT:     { name:'白痴',   camp:'good', skill:'被放逐翻牌免死，失去投票权。' },
+  VILLAGER:  { name:'平民',   camp:'good', skill:'没有技能，靠发言与投票。' },
+  WOLF:      { name:'狼人',   camp:'wolf', skill:'与队友共同击杀一人；可空刀。' },
+  WOLF_KING: { name:'白狼王', camp:'wolf', skill:'白天自爆时可带走一人。' }
+};
+
+const BOARDS = {
+  guard: {
+    id:'guard', name:'预女猎守',
+    roles:['SEER','WITCH','HUNTER','GUARD','VILLAGER','VILLAGER','VILLAGER','VILLAGER','WOLF','WOLF','WOLF','WOLF'],
+    night:[
+      { role:'GUARD', line:'守卫请睁眼，请选择你要守护的人', opt:'空守' },
+      { role:'SEER',  line:'预言家请睁眼，请选择你要查验的人', opt:'' },
+      { role:'WOLF',  line:'狼人请睁眼，互相确认队友；请选择击杀目标', opt:'空刀' },
+      { role:'WITCH', line:'女巫请睁眼，是否使用解药或毒药？', opt:'不用药' }
+    ]
+  },
+  idiot: {
+    id:'idiot', name:'预女猎白',
+    roles:['SEER','WITCH','HUNTER','IDIOT','VILLAGER','VILLAGER','VILLAGER','VILLAGER','WOLF','WOLF','WOLF','WOLF_KING'],
+    night:[
+      { role:'SEER',  line:'预言家请睁眼，请选择你要查验的人', opt:'' },
+      { role:'WOLF',  line:'狼人请睁眼，互相确认队友；请选择击杀目标', opt:'空刀' },
+      { role:'WITCH', line:'女巫请睁眼，是否使用解药或毒药？', opt:'不用药' }
+    ]
+  }
+};
+
+const S = {
+  view:'home', boardId:'guard', dealMode:'A', sheriffOn:true, selfSaveOn:true,
+  seats:[], phase:'SETUP', round:1,
+  dealIdx:1, dealt:0, nightStep:0, nightActions:{},
+  candidates:[], sheriff:0, elected:0,
+  votes:{}, abstain:0, exiled:0,
+  deaths:[], events:[], history:[], aiRole:'SEER', aiTags:{}, aiNotes:{}
+};
+
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+function esc(v){ return String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmtRole(id){ return ROLES[id] ? ROLES[id].name : '—'; }
+
+let toastTimer;
+function toast(msg){
+  const t=$('#toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'), 2100);
+}
+
+function confirmAsk(title, text, okText='确认'){
+  return new Promise(res=>{
+    const m=$('#modal'); $('#modalTitle').textContent=title; $('#modalText').textContent=text;
+    $('#modalOk').textContent=okText; m.classList.add('on');
+    const done=v=>{ m.classList.remove('on'); $('#modalOk').onclick=null; $('#modalCancel').onclick=null; res(v); };
+    $('#modalOk').onclick=()=>done(true); $('#modalCancel').onclick=()=>done(false);
+  });
+}
+
+/* ---------- navigation ---------- */
+const PHASE_LABEL = {
+  SETUP:'开局设置', DEAL:'发牌', NIGHT:'夜间', SHERIFF:'警长竞选',
+  DAWN:'公布死讯', SPEECH:'发言', VOTE:'投票', RESULT:'结算', HOME:'首页',
+  ASSISTANT:'我的助手', RULES:'规则与攻略'
+};
+
+function go(view){
+  S.view = view;
+  $$('.screen').forEach(s=>s.classList.remove('on'));
+  const target = $('#v-'+view); if(target) target.classList.add('on');
+  const phase = view==='home' ? 'HOME' : view==='assistant' ? 'ASSISTANT' : view==='rules' ? 'RULES'
+              : view==='setup' ? 'SETUP' : view==='deal' ? 'DEAL' : view==='night' ? 'NIGHT'
+              : view==='sheriff' ? 'SHERIFF' : view==='dawn' ? 'DAWN' : view==='speech' ? 'SPEECH'
+              : view==='vote' ? 'VOTE' : 'RESULT';
+  $('#phaseText').textContent = PHASE_LABEL[phase];
+  window.scrollTo({ top:0, behavior:'instant' in window ? 'instant' : 'auto' });
+  refreshAll();
+}
+
+/* ---------- state helpers ---------- */
+function roleOf(no){ const s=S.seats.find(x=>x.no===no); return s ? s.roleId : null; }
+function aliveSeats(){ return S.seats.filter(s=>s.alive); }
+function seatCell(s, {selectable=false, role=false, votes=0, sheriff=false, deadBadge=true}={}){
+  const b = el(`<button class="seat ${s.alive?'':'dead'}" data-seat="${s.no}" aria-pressed="false">
+      <span class="n">${s.no}</span>
+      ${role ? `<span class="r">${fmtRole(s.roleId)}</span>` : `<span class="r">${s.alive?'在场':'出局'}</span>`}
+      ${sheriff && s.no===S.sheriff ? '<span class="badge">警</span>' : ''}
+      ${!s.alive && deadBadge ? '<span class="badge dead-b">亡</span>' : ''}
+      ${votes ? `<span class="vote">${votes}票</span>` : ''}
+    </button>`);
+  if(!selectable){ b.disabled = true; b.style.cursor='default'; }
+  return b;
+}
+
+function pushEvent(text, kind=''){
+  S.events.push({ round:S.round, text, kind, at:Date.now() });
+  renderLogs();
+}
+function renderLogs(){
+  const html = S.events.length
+    ? S.events.slice().reverse().map(e=>`<li data-kind="${e.kind}"><span class="r">${e.round}</span><span>${esc(e.text)}</span></li>`).join('')
+    : '<li><span class="r">—</span><span>尚未开始对局</span></li>';
+  ['#railLog','#sheetLog'].forEach(sel=>{ const n=$(sel); if(n) n.innerHTML=html; });
+}
+
+function snapshot(){
+  S.history.push(JSON.stringify({ seats:S.seats, nightStep:S.nightStep, nightActions:S.nightActions, sheriff:S.sheriff, votes:S.votes, abstain:S.abstain, exiled:S.exiled, deaths:S.deaths, events:S.events, round:S.round, dealt:S.dealt, dealIdx:S.dealIdx }));
+  if(S.history.length>30) S.history.shift();
+}
+async function back(step=1){
+  if(!S.history.length){ toast('没有可回退的步骤'); return; }
+  const ok = await confirmAsk('回退一步', '将撤销最近一次操作并恢复到上一步状态，确定吗？', '回退');
+  if(!ok) return;
+  const st = JSON.parse(S.history.pop());
+  Object.assign(S, st);
+  renderLogs(); renderSeatsAll();
+  toast('已回退一步');
+  if(S.view==='deal') renderDeal();
+  if(S.view==='night') renderNight();
+  if(S.view==='vote') renderVote();
+}
+
+/* ---------- seats rendering ---------- */
+function renderSetupSeats(){
+  const box = $('#setupSeats'); box.innerHTML='';
+  for(let i=1;i<=12;i++){
+    const cell = el(`<button class="seat" data-setup="${i}"><span class="n">${i}</span><span class="r">在场</span></button>`);
+    box.appendChild(cell);
+  }
+  box.onclick = (e)=>{
+    const b = e.target.closest('[data-setup]'); if(!b) return;
+    b.classList.toggle('dead');
+    const dead = $$('[data-setup].dead', box).length;
+    if(dead>0) toast(`已标记 ${dead} 个缺号；正式开局会拦截（原型提示）`);
+    else toast('编号 1–12 完整');
+  };
+}
+
+function renderRail(){
+  const html = S.seats.map(s=>seatCell(s,{role:true, sheriff:true}).outerHTML).join('');
+  const empty = `<p class="faint" style="font-size:12.5px;margin:2px 0 4px">未开局。开始发牌后这里显示 1–12 号座位与身份。</p>`;
+  ['#railSeats','#sheetSeats'].forEach(sel=>{ const n=$(sel); if(n) n.innerHTML = html || empty; });
+  ['#railRound','#sheetRound'].forEach(sel=>{ const n=$(sel); if(n){ n.textContent = S.seats.length ? `第 ${S.round} 天` : '待开局'; } });
+}
+function renderSeatsAll(){ renderRail(); }
+
+/* ---------- deal ---------- */
+function dealRoles(){
+  const pool = BOARDS[S.boardId].roles.slice();
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  S.seats = pool.map((roleId,i)=>({ no:i+1, roleId, alive:true }));
+  S.dealIdx = 1; S.dealt = 0; S.phase='DEAL';
+}
+
+function renderDeal(){
+  const modeA = S.dealMode==='A';
+  $('#dealTitle').textContent = `发牌 · ${modeA?'接力查看':'线下逐步确认'}`;
+  $('#dealLead').textContent  = modeA ? '全屏遮罩 → 玩家查看身份 → 交回下一位。' : '默认遮罩，主持人二次点击才显示身份，确认后进入下一位。';
+  $('#dealNote').textContent  = modeA
+    ? '遮罩中不显示身份；每位玩家只在自己那一步看到身份。'
+    : '模式 B 默认遮罩；「显示身份」为二次操作，防止旁人误看。';
+  $('#dealCount').textContent = `${S.dealt} / 12`;
+
+  const box = $('#dealSeats'); box.innerHTML='';
+  S.seats.forEach(s=>{
+    const done = s.no <= S.dealt;
+    const cell = el(`<button class="seat ${done?'':'dead'}" data-deal="${s.no}">
+        <span class="n">${s.no}</span><span class="r">${done?'已发':'待发'}</span>
+        ${s.no===S.dealIdx ? '<span class="badge">当前</span>' : ''}
+      </button>`);
+    cell.style.opacity = done ? 1 : .5;
+    cell.disabled = true;
+    box.appendChild(cell);
+  });
+
+  const nextNo = S.dealt + 1;
+  $('#btnNextSeat').textContent = modeA ? `呼叫 ${Math.min(nextNo,12)} 号查看` : `为 ${Math.min(nextNo,12)} 号显示`;
+  $('#btnNextSeat').disabled = S.dealt >= 12;
+  $('#btnShowId').disabled = S.dealt >= 12;
+  $('#btnDealDone').disabled = S.dealt < 12;
+  renderRail();
+}
+
+function openCover(){
+  if(S.dealt>=12){ toast('12 位玩家都已发牌'); return; }
+  const no = S.dealt + 1;
+  const modeA = S.dealMode==='A';
+  $('#coverTitle').textContent = modeA ? `请把手机交给 ${no} 号` : `请 ${no} 号确认身份`;
+  $('#coverFront').hidden = false; $('#coverBack').hidden = true;
+  $('#cover').classList.add('on');
+  $('#coverReveal').focus();
+}
+function revealCover(){
+  const no = S.dealt + 1; const roleId = roleOf(no); const r = ROLES[roleId];
+  $('#coverCamp').textContent = r.camp==='wolf' ? '狼人阵营' : '好人阵营';
+  $('#coverRole').textContent = r.name;
+  $('#coverSkill').textContent = r.skill;
+  $('#coverIdCard').classList.toggle('wolf', r.camp==='wolf');
+  $('#coverFront').hidden = true; $('#coverBack').hidden = false;
+}
+function closeCover(){
+  S.dealt++; S.dealIdx = Math.min(S.dealt+1, 12); S.phase='DEAL';
+  $('#cover').classList.remove('on');
+  renderDeal();
+  if(S.dealt===12){ toast('发牌完成，可以进入天黑'); pushEvent('发牌完成', 'deal'); }
+}
+
+/* ---------- night ---------- */
+function currentNight(){ return BOARDS[S.boardId].night[S.nightStep]; }
+
+function renderNight(){
+  $('#nightEyebrow').textContent = `第 ${S.round} 夜`;
+  const box = $('#nightStep');
+  const step = currentNight();
+  if(!step){ box.innerHTML=''; return; }
+  const total = BOARDS[S.boardId].night.length;
+  const act = S.nightActions[S.round] || (S.nightActions[S.round]={});
+  const chipped = step.role==='WOLF' ? 'AC-3 · 私密' : (step.role==='WITCH' ? 'AC-3 · 私密' : 'AC-4');
+  const kill = act.WOLF;
+  const priv = step.role==='WITCH' && kill
+    ? `<div class="priv-line">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6l-8-3Z"/></svg>
+        今晚 ${kill} 号被刀（仅女巫可见）
+      </div>` : '';
+
+  box.innerHTML = `
+    <div class="step-top">
+      <span class="chip ${step.role==='WOLF'||step.role==='WITCH'?'priv':'ac'}">${chipped}</span>
+      <span>${fmtRole(step.role)}</span>
+      <span class="step-progress">${Array.from({length:total},(_,i)=>`<i class="${i<=S.nightStep?'on':''}"></i>`).join('')}</span>
+    </div>
+    <div class="step-body">
+      <p class="role-line">${step.line.replace(/请选择/, '<span class="q">请选择</span>')}</p>
+      <p class="sub-line">${step.role==='WOLF'?'多狼由主持人代录；分歧按空刀。':'点编号选择目标，可跳过。'}</p>
+      ${priv}
+      <div class="seat-grid" id="nightSeats"></div>
+      <div style="margin-top:12px" class="chips" id="nightPick"></div>
+    </div>`;
+
+  const seats = $('#nightSeats');
+  aliveSeats().forEach(s=>{
+    const b = seatCell(s,{selectable:true, role:false, sheriff:true});
+    if(act[step.role]===s.no) b.classList.add('sel');
+    b.onclick = ()=>{
+      $$('.seat', seats).forEach(x=>x.classList.remove('sel'));
+      act[step.role] = s.no;
+      b.classList.add('sel');
+      renderNightPick();
+    };
+    seats.appendChild(b);
+  });
+
+  const pick = $('#nightPick');
+  function renderNightPick(){
+    pick.innerHTML='';
+    if(step.opt){
+      const b = el(`<button class="tag">${step.opt}</button>`);
+      b.setAttribute('aria-pressed', act[step.role]===0 ? 'true':'false');
+      b.onclick = ()=>{
+        act[step.role] = act[step.role]===0 ? undefined : 0;
+        $$('.seat', seats).forEach(x=>x.classList.remove('sel'));
+        renderNightPick();
+      };
+      pick.appendChild(b);
+    }
+    const cur = act[step.role];
+    if(cur && cur!==0){
+      const c = el(`<span class="chip ok">已选 ${cur} 号</span>`); pick.appendChild(c);
+    }
+    if(step.role==='WITCH'){
+      const seg = el(`<div class="seg" style="width:100%;margin-top:8px">
+        <button data-wm="save" aria-pressed="${act.WITCH_MODE!=='poison'}">解药</button>
+        <button data-wm="poison" aria-pressed="${act.WITCH_MODE==='poison'}">毒药</button>
+      </div>`);
+      seg.onclick = (ev)=>{
+        const b = ev.target.closest('[data-wm]'); if(!b) return;
+        act.WITCH_MODE = b.dataset.wm;
+        renderNight();
+      };
+      pick.appendChild(seg);
+    }
+  }
+  renderNightPick();
+  $('#btnNightNext').textContent = (S.nightStep >= total-1) ? '天亮了，结算夜晚' : '确认，下一位';
+  renderRail();
+}
+
+function nightNext(){
+  const total = BOARDS[S.boardId].night.length;
+  const act = S.nightActions[S.round] || {};
+  const step = currentNight();
+  if(step && !(step.role in act) && step.opt){ toast(`请先选择目标或「${step.opt}」`); return; }
+  if(S.nightStep < total-1){ S.nightStep++; renderNight(); return; }
+  // 夜晚结算
+  const kill = act.WOLF || 0;
+  const guarded = act.GUARD || 0;
+  const saved = (act.WITCH_MODE==='save') ? (act.WITCH || 0) : 0;
+  const poisoned = (act.WITCH_MODE==='poison') ? (act.WITCH || 0) : 0;
+  const deaths=[];
+  if(kill){
+    const sameGuard = guarded===kill;
+    if(!sameGuard && !saved) deaths.push({no:kill, how:'night'});
+    if(sameGuard && saved) { deaths.push({no:kill, how:'same'}); }
+  }
+  if(poisoned && !deaths.some(d=>d.no===poisoned)) deaths.push({no:poisoned, how:'poison'});
+  S.deaths = deaths;
+  deaths.forEach(d=>{ const s=S.seats.find(x=>x.no===d.no); if(s) s.alive=false; });
+  S.phase='DAWN';
+  pushEvent(deaths.length ? `昨夜 ${deaths.map(d=>d.no+' 号').join('、')} 出局` : '昨夜平安夜', deaths.length?'death':'');
+  if(S.round===1 && S.sheriffOn){ go('sheriff'); renderSheriff(); }
+  else { go('dawn'); renderDawn(); }
+}
+
+function renderDawn(){
+  $('#dawnEyebrow').textContent = `第 ${S.round} 天 · 天亮`;
+  const box = $('#dawnResult');
+  if(!S.deaths.length){
+    box.innerHTML = `<div class="notice" style="margin:0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2"/></svg>
+      <span>平安夜：昨夜无人出局。按流程进入遗言与发言。</span></div>`;
+  } else {
+    box.innerHTML = `<p style="margin:0 0 8px;font-size:15px"><b>${S.deaths.map(d=>d.no+' 号').join('、')}</b> 出局</p>
+      <div class="chips">${S.deaths.map(d=>`<span class="chip">${d.how==='same'?'同守同救':d.how==='poison'?'被毒':'被刀'}</span>`).join('')}</div>`;
+  }
+  renderRail();
+}
+
+/* ---------- sheriff ---------- */
+function renderSheriff(){
+  const box = $('#sheriffSeats'); box.innerHTML='';
+  S.seats.filter(s=>s.alive).forEach(s=>{
+    const b = seatCell(s,{selectable:true, sheriff:true});
+    if(S.candidates.includes(s.no)) b.classList.add('sel');
+    b.onclick = ()=>{
+      const i=S.candidates.indexOf(s.no);
+      if(i>=0) S.candidates.splice(i,1); else S.candidates.push(s.no);
+      b.classList.toggle('sel');
+      updateSheriffBtns();
+    };
+    box.appendChild(b);
+  });
+  updateSheriffBtns(); renderRail();
+}
+function updateSheriffBtns(){
+  const ok = S.candidates.length>0;
+  $('#btnSheriffElect').disabled = !ok;
+  $('#btnSheriffNext').disabled = !S.sheriff && S.candidates.length>0;
+}
+
+/* ---------- speech ---------- */
+function renderSpeech(){
+  $('#speechEyebrow').textContent = `第 ${S.round} 天 · 发言`;
+  const alive = aliveSeats();
+  $('#speechCount').textContent = `${alive.length} 人`;
+  const startNo = S.deaths.length ? S.deaths[0].no : 1;
+  const ordered = alive.slice().sort((a,b)=>{
+    const da=(a.no-startNo+12)%12, db=(b.no-startNo+12)%12;
+    return da-db;
+  });
+  $('#speechList').innerHTML = ordered.map((s,i)=>`<li>${i+1}. <b style="color:var(--text)">${s.no} 号</b> ${s.no===S.sheriff?'（警长）':''}</li>`).join('');
+  renderRail();
+}
+
+/* ---------- vote ---------- */
+function renderVote(){
+  $('#voteEyebrow').textContent = `第 ${S.round} 天 · 投票`;
+  const box = $('#voteSeats'); box.innerHTML='';
+  S.votes = S.votes || {};
+  aliveSeats().forEach(s=>{
+    const v = S.votes[s.no] || 0;
+    const b = seatCell(s,{selectable:true, votes:v, sheriff:true});
+    b.onclick = ()=>{
+      S.votes[s.no] = (S.votes[s.no]||0)+1;
+      renderVote();
+    };
+    box.appendChild(b);
+  });
+  const totalVotes = Object.values(S.votes).reduce((a,b)=>a+b,0) + S.abstain;
+  $('#voteSum').textContent = `${totalVotes} 票${S.abstain?`（弃 ${S.abstain}）`:''}`;
+  $('#btnExile').disabled = totalVotes===0;
+  renderRail();
+}
+function tally(){
+  if(!(S.sheriff && S.seats.find(s=>s.no===S.sheriff && s.alive))) { /* no weight */ }
+  const entries = Object.entries(S.votes).filter(([,v])=>v>0);
+  if(!entries.length){ toast('还没有投票'); return; }
+  entries.sort((a,b)=>b[1]-a[1]);
+  const top = entries[0][1];
+  const tied = entries.filter(e=>e[1]===top);
+  if(tied.length>1){
+    toast(`平票：${tied.map(t=>t[0]+' 号').join('、')}（${top} 票）→ 进入 PK 复投`);
+    S.votes = {}; S.abstain = 0; renderVote(); return;
+  }
+  const no = Number(tied[0][0]);
+  const roleId = roleOf(no);
+  if(roleId==='IDIOT'){
+    pushEvent(`${no} 号被放逐，白痴翻牌免死（失去投票权）`, 'death');
+    toast('白痴翻牌：免死、保留发言、失去投票权');
+    S.votes={}; S.abstain=0; renderVote(); return;
+  }
+  S.exiled = no;
+  const s = S.seats.find(x=>x.no===no); if(s) s.alive=false;
+  pushEvent(`${no} 号被放逐出局`, 'death');
+  S.votes={}; S.abstain=0;
+  finishGame('exile');
+}
+function finishGame(reason){
+  const alive = S.seats.filter(s=>s.alive);
+  const wolves = alive.filter(s=>ROLES[s.roleId].camp==='wolf').length;
+  const gods = alive.filter(s=>['SEER','WITCH','HUNTER','GUARD','IDIOT'].includes(s.roleId)).length;
+  const vills = alive.filter(s=>s.roleId==='VILLAGER').length;
+  let winner=null, why='';
+  if(wolves===0){ winner='好人阵营胜利'; why='全部狼人出局'; }
+  else if(gods===0){ winner='狼人阵营胜利'; why='神职全部出局（屠边）'; }
+  else if(vills===0){ winner='狼人阵营胜利'; why='平民全部出局（屠边）'; }
+
+  if(!winner){
+    // 未满足胜利条件：进入下一夜（原型简化：不模拟完整昼夜循环细节）
+    S.round++; S.nightStep=0; S.deaths=[]; S.votes={}; S.abstain=0; S.candidates=[]; S.phase='NIGHT';
+    pushEvent(`第 ${S.round-1} 天结束，未满足胜利条件，进入第 ${S.round} 夜`);
+    toast(`未满足胜利条件 → 第 ${S.round} 夜`);
+    go('night'); renderNight(); return;
+  }
+
+  S.phase='RESULT';
+  pushEvent(`${winner}：${why}`, 'win');
+  renderResult(winner, why);
+  go('result');
+}
+function renderResult(winner, why){
+  $('#resultBanner').innerHTML = `<div class="w">${winner}</div><div class="why">${why}</div>`;
+  $('#revealSeats').innerHTML = S.seats.map(s=>{
+    const camp = ROLES[s.roleId].camp;
+    return `<div class="rv"><span class="n">${s.no}</span><span>${fmtRole(s.roleId)}</span><span class="camp-dot ${camp}"></span></div>`;
+  }).join('');
+  const log = S.events.slice().reverse().map(e=>`<li data-kind="${e.kind}"><span class="r">第${e.round}${e.kind==='death'?'天':'夜'}</span><span>${esc(e.text)}</span></li>`).join('');
+  $('#resultLog').innerHTML = log || '<li><span>无事件</span></li>';
+}
+
+/* ---------- assistant ---------- */
+const AI_TAGS = ['金水','查杀','悍跳嫌疑','划水','疑似狼'];
+const AI_TIPS = {
+  SEER:['好人','白天报查验，带队归票'], WITCH:['好人','报药与救人信息，谨慎跳身份'],
+  HUNTER:['好人','不要轻易暴露，被放逐可开枪'], GUARD:['好人','记录守人，避免连守'],
+  VILLAGER:['好人','听发言找逻辑漏洞'], WOLF:['狼人','伪装好人视角，避免视角矛盾']
+};
+function renderAssistant(){
+  $('#asCamp').textContent = AI_TIPS[S.aiRole][0];
+  $('#asTip').textContent  = AI_TIPS[S.aiRole][1];
+  $('#asRound').textContent = `第 1 天`;
+  $('#asAlive').textContent = `12 / 12`;
+  const box = $('#asPlayers'); box.innerHTML='';
+  for(let i=1;i<=12;i++){
+    const tags = S.aiTags[i] || [];
+    const row = el(`<div class="prow">
+      <div class="prow-head">
+        <span class="prow-no">${i}</span>
+        <span style="font-size:13.5px;color:var(--muted)">${i===5?'我':''}</span>
+        <span class="chip" style="margin-left:auto">${tags.length?tags.length+' 个标签':'未标记'}</span>
+      </div>
+      <div class="tags">${AI_TAGS.map(t=>`<button class="tag ${t==='查杀'||t==='疑似狼'?'hot':''}" data-tag="${t}" data-seat="${i}" aria-pressed="${tags.includes(t)}">${t}</button>`).join('')}</div>
+      <textarea class="ta" data-note="${i}" placeholder="信息 / 发言要点（第 1 轮）">${esc(S.aiNotes[i]||'')}</textarea>
+    </div>`);
+    box.appendChild(row);
+  }
+  box.onclick = (e)=>{
+    const b=e.target.closest('[data-tag]'); if(!b) return;
+    const no=b.dataset.seat, t=b.dataset.tag;
+    S.aiTags[no] = S.aiTags[no] || [];
+    const i=S.aiTags[no].indexOf(t);
+    if(i>=0) S.aiTags[no].splice(i,1); else S.aiTags[no].push(t);
+    b.setAttribute('aria-pressed', S.aiTags[no].includes(t));
+  };
+  box.oninput = (e)=>{
+    const n=e.target.closest('[data-note]'); if(!n) return;
+    S.aiNotes[n.dataset.note] = n.value;
+  };
+}
+
+/* ---------- capability / wake lock ---------- */
+let wakeLock=null;
+async function detectCaps(){
+  const wake = 'wakeLock' in navigator;
+  const ws = 'WebSocket' in window;
+  $('#capWake').textContent = wake ? '可用' : '不支持（需手动设置常亮）';
+  $('#capWake').style.color = wake ? 'var(--good)' : 'var(--muted)';
+  $('#capWs').textContent = ws ? '可用' : '不可用';
+  $('#capWs').style.color = ws ? 'var(--good)' : 'var(--muted)';
+}
+async function keepAwake(){
+  if(!('wakeLock' in navigator)) return;
+  try{ wakeLock = await navigator.wakeLock.request('screen'); }catch(e){ /* 降级：提示手动 */ }
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && S.phase!=='SETUP' && S.phase!=='RESULT') keepAwake(); });
+
+/* ---------- global wiring ---------- */
+function refreshAll(){ renderRail(); renderLogs(); }
+
+document.addEventListener('click', async (e)=>{
+  const goBtn = e.target.closest('[data-go]');
+  if(goBtn){
+    const v = goBtn.dataset.go;
+    if(v==='assistant'){ go('assistant'); renderAssistant(); return; }
+    if(v==='rules'){ go('rules'); return; }
+    if(v==='setup'){ go('setup'); return; }
+    go(v); return;
+  }
+});
+
+/* setup */
+$$('.board-opt').forEach(b=>{
+  b.onclick = ()=>{
+    $$('.board-opt').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    S.boardId = b.dataset.board;
+    toast(`已选 ${b.querySelector('.t').textContent}`);
+  };
+});
+$$('[data-deal]').forEach(b=>{
+  b.onclick = ()=>{
+    $$('[data-deal]').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    S.dealMode = b.dataset.deal;
+    $('#dealHint').textContent = S.dealMode==='A'
+      ? '接力查看：全屏遮罩，玩家自己点开身份，看完回遮罩。'
+      : '线下逐步确认：默认遮罩，主持人二次点击显示身份并逐个确认。';
+  };
+});
+$('#optSheriff').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked', on); S.sheriffOn=on; };
+$('#optSelfSave').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked', on); S.selfSaveOn=on; };
+
+$('#btnStartDeal').onclick = async ()=>{
+  const ok = await confirmAsk('开始发牌', '将随机分配两套板子的身份并进入发牌。开局后不可更改板子，确定吗？', '开始');
+  if(!ok) return;
+  S.history=[]; S.events=[]; S.round=1; S.nightStep=0; S.nightActions={}; S.candidates=[]; S.sheriff=0;
+  dealRoles();
+  pushEvent(`开局：${BOARDS[S.boardId].name} · ${S.dealMode==='A'?'接力查看':'逐步确认'}`);
+  keepAwake();
+  go('deal'); renderDeal();
+};
+
+/* deal */
+$('#btnShowId').onclick = openCover;
+$('#btnNextSeat').onclick = openCover;
+$('#coverReveal').onclick = revealCover;
+$('#coverDone').onclick = closeCover;
+$('#coverHide').onclick = ()=>{ $('#coverFront').hidden=false; $('#coverBack').hidden=true; $('#coverTitle').textContent='已重新遮罩，请交给下一位'; };
+$('#btnDealBack').onclick = async ()=>{
+  if(S.dealt===0 && !S.history.length){ toast('当前没有可回退的发牌'); return; }
+  if(S.dealt>0){ S.dealt--; renderDeal(); toast('已退回上一位'); }
+  else await back();
+};
+$('#btnDealDone').onclick = ()=>{
+  S.phase='NIGHT'; S.nightStep=0;
+  pushEvent('天黑请闭眼');
+  go('night'); renderNight();
+};
+
+/* night */
+$('#btnNightNext').onclick = nightNext;
+$('#btnNightBack').onclick = async ()=>{
+  const act = S.nightActions[S.round] || {};
+  const step = currentNight();
+  if(step && step.role in act){ delete act[step.role]; renderNight(); toast('已撤销本步选择'); return; }
+  if(S.nightStep>0){ S.nightStep--; renderNight(); toast('已退回上一位角色'); return; }
+  await back();
+};
+
+/* sheriff */
+$('#btnSheriffElect').onclick = ()=>{
+  if(!S.candidates.length) return;
+  if(S.candidates.length===1){ S.sheriff=S.candidates[0]; }
+  else { S.sheriff = S.candidates[0]; toast(`原型简化：默认首位当选（${S.candidates[0]} 号）`); }
+  S.seats.forEach(s=>{ /* noop */ });
+  pushEvent(`${S.sheriff} 号当选警长`);
+  $('#btnSheriffNext').disabled=false;
+  updateSheriffBtns();
+  renderRail();
+};
+$('#btnSheriffNone').onclick = ()=>{ S.sheriff=0; S.candidates=[]; pushEvent('本局无警长'); $('#btnSheriffNext').disabled=false; renderSheriff(); };
+$('#btnSheriffNext').onclick = ()=>{ go('dawn'); renderDawn(); };
+$('#btnSheriffBack').onclick = ()=>back();
+
+/* dawn */
+$('#optHunter').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked',on); if(on) pushEvent('猎人开枪（主持人记录）','death'); };
+$('#optBadge').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked',on); if(on) pushEvent('警徽流转（主持人记录）'); };
+$('#btnDawnNext').onclick = ()=>{ go('speech'); renderSpeech(); };
+$('#btnDawnBack').onclick = ()=>back();
+
+/* speech */
+$('#btnExplode').onclick = async ()=>{
+  const ok = await confirmAsk('确认自爆', '自爆将中止当前发言流程，白狼王可带走一人，随后立即检查胜负。', '确认自爆');
+  if(!ok) return;
+  pushEvent('有人自爆，中止当前流程', 'death');
+  S.votes={}; finishGame('explode');
+};
+$('#btnSpeechNext').onclick = ()=>{ go('vote'); renderVote(); };
+$('#btnSpeechBack').onclick = ()=>back();
+
+/* vote */
+$('#btnVoteAbstain').onclick = ()=>{ S.abstain++; renderVote(); };
+$('#btnVoteClear').onclick = ()=>{ S.votes={}; S.abstain=0; renderVote(); };
+$('#btnVoteTally').onclick = tally;
+$('#btnExile').onclick = ()=>{ tally(); };
+$('#btnVoteBack').onclick = ()=>back();
+
+/* result */
+$('#btnAgain').onclick = ()=>{ S.history=[]; S.events=[]; S.votes={}; S.abstain=0; S.deaths=[]; S.nightStep=0; S.nightActions={}; S.candidates=[]; S.sheriff=0; S.round=1; pushEvent('再来一局，保留编号'); go('setup'); };
+$('#btnWipe').onclick = async ()=>{
+  const ok = await confirmAsk('清除本局', '将清除本机对局状态，规则内容与 AI 配置不受影响。确定吗？', '清除');
+  if(!ok) return;
+  S.seats=[]; S.events=[]; S.votes={}; S.abstain=0; S.deaths=[]; S.sheriff=0; S.candidates=[]; S.round=1; S.nightStep=0; S.nightActions={}; S.history=[];
+  toast('已清除本局'); go('home');
+};
+
+/* assistant */
+$$('.as-role').forEach(b=>{
+  b.onclick = ()=>{
+    $$('.as-role').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    S.aiRole=b.dataset.role;
+    $('#asCamp').textContent = AI_TIPS[S.aiRole][0];
+    $('#asTip').textContent  = AI_TIPS[S.aiRole][1];
+  };
+});
+$('#btnAi').onclick = ()=>{ toast('AI 请求（原型仅示意，不发起真实请求）'); };
+$('#btnAiFail').onclick = ()=>{
+  $('#aiOut').innerHTML = `<div class="ai-sec"><h4 style="color:var(--danger)">请求失败</h4><p>Key 无效或额度不足（KEY_INVALID / QUOTA）。请检查模型配置后重试；主持与记录功能不受影响。</p></div>`;
+  toast('已模拟失败态');
+};
+
+/* sheet */
+$('#railBtn').onclick = ()=>{ $('#sheet').classList.add('on'); renderRail(); renderLogs(); };
+$$('[data-close-sheet]').forEach(n=>n.onclick = ()=>$('#sheet').classList.remove('on'));
+
+/* first-run guide */
+(function firstRun(){
+  if(localStorage.getItem('lrs_proto_guide')==='1') return;
+  setTimeout(async ()=>{
+    const ok = await confirmAsk('首次使用（3 步）', '1. 选板子 → 2. 发牌 → 3. 按卡片主持。可随时跳过。是否现在开始主持？', '去选板子');
+    localStorage.setItem('lrs_proto_guide','1');
+    if(ok) go('setup');
+  }, 700);
+})();
+
+/* init */
+detectCaps();
+renderSetupSeats();
+refreshAll();
+window.addEventListener('keydown', (e)=>{
+  if(e.key==='Escape'){ $('#cover').classList.remove('on'); $('#modal').classList.remove('on'); $('#sheet').classList.remove('on'); }
+});
+</script>
+</body>
+</html>
