@@ -4,7 +4,7 @@
 - 日期：2026-11-25
 - PRD 基线：v1.3.1（P0 本轮；P1 下一迭代）
 - 适用范围：移动端优先 Web 应用；P0 单机主持 + 个人助手 + AI 中转；P1 联机预留
-- 文档状态：待步骤 3 验收；阶段与验收状态以 [project-progress.md](../plan/project-progress.md) 为准
+- 文档状态：活跃（步骤 3 已验收，2026-11-25）；阶段与验收状态以 [project-progress.md](../plan/project-progress.md) 为准
 - 关联：[API 契约](api-contract.md)、[开发环境信息](dev-info.md)、[ADR 索引](#14-adr-索引)
 
 ## 1. 目标、范围与约束
@@ -80,6 +80,7 @@ Browser ──HTTPS──> Node/Fastify ──┬── /            → apps/we
 | P0-11 本地数据 | AC-11 | IndexedDB/localStorage | 刷新/清空测试 | 已承接 |
 | P0-12 屏幕常亮 | AC-16 | web Wake Lock + fallback | 真机 hide/show | 已承接 |
 | NFR 移动端性能 | AC-16/AC-17 | Vite 代码分割、Tailwind、SVG/系统字体 | Lighthouse + 真机 | 已承接 |
+| NFR 可访问性 | 走查 + 真机 | 触控 ≥44px、对比度 ≥4.5:1、系统字体放大不截断 | AC-16 走查 + T-021 | 已承接 |
 | NFR 安全/隐私 | 安全用例 | 匿名会话、CSRF、CORS、CSP、SSRF、服务端过滤 | 安全测试 | 已承接 |
 | NFR AI 时效/限频 | AC-10 | API 超时、响应上限、限频 | 契约/故障注入 | 已承接 |
 | P1 联机/PWA/术语/笔记 | AC-12~AC-15、AC-19 | `apps/api` rooms + Socket.IO + SQLite；web P1 | P1 验收 | 预留（下一迭代） |
@@ -252,7 +253,7 @@ erDiagram
 - **会话**：`lrs_anon` httpOnly + Secure + SameSite=Lax；无账号；会话 ID 只用于房间绑定与限频。
 - **CSRF**：`GET /session` 返回 token；写接口 `X-CSRF-Token`；Origin 校验。
 - **CORS**：同源优先；分离部署白名单；带凭证不使用 `*`。
-- **CSP**：`script-src 'self'`；禁止内联脚本；AI 输出纯文本/安全 Markdown。
+- **CSP**：`script-src 'self'`；禁止内联脚本；AI 输出纯文本/安全 Markdown；Radix/Tailwind 若需内联样式，实测后允许 `style-src 'self' 'unsafe-inline'`，保持脚本严格。
 - **XSS**：React 默认转义；Markdown 渲染需 sanitize；禁止 `dangerouslySetInnerHTML` 未净化内容。
 - **AI SSRF**：仅 https；拒绝私网/环回/链路本地/元数据；不跟随私网重定向；超时/响应上限。
 - **Key**：不落库、不写日志、不进入错误上报；默认不持久化。
@@ -261,7 +262,6 @@ erDiagram
 - **数据**：DB 不公网；最小权限；备份加密/访问控制；日志不含 Key/上下文/笔记；备份保留期与隐私政策一致。
 - **会话密钥**：`SESSION_SECRET` 轮换会使所有匿名会话/绑定失效；需公告/维护窗口；主持令牌独立。
 - **传输**：HTTPS/HSTS；安全头；证书续期；云 LB 场景校验 `TRUST_PROXY` 与真实 IP。
-- **CSP**：`script-src 'self'`；Radix/Tailwind 若需内联样式，实测后允许 `style-src 'self' 'unsafe-inline'`，保持脚本严格。
 
 ## 10. 非功能设计与验证
 
@@ -269,7 +269,7 @@ erDiagram
 | --- | --- | --- |
 | 移动端首屏 | 路由级代码分割；规则内容懒加载；系统字体/SVG；Tailwind | Lighthouse 5G/4G；首屏 JS ≤250KB gzip |
 | 帧率 | 避免大列表重渲染；AI 结果分段渲染；无长动画 | 真机 60fps/中端 ≥55fps；长任务 ≤50ms |
-| 触控/布局 | 44px 触控；底部拇指区；100dvh/safe-area；16px 输入框 | AC-16 真机矩阵 |
+| 触控/布局 | 44px 触控；底部拇指区；100dvh/safe-area；16px 输入框；对比度 ≥4.5:1；字体放大不截断 | AC-16 真机矩阵 |
 | 网络 | 5G/Wi-Fi 主；4G/弱网降级；WS 重连；轮询降级 | AC-17 + 故障注入 |
 | AI 时效 | 连接 30s/总 60s；1MB；每会话 1 个在途 + 全局限并发；限频 | AC-10 + 契约/并发测试 |
 | Node 请求限制 | 全局 bodyLimit 256KB；AI 128KB；snapshot 256KB；WS 64KB；request/header/connection/keep-alive 超时 | 大包/慢请求/超时测试 |
