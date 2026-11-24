@@ -21,9 +21,9 @@
 
 **目标**：为 P0 提供同源静态服务、匿名会话、AI 中转与健康检查；为 P1 预留路由/数据层但不实现房间业务。
 
-**范围内**：Fastify 启动、`@fastify/static`（SPA fallback）、`@fastify/cookie`、CSRF、`@fastify/helmet`、`@fastify/compress`、`@fastify/rate-limit`、`POST /api/v1/ai/relay`、`GET /api/v1/session`、`GET /api/v1/health`、SSRF/超时/响应上限/日志脱敏；请求限制与 `TRUST_PROXY`。
+**范围内**：Fastify 启动、`@fastify/static`（SPA fallback）、`@fastify/cookie`、CSRF、`@fastify/helmet`、`@fastify/compress`、`@fastify/rate-limit`、`POST /api/v1/ai/relay`、`GET /api/v1/session`、`GET /api/v1/health`、SSRF/超时/响应上限/日志脱敏；请求限制与 `TRUST_PROXY`；HTTP 内部静态/健康检查冒烟。
 
-**范围外**：P1 房间/WS/SQLite 业务（M2）。
+**范围外**：P1 房间/WS/SQLite 业务（M2）；P1 路由/数据层不在本任务内预留实现。
 
 ### 技术方案
 
@@ -43,7 +43,8 @@
 
 - `GET /session`、`GET /health`、`POST /ai/relay` 契约测试通过。
 - SSRF/超时/大包/限频/日志脱敏用例通过；静态/API 路由不互相吞。
-- 产出：`apps/api` 源码与测试；证据：测试报告。
+- 先做 HTTP 内部冒烟（静态 fallback/健康检查），TLS/443 留到 T-024。
+- 产出：`apps/api` 源码与测试；证据：`docs/test/evidence/M1/T-019/`。
 
 ### 风险与恢复
 

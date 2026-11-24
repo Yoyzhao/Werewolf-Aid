@@ -71,29 +71,36 @@
 | T-007 | 步骤 3 技术架构 | M1/3 | 已完成 | P0 | T-006 | tech-arch | tech-arch v1.2 | 无 |
 | T-008 | 用户验收步骤 3 | M1/3 | 已完成 | P0 | T-007 | tech-arch | 2026-11-25 | 无 |
 | T-009 | 步骤 4 任务拆解 | M1/4 | 已完成 | P0 | T-008 | [STEP-4](tasks/M1/STEP-4.md) | 本文件/STEP-4 | 待阶段验收 |
-| T-010 | P1 下一迭代规划 | M2/规划 | 待开始 | P1 | T-024 | [dev-plan](project-dev-plan.md) | 未产生 | M1 后启动 |
+| T-010 | P1 下一迭代规划 | M2/规划 | 待开始 | P1 | T-019/T-031 | [dev-plan](project-dev-plan.md) | 未产生 | M1 核心后启动 |
 | T-011 | 部署形态调整 Node-only | M1/3 | 已完成 | P0 | T-008 | tech-arch | ADR-005 | 无 |
 | T-012 | 技术方案评审整改 | M1/3 | 已完成 | P0 | T-011 | tech-arch | tech-arch v1.2 / API v1.1 | 无 |
-| T-013 | 移动端原型 | M1/5A | 待开发 | P0 | T-012 | [STEP-5A](tasks/M1/STEP-5A.md) | `docs/prototype/` | 待 5A 启动 |
-| T-014 | 交互细化/契约冻结 | M1/5B | 待开发 | P0 | T-013 | [STEP-5B](tasks/M1/STEP-5B.md) | 原型 v2/状态清单 | 待 5B 启动 |
-| T-015 | 工程脚手架与共享包 | M1/5C | 待开发 | P0 | T-014 | [STEP-5C](tasks/M1/STEP-5C.md) | 根工程/共享包 | 待 5C 启动 |
-| T-016 | game-engine 规则/状态机/视图 | M1/5C | 待开发 | P0 | T-015 | [STEP-5C](tasks/M1/STEP-5C.md) | `packages/game-engine` | 待 5C 启动 |
-| T-017 | 主持端流程与本地存储 | M1/5C | 待开发 | P0 | T-015/T-016 | [STEP-5C](tasks/M1/STEP-5C.md) | `apps/web` 主持端 | 待 5C 启动 |
-| T-018 | 个人助手与规则内容 | M1/5C | 待开发 | P0 | T-015/T-017 | [STEP-5C](tasks/M1/STEP-5C.md) | 助手/`rules-content` | 待 5C 启动 |
-| T-019 | API 服务与 AI 中转 | M1/5D | 待开发 | P0 | T-015 | [STEP-5D](tasks/M1/STEP-5D.md) | `apps/api` | 待 5D 启动 |
-| T-020 | AI 前端接入与整合 | M1/6 | 待开发 | P0 | T-018/T-019 | [STEP-6](tasks/M1/STEP-6.md) | AI 联调记录 | 待 6 启动 |
-| T-021 | 移动端性能与兼容 | M1/5C | 待开发 | P0 | T-017/T-018 | [STEP-5C](tasks/M1/STEP-5C.md) | 性能/兼容报告 | 待 5C 启动 |
-| T-022 | 系统联调与 P0 验收 | M1/7 | 待开发 | P0 | T-020/T-021 | [STEP-7](tasks/M1/STEP-7.md) | 联调/验收报告 | 待 7 启动 |
-| T-023 | 测试用例与执行 | M1/8 | 待开发 | P0 | T-022 | [STEP-8](tasks/M1/STEP-8.md) | `docs/test/` | 待 8 启动 |
-| T-024 | 部署与上线准备 | M1/9 | 待开发 | P0 | T-023 | [STEP-9](tasks/M1/STEP-9.md) | `docs/deploy/` | 待 9 启动 |
+| T-013 | 主持闭环原型 | M1/5A | 待开发 | P0 | T-012 | [STEP-5A](tasks/M1/STEP-5A.md#t-013) | `docs/prototype/` | 待 5A 启动 |
+| T-025 | 助手与规则原型 | M1/5A | 待开发 | P0 | T-012 | [STEP-5A](tasks/M1/STEP-5A.md#t-025) | `docs/prototype/` | 待 5A 启动 |
+| T-014 | 交互细化/契约冻结 | M1/5B | 待开发 | P0 | T-013/T-025 | [STEP-5B](tasks/M1/STEP-5B.md#t-014) | 原型 v2/状态清单 | 待 5B 启动 |
+| T-015 | 工程脚手架/CI/共享包 | M1/5C | 待开发 | P0 | T-014 | [STEP-5C](tasks/M1/STEP-5C.md#t-015) | 根工程/共享包 | 待 5C 启动 |
+| T-026 | 板子/角色配置 | M1/5C | 待开发 | P0 | T-015 | [STEP-5C](tasks/M1/STEP-5C.md#t-026) | `game-engine` 配置 | 待 5C 启动 |
+| T-027 | 状态机与动作 | M1/5C | 待开发 | P0 | T-026 | [STEP-5C](tasks/M1/STEP-5C.md#t-027) | 状态机/动作 | 待 5C 启动 |
+| T-028 | 冲突/技能/胜负 | M1/5C | 待开发 | P0 | T-027 | [STEP-5C](tasks/M1/STEP-5C.md#t-028) | 规则/胜负函数 | 待 5C 启动 |
+| T-029 | 开局与双模式发牌 | M1/5C | 待开发 | P0 | T-015/T-027 | [STEP-5C](tasks/M1/STEP-5C.md#t-029) | 开局/发牌页面 | 待 5C 启动 |
+| T-030 | 夜间/竞选/死讯/发言 | M1/5C | 待开发 | P0 | T-029/T-028 | [STEP-5C](tasks/M1/STEP-5C.md#t-030) | 夜间/白天页面 | 待 5C 启动 |
+| T-031 | 投票/结算/本地/WakeLock | M1/5C | 待开发 | P0 | T-030/T-028 | [STEP-5C](tasks/M1/STEP-5C.md#t-031) | 投票/结算/存储 | 待 5C 启动 |
+| T-032 | 规则内容编写与评审 | M1/5C | 待开发 | P0 | T-015 | [STEP-5C](tasks/M1/STEP-5C.md#t-032) | `rules-content` | 待 5C 启动 |
+| T-018 | 个人助手 UI | M1/5C | 待开发 | P0 | T-015/T-032 | [STEP-5C](tasks/M1/STEP-5C.md#t-018) | 助手页面/上下文 | 待 5C 启动 |
+| T-021 | 移动端性能与兼容终检 | M1/5C | 待开发 | P0 | T-031/T-018 | [STEP-5C](tasks/M1/STEP-5C.md#t-021) | 性能/兼容报告 | 待 5C 启动 |
+| T-019 | API 服务与 AI 中转 | M1/5D | 待开发 | P0 | T-015 | [STEP-5D](tasks/M1/STEP-5D.md#t-019) | `apps/api` | 待 5D 启动 |
+| T-020 | AI 前端接入与整合 | M1/6 | 待开发 | P0 | T-018/T-019 | [STEP-6](tasks/M1/STEP-6.md#t-020) | AI 联调记录 | 待 6 启动 |
+| T-022 | 系统联调与 P0 验收 | M1/7 | 待开发 | P0 | T-020/T-021/T-031 | [STEP-7](tasks/M1/STEP-7.md#t-022) | 联调/验收报告 | 待 7 启动 |
+| T-023 | 测试用例与全量回归 | M1/8 | 待开发 | P0 | T-022 | [STEP-8](tasks/M1/STEP-8.md#t-023) | `docs/test/` | 待 8 启动 |
+| T-024 | 部署与上线准备 | M1/9 | 待开发 | P0 | T-023 | [STEP-9](tasks/M1/STEP-9.md#t-024) | `docs/deploy/` | 待 9 启动 |
 
-> M1 实现任务（T-013～T-024）共 12 项，当前完成 0 项；前置阶段任务 T-001～T-012 已完成（T-010 属 M2）。
+> M1 实现任务共 18 项（T-013、T-025、T-014、T-015、T-026～T-032、T-018、T-021、T-019、T-020、T-022～T-024），当前完成 0 项；前置阶段任务 T-001～T-012 已完成（T-010 属 M2）。
 
 ## 步骤 4 产出
 
 - [项目开发计划](project-dev-plan.md)：M1/M2/M3 里程碑与功能点。
 - [STEP-4 任务拆解](tasks/M1/STEP-4.md)：任务分解、依赖链与阶段文档索引。
 - [STEP-5A](tasks/M1/STEP-5A.md)～[STEP-9](tasks/M1/STEP-9.md)：阶段任务入口。
+- 任务池：18 个 M1 实现任务（5A 2、5B 1、5C 10、5D 1、6 1、7 1、8 1、9 1）。
 - 本文件：任务池、阶段概览、确认记录与风险。
 
 ## 已确认决策
@@ -126,7 +133,7 @@
 
 ### 2026-11-25 进度快照
 
-**当前进度**：阶段 4 完成，待验收；M1 实现任务 0/12。
+**当前进度**：阶段 4 完成，待验收；M1 实现任务 0/18。
 
 **已完成**：
 - PRD v1.3.1 验收、技术方案 v1.2 验收。
