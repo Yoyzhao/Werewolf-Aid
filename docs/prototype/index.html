@@ -1123,6 +1123,12 @@
   .ai-sec h4{color:var(--accent);letter-spacing:.14em;font-size:10.5px;text-transform:uppercase}
   .ai-sec p{line-height:1.7}
   .ai-note{color:var(--faint)}
+  .ai-loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+  .ai-loading b{display:block;color:var(--text);font-size:13.5px;font-weight:600}
+  .ai-loading small{display:block;margin-top:2px;font-size:11.5px;color:var(--faint)}
+  .ai-loading .spinner{width:18px;height:18px;flex:none;border-radius:50%;border:2px solid rgba(231,182,90,.2);border-top-color:var(--accent);animation:spin .8s linear infinite}
+  .ai-loading .btn.ghost{margin-left:auto;flex:none;min-height:36px;padding:0 12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
   /* ---------- rules ---------- */
   details.acc{
@@ -1231,6 +1237,41 @@
     .card{padding:22px}
     .rail{top:108px}
   }
+
+  /* ---------- 5B state additions ---------- */
+  [hidden]{display:none!important}
+  .sheriff-steps{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:0 0 14px}
+  .sheriff-steps .ss{font-size:10px;letter-spacing:.06em;color:var(--faint);padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);white-space:nowrap}
+  .sheriff-steps .ss.on{color:var(--accent-2);border-color:rgba(231,182,90,.42);background:rgba(231,182,90,.1)}
+  .sheriff-steps .ds-line{flex:1;min-width:4px;background:var(--line-strong)}
+  .lw-list{display:grid;gap:6px}
+  .lw-row{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(16,20,34,.5);font-size:13px;color:var(--muted)}
+  .lw-row.done{border-color:rgba(70,185,138,.3);background:rgba(70,185,138,.06);color:var(--faint)}
+  .lw-row b{color:var(--text)}
+  .lw-row.done b{color:var(--muted)}
+  .lw-row .tick{margin-left:auto;font-size:11px;color:var(--faint)}
+  .lw-row.done .tick{color:var(--good)}
+  .dawn-targets{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+  .dawn-targets .dl{font-size:11.5px;color:var(--faint);margin-bottom:6px}
+  .pick-grid{display:flex;flex-wrap:wrap;gap:6px}
+  .pick-chip{min-height:38px;padding:0 11px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface-2);font-size:12px;color:var(--muted)}
+  .pick-chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-2);background:rgba(231,182,90,.12)}
+  .vote-opts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .vote-opts .faint{font-size:11.5px}
+  .night-result{margin:0 0 12px;padding:9px 12px;border:1px solid rgba(231,182,90,.24);border-radius:11px;background:rgba(231,182,90,.07);font-size:12.5px;color:var(--accent-2)}
+  .night-result b{color:var(--text)}
+  .ai-config{display:grid;gap:10px}
+  .ai-field{display:grid;gap:4px;font-size:11.5px;color:var(--muted)}
+  .ai-field input{width:100%;min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font-size:16px}
+  .ai-field.inline{display:flex;align-items:center;gap:8px;font-size:12px}
+  .ai-field.inline input{width:auto;min-height:0}
+  .ai-status{font-size:11.5px;color:var(--faint)}
+  .ai-status.ok{color:var(--good)}
+  .ai-ctx{display:grid;gap:7px}
+  .ai-ctx .ctx-sec{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(16,20,34,.5)}
+  .ai-ctx .ctx-sec b{display:block;margin-bottom:3px;font-size:10px;letter-spacing:.12em;color:var(--accent)}
+  .ai-ctx .ctx-sec span{font-size:12.5px;line-height:1.6;color:var(--muted)}
+  .ai-free{width:100%;min-height:64px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font-size:16px;resize:vertical}
 
   /* ---------- motion ---------- */
   @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -1521,6 +1562,14 @@
         <h1>警长竞选</h1>
         <p class="lead">报名 → 发言 → 退水 → 警下投票 → 平票 PK；再平则本局无警长。</p>
 
+        <div class="sheriff-steps" aria-label="竞选流程">
+          <span class="ss on">1 报名</span><i class="ds-line"></i>
+          <span class="ss">2 发言</span><i class="ds-line"></i>
+          <span class="ss">3 退水</span><i class="ds-line"></i>
+          <span class="ss">4 警下投票</span><i class="ds-line"></i>
+          <span class="ss">5 PK</span>
+        </div>
+
         <div class="card">
           <div class="card-head"><h3>上警玩家</h3><span class="hint">AC-3</span></div>
           <div class="seat-grid compact" id="sheriffSeats"></div>
@@ -1559,6 +1608,13 @@
             <div><span class="lab">警长死亡，处理警徽</span><span class="sub">移交或撕毁</span></div>
             <button class="switch ctl" id="optBadge" role="switch" aria-checked="false" aria-label="警徽流转"><span class="sr">警徽流转</span></button>
           </div>
+          <div class="dawn-targets" id="hunterTargets" hidden></div>
+          <div class="dawn-targets" id="badgeTargets" hidden></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>遗言</h3><span class="hint" id="lastWordsHint">首夜/白天出局有遗言</span></div>
+          <div class="lw-list" id="lastWords"></div>
         </div>
 
         <div class="actionbar"><div class="bar-in">
@@ -1594,6 +1650,10 @@
         <div class="card">
           <div class="card-head"><h3>投票录入</h3><span class="hint" id="voteSum">0 票</span></div>
           <div class="seat-grid" id="voteSeats"></div>
+          <div class="vote-opts">
+            <button class="tag" id="btnVoteSheriff" aria-pressed="false">警长票 1.5</button>
+            <span class="faint" id="voteModeHint">原型演示归票 + 权重；正式版支持逐票录入。</span>
+          </div>
           <div class="divider"></div>
           <div class="btn-row">
             <button class="btn" id="btnVoteAbstain">+ 弃票</button>
@@ -1604,7 +1664,7 @@
 
         <div class="actionbar"><div class="bar-in">
           <button class="btn ghost" id="btnVoteBack">回退</button>
-          <button class="btn primary" id="btnExile" disabled>放逐并进入结算</button>
+          <button class="btn primary" id="btnExile" disabled>放逐并检查胜负</button>
         </div></div>
       </section>
 
@@ -1677,12 +1737,33 @@
             </div>
 
             <div class="card">
+              <div class="card-head"><h3>AI 配置</h3><span class="hint">BYOK · Key 默认仅本会话</span></div>
+              <div class="ai-config">
+                <label class="ai-field">接口地址<input id="aiEndpoint" type="url" placeholder="https://api.example.com/v1/chat/completions" autocomplete="off"></label>
+                <label class="ai-field">模型名<input id="aiModel" placeholder="gpt-4o-mini" autocomplete="off"></label>
+                <label class="ai-field">API Key<input id="aiKey" type="password" placeholder="sk-..." autocomplete="off"></label>
+                <label class="ai-field inline"><input type="checkbox" id="aiRemember"> 记住本次会话</label>
+                <div class="btn-row">
+                  <button class="btn" id="btnAiSave">保存配置</button>
+                  <button class="btn ghost" id="btnAiClear">清除配置</button>
+                </div>
+                <div class="ai-status" id="aiConfigStatus">未配置</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>AI 上下文预览</h3><span class="hint" id="aiCtxLen">0 字</span></div>
+              <div class="ai-ctx" id="aiContext"></div>
+              <label class="ai-field" style="margin-top:10px">自由描述<textarea class="ai-free" id="aiFree" maxlength="2000" placeholder="补充你想让军师关注的信息"></textarea></label>
+            </div>
+
+            <div class="card">
               <div class="card-head"><h3>AI 军师 · 局势解读</h3><span class="hint">AC-9 / AC-10</span></div>
               <div class="btn-row" style="margin-bottom:12px">
                 <button class="btn primary" id="btnAi">让军师整理（示意）</button>
                 <button class="btn" id="btnAiFail">模拟失败</button>
               </div>
-              <div class="ai-out" id="aiOut">
+              <div class="ai-out" id="aiOut" aria-live="polite">
                 <div class="ai-sec"><h4>信息整理</h4><p>2 号发言前后矛盾；7 号与 9 号互保；5 号（你）首夜查杀 3 号后，3 号未再发言。</p></div>
                 <div class="ai-sec"><h4>可疑对象与依据</h4><p>3 号：被查杀后沉默，且与 7 号无互动（基于「查杀」标签）。7 号：两次改口，动机不明（基于发言要点第 1 轮）。</p></div>
                 <div class="ai-sec"><h4>下一步建议</h4><p>优先让 3 号自证；若 3 号跳守卫需与 4 号对锁；警徽流建议压 9 号。</p></div>
@@ -1923,9 +2004,11 @@ const S = {
   seats:[], phase:'SETUP', round:1,
   dealIdx:1, dealt:0, nightStep:0, nightActions:{},
   candidates:[], sheriff:0, elected:0,
-  votes:{}, abstain:0, exiled:0,
+  votes:{}, abstain:0, exiled:0, voteWeight:1, sheriffVoteUsed:false,
   spoken:[], spokenRound:0,
-  deaths:[], events:[], history:[], aiRole:'SEER', aiTags:{}, aiNotes:{}
+  lastWords:[], lastWordsRound:0, dawnHunterTarget:0, dawnBadgeTarget:null,
+  deaths:[], events:[], history:[], aiRole:'SEER', aiTags:{}, aiNotes:{},
+  aiConfig:{endpoint:'https://api.example.com/v1/chat/completions', model:'gpt-4o-mini', key:'sk-demo', remember:false}, aiFree:''
 };
 let manualPeekOn = false;
 
@@ -1935,6 +2018,7 @@ const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
 function esc(v){ return String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function fmtRole(id){ return ROLES[id] ? ROLES[id].name : '—'; }
+function fmtVote(n){ return Number.isInteger(n) ? String(n) : n.toFixed(1); }
 
 let toastTimer;
 function toast(msg){
@@ -2021,7 +2105,7 @@ function seatCell(s, {selectable=false, role=false, votes=0, sheriff=false, dead
       ${role ? `<span class="r">${fmtRole(s.roleId)}</span>` : `<span class="r">${s.alive?'在场':'出局'}</span>`}
       ${sheriff && s.no===S.sheriff ? '<span class="badge">警</span>' : ''}
       ${!s.alive && deadBadge ? '<span class="badge dead-b">亡</span>' : ''}
-      ${votes ? `<span class="vote">${votes}票</span>` : ''}
+      ${votes ? `<span class="vote">${fmtVote(votes)}票</span>` : ''}
     </button>`);
   if(!selectable){ b.disabled = true; b.style.cursor='default'; }
   return b;
@@ -2039,7 +2123,7 @@ function renderLogs(){
 }
 
 function snapshot(){
-  S.history.push(JSON.stringify({ seats:S.seats, nightStep:S.nightStep, nightActions:S.nightActions, sheriff:S.sheriff, votes:S.votes, abstain:S.abstain, exiled:S.exiled, deaths:S.deaths, events:S.events, round:S.round, dealt:S.dealt, dealIdx:S.dealIdx }));
+  S.history.push(JSON.stringify({ seats:S.seats, nightStep:S.nightStep, nightActions:S.nightActions, sheriff:S.sheriff, votes:S.votes, abstain:S.abstain, voteWeight:S.voteWeight, sheriffVoteUsed:S.sheriffVoteUsed, exiled:S.exiled, deaths:S.deaths, events:S.events, round:S.round, dealt:S.dealt, dealIdx:S.dealIdx, candidates:S.candidates, spoken:S.spoken, lastWords:S.lastWords, dawnHunterTarget:S.dawnHunterTarget, dawnBadgeTarget:S.dawnBadgeTarget }));
   if(S.history.length>30) S.history.shift();
 }
 async function back(step=1){
@@ -2052,6 +2136,9 @@ async function back(step=1){
   toast('已回退一步');
   if(S.view==='deal') renderDeal();
   if(S.view==='night') renderNight();
+  if(S.view==='sheriff') renderSheriff();
+  if(S.view==='dawn') renderDawn();
+  if(S.view==='speech') renderSpeech();
   if(S.view==='vote') renderVote();
 }
 
@@ -2268,6 +2355,7 @@ function renderNight(){
         </div>
       </div>
       ${priv}
+      <div class="night-result" id="nightPrivate" hidden></div>
       <div class="seat-grid" id="nightSeats"></div>
       <div style="margin-top:12px" class="chips" id="nightPick"></div>
     </div>`;
@@ -2281,11 +2369,30 @@ function renderNight(){
       act[step.role] = s.no;
       b.classList.add('sel');
       renderNightPick();
+      renderNightPrivate(step, act);
     };
     seats.appendChild(b);
   });
 
   const pick = $('#nightPick');
+  function renderNightPrivate(step, act){
+    const box = $('#nightPrivate'); if(!box) return;
+    let html = '';
+    if(step.role==='SEER' && act.SEER){
+      const t = act.SEER, camp = ROLES[roleOf(t)].camp;
+      html = `查验结果：<b>${t} 号是${camp==='wolf'?'狼人':'好人'}</b>（仅主持端可见）`;
+    } else if(step.role==='WOLF'){
+      const wolves = S.seats.filter(s=>ROLES[s.roleId].camp==='wolf').map(s=>`${s.no} 号`).join('、');
+      html = `狼队：<b>${wolves}</b>（仅主持端可见）`;
+    } else if(step.role==='WITCH' && act.WOLF){
+      html = `今晚 <b>${act.WOLF} 号</b>被刀；解药与毒药各限一瓶。`;
+    } else if(step.role==='GUARD'){
+      const prev = (S.nightActions[S.round-1]||{}).GUARD;
+      html = prev ? `上一夜守护 <b>${prev} 号</b>；本夜不可连守。` : '可自守；不可连续两夜守同一人。';
+    }
+    box.hidden = !html;
+    box.innerHTML = html;
+  }
   function renderNightPick(){
     pick.innerHTML='';
     if(step.opt){
@@ -2314,8 +2421,10 @@ function renderNight(){
       };
       pick.appendChild(seg);
     }
+    renderNightPrivate(step, act);
   }
   renderNightPick();
+  renderNightPrivate(step, act);
   $('#btnNightNext').textContent = (S.nightStep >= total-1) ? '天亮了，结算夜晚' : '确认，下一位';
   renderRail();
 }
@@ -2348,6 +2457,8 @@ function nightNext(){
 
 function renderDawn(){
   $('#dawnEyebrow').textContent = `第 ${S.round} 天 · 天亮`;
+  ['#optHunter','#optBadge'].forEach(sel=>{ const n=$(sel); if(n) n.setAttribute('aria-checked','false'); });
+  S.dawnHunterTarget = 0; S.dawnBadgeTarget = null;
   const box = $('#dawnResult');
   if(!S.deaths.length){
     box.innerHTML = `<div class="notice" style="margin:0">
@@ -2357,7 +2468,79 @@ function renderDawn(){
     box.innerHTML = `<p style="margin:0 0 8px;font-size:15px"><b>${S.deaths.map(d=>d.no+' 号').join('、')}</b> 出局</p>
       <div class="chips">${S.deaths.map(d=>`<span class="chip">${d.how==='same'?'同守同救':d.how==='poison'?'被毒':'被刀'}</span>`).join('')}</div>`;
   }
+  renderLastWords();
+  renderDawnTargets();
   renderRail();
+}
+function renderLastWords(){
+  const box = $('#lastWords'), hint = $('#lastWordsHint');
+  if(!box) return;
+  if(S.lastWordsRound !== S.round){ S.lastWords = []; S.lastWordsRound = S.round; }
+  const eligible = S.round===1 ? S.deaths.map(d=>d.no) : [];
+  if(S.round > 1){
+    hint.textContent = '第 2 夜起无遗言';
+    box.innerHTML = `<p class="faint" style="font-size:12.5px;margin:0">本夜出局玩家无遗言，直接进入发言。</p>`;
+    return;
+  }
+  if(!eligible.length){
+    hint.textContent = '平安夜无遗言';
+    box.innerHTML = `<p class="faint" style="font-size:12.5px;margin:0">昨夜无人出局，无需遗言。</p>`;
+    return;
+  }
+  hint.textContent = `${S.lastWords.length} / ${eligible.length} 已发言`;
+  box.innerHTML = eligible.map(no=>{
+    const done = S.lastWords.includes(no);
+    return `<button class="lw-row ${done?'done':''}" data-lw="${no}" aria-pressed="${done}">
+      <b>${no} 号</b><span>遗言</span><span class="tick">${done?'已发言':'点一下标记'}</span></button>`;
+  }).join('');
+  $$('[data-lw]', box).forEach(b=>{
+    b.onclick = ()=>{
+      const no = Number(b.dataset.lw), i = S.lastWords.indexOf(no);
+      if(i>=0) S.lastWords.splice(i,1); else S.lastWords.push(no);
+      renderLastWords();
+    };
+  });
+}
+function renderDawnTargets(){
+  const hunterPanel = $('#hunterTargets'), badgePanel = $('#badgeTargets');
+  if(!hunterPanel || !badgePanel) return;
+  const hunterOn = $('#optHunter').getAttribute('aria-checked')==='true';
+  const badgeOn = $('#optBadge').getAttribute('aria-checked')==='true';
+  hunterPanel.hidden = !hunterOn;
+  badgePanel.hidden = !badgeOn;
+  const alive = aliveSeats();
+  if(hunterOn){
+    hunterPanel.innerHTML = `<div class="dl">猎人开枪目标（被毒/被白狼王带走不可开枪）</div>
+      <div class="pick-grid">
+        <button class="pick-chip" data-hunter="0" aria-pressed="${!S.dawnHunterTarget}">跳过</button>
+        ${alive.map(s=>`<button class="pick-chip" data-hunter="${s.no}" aria-pressed="${S.dawnHunterTarget===s.no}">${s.no} 号</button>`).join('')}
+      </div>`;
+  }
+  if(badgeOn){
+    badgePanel.innerHTML = `<div class="dl">警徽处理</div>
+      <div class="pick-grid">
+        <button class="pick-chip" data-badge="0" aria-pressed="${S.dawnBadgeTarget===0}">撕毁</button>
+        ${alive.map(s=>`<button class="pick-chip" data-badge="${s.no}" aria-pressed="${S.dawnBadgeTarget===s.no}">交给 ${s.no} 号</button>`).join('')}
+      </div>`;
+  }
+  hunterPanel.onclick = (e)=>{
+    const b = e.target.closest('[data-hunter]'); if(!b) return;
+    const no = Number(b.dataset.hunter);
+    if(no !== S.dawnHunterTarget){
+      S.dawnHunterTarget = no;
+      if(no) pushEvent(`猎人开枪 → ${no} 号`, 'death');
+    }
+    renderDawnTargets();
+  };
+  badgePanel.onclick = (e)=>{
+    const b = e.target.closest('[data-badge]'); if(!b) return;
+    const no = Number(b.dataset.badge);
+    if(no !== S.dawnBadgeTarget){
+      S.dawnBadgeTarget = no;
+      pushEvent(no ? `警徽移交给 ${no} 号` : '警徽撕毁');
+    }
+    renderDawnTargets();
+  };
 }
 
 /* ---------- sheriff ---------- */
@@ -2417,42 +2600,55 @@ function renderVote(){
   $('#voteEyebrow').textContent = `第 ${S.round} 天 · 投票`;
   const box = $('#voteSeats'); box.innerHTML='';
   S.votes = S.votes || {};
+  const sheriffAlive = !!(S.sheriff && S.seats.find(s=>s.no===S.sheriff && s.alive));
+  if(!sheriffAlive){ S.voteWeight = 1; S.sheriffVoteUsed = false; }
   aliveSeats().forEach(s=>{
     const v = S.votes[s.no] || 0;
     const b = seatCell(s,{selectable:true, votes:v, sheriff:true});
     b.onclick = ()=>{
-      S.votes[s.no] = (S.votes[s.no]||0)+1;
+      const w = S.voteWeight;
+      S.votes[s.no] = (S.votes[s.no]||0) + w;
+      if(w > 1){ S.sheriffVoteUsed = true; S.voteWeight = 1; }
       renderVote();
     };
     box.appendChild(b);
   });
   const totalVotes = Object.values(S.votes).reduce((a,b)=>a+b,0) + S.abstain;
-  $('#voteSum').textContent = `${totalVotes} 票${S.abstain?`（弃 ${S.abstain}）`:''}`;
+  $('#voteSum').textContent = `${fmtVote(totalVotes)} 票${S.abstain?`（弃 ${S.abstain}）`:''}`;
   $('#btnExile').disabled = totalVotes===0;
+  const sw = $('#btnVoteSheriff');
+  if(sw){
+    sw.hidden = !sheriffAlive;
+    sw.disabled = !sheriffAlive || S.sheriffVoteUsed;
+    sw.setAttribute('aria-pressed', S.voteWeight===1.5 ? 'true':'false');
+    sw.textContent = S.sheriffVoteUsed ? '警长票已记 1.5' : (S.voteWeight===1.5 ? '下一次点击按 1.5 票' : '警长票 1.5');
+  }
   renderRail();
 }
+function resetVote(){
+  S.votes={}; S.abstain=0; S.voteWeight=1; S.sheriffVoteUsed=false;
+}
 function tally(){
-  if(!(S.sheriff && S.seats.find(s=>s.no===S.sheriff && s.alive))) { /* no weight */ }
   const entries = Object.entries(S.votes).filter(([,v])=>v>0);
   if(!entries.length){ toast('还没有投票'); return; }
   entries.sort((a,b)=>b[1]-a[1]);
-  const top = entries[0][1];
-  const tied = entries.filter(e=>e[1]===top);
+  const top = Math.round(entries[0][1]*2);
+  const tied = entries.filter(e=>Math.round(e[1]*2)===top);
   if(tied.length>1){
-    toast(`平票：${tied.map(t=>t[0]+' 号').join('、')}（${top} 票）→ 进入 PK 复投`);
-    S.votes = {}; S.abstain = 0; renderVote(); return;
+    toast(`平票：${tied.map(t=>t[0]+' 号').join('、')}（${fmtVote(top/2)} 票）→ 进入 PK 复投`);
+    resetVote(); renderVote(); return;
   }
   const no = Number(tied[0][0]);
   const roleId = roleOf(no);
   if(roleId==='IDIOT'){
     pushEvent(`${no} 号被放逐，白痴翻牌免死（失去投票权）`, 'death');
     toast('白痴翻牌：免死、保留发言、失去投票权');
-    S.votes={}; S.abstain=0; renderVote(); return;
+    resetVote(); renderVote(); return;
   }
   S.exiled = no;
   const s = S.seats.find(x=>x.no===no); if(s) s.alive=false;
   pushEvent(`${no} 号被放逐出局`, 'death');
-  S.votes={}; S.abstain=0;
+  resetVote();
   finishGame('exile');
 }
 function finishGame(reason){
@@ -2467,13 +2663,15 @@ function finishGame(reason){
 
   if(!winner){
     // 未满足胜利条件：进入下一夜（原型简化：不模拟完整昼夜循环细节）
-    S.round++; S.nightStep=0; S.deaths=[]; S.votes={}; S.abstain=0; S.candidates=[]; S.phase='NIGHT';
+    S.round++; S.nightStep=0; S.deaths=[]; resetVote(); S.candidates=[]; S.phase='NIGHT';
+    S.lastWords=[]; S.dawnHunterTarget=0; S.dawnBadgeTarget=null;
     pushEvent(`第 ${S.round-1} 天结束，未满足胜利条件，进入第 ${S.round} 夜`);
     toast(`未满足胜利条件 → 第 ${S.round} 夜`);
     go('night'); renderNight(); return;
   }
 
   S.phase='RESULT';
+  releaseAwake();
   pushEvent(`${winner}：${why}`, 'win');
   renderResult(winner, why);
   go('result');
@@ -2526,15 +2724,18 @@ function renderAssistant(){
     const i=S.aiTags[no].indexOf(t);
     if(i>=0) S.aiTags[no].splice(i,1); else S.aiTags[no].push(t);
     b.setAttribute('aria-pressed', S.aiTags[no].includes(t));
+    renderAiContext();
   };
   box.oninput = (e)=>{
     const n=e.target.closest('[data-note]'); if(!n) return;
     S.aiNotes[n.dataset.note] = n.value;
+    renderAiContext();
   };
+  renderAiContext();
 }
 
 /* ---------- capability / wake lock ---------- */
-let wakeLock=null;
+let wakeLock=null, wakeWarned=false;
 async function detectCaps(){
   const wake = 'wakeLock' in navigator;
   const ws = 'WebSocket' in window;
@@ -2543,9 +2744,20 @@ async function detectCaps(){
   $('#capWs').textContent = ws ? '可用' : '不可用';
   $('#capWs').style.color = ws ? 'var(--good)' : 'var(--muted)';
 }
+function wakeFallback(){
+  if(wakeWarned) return;
+  wakeWarned = true;
+  toast('未能开启屏幕常亮，请在系统设置中关闭自动锁屏');
+}
 async function keepAwake(){
-  if(!('wakeLock' in navigator)) return;
-  try{ wakeLock = await navigator.wakeLock.request('screen'); }catch(e){ /* 降级：提示手动 */ }
+  if(!('wakeLock' in navigator)){ wakeFallback(); return; }
+  try{ wakeLock = await navigator.wakeLock.request('screen'); }
+  catch(e){ wakeFallback(); }
+}
+async function releaseAwake(){
+  if(!wakeLock) return;
+  try{ await wakeLock.release(); }catch(e){}
+  wakeLock = null;
 }
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && S.phase!=='SETUP' && S.phase!=='RESULT') keepAwake(); });
 
@@ -2597,7 +2809,8 @@ $('#btnStartDeal').onclick = async ()=>{
     : '将按所选板子随机分配身份并进入发牌。开局后不可更改板子，确定吗？', '开始');
   if(!ok) return;
   S.history=[]; S.events=[]; S.round=1; S.nightStep=0; S.nightActions={}; S.candidates=[]; S.sheriff=0;
-  S.spoken=[]; S.spokenRound=0;
+  S.spoken=[]; S.spokenRound=0; S.lastWords=[]; S.lastWordsRound=0; S.dawnHunterTarget=0; S.dawnBadgeTarget=null;
+  resetVote();
   manualPeekOn = false;
   if(isManual) startManualDeal(); else dealRoles();
   const modeName = {A:'接力查看',B:'线下逐步确认',C:'实体牌录入'}[S.dealMode];
@@ -2667,8 +2880,8 @@ $('#btnSheriffNext').onclick = ()=>{ go('dawn'); renderDawn(); };
 $('#btnSheriffBack').onclick = ()=>back();
 
 /* dawn */
-$('#optHunter').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked',on); if(on) pushEvent('猎人开枪（主持人记录）','death'); };
-$('#optBadge').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked',on); if(on) pushEvent('警徽流转（主持人记录）'); };
+$('#optHunter').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked',on); if(!on) S.dawnHunterTarget=0; renderDawnTargets(); };
+$('#optBadge').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked',on); if(!on) S.dawnBadgeTarget=null; renderDawnTargets(); };
 $('#btnDawnNext').onclick = ()=>{ go('speech'); renderSpeech(); };
 $('#btnDawnBack').onclick = ()=>back();
 
@@ -2684,17 +2897,25 @@ $('#btnSpeechBack').onclick = ()=>back();
 
 /* vote */
 $('#btnVoteAbstain').onclick = ()=>{ S.abstain++; renderVote(); };
-$('#btnVoteClear').onclick = ()=>{ S.votes={}; S.abstain=0; renderVote(); };
+$('#btnVoteClear').onclick = ()=>{ resetVote(); renderVote(); };
+$('#btnVoteSheriff').onclick = ()=>{
+  const sheriffAlive = !!(S.sheriff && S.seats.find(s=>s.no===S.sheriff && s.alive));
+  if(!sheriffAlive || S.sheriffVoteUsed) return;
+  S.voteWeight = S.voteWeight===1.5 ? 1 : 1.5;
+  renderVote();
+};
 $('#btnVoteTally').onclick = tally;
 $('#btnExile').onclick = ()=>{ tally(); };
 $('#btnVoteBack').onclick = ()=>back();
 
 /* result */
-$('#btnAgain').onclick = ()=>{ S.history=[]; S.events=[]; S.votes={}; S.abstain=0; S.deaths=[]; S.nightStep=0; S.nightActions={}; S.candidates=[]; S.sheriff=0; S.round=1; pushEvent('再来一局，保留编号'); go('setup'); };
+$('#btnAgain').onclick = ()=>{ S.history=[]; S.events=[]; resetVote(); S.deaths=[]; S.nightStep=0; S.nightActions={}; S.candidates=[]; S.sheriff=0; S.round=1; S.lastWords=[]; S.dawnHunterTarget=0; S.dawnBadgeTarget=null; pushEvent('再来一局，保留编号'); go('setup'); };
 $('#btnWipe').onclick = async ()=>{
   const ok = await confirmAsk('清除本局', '将清除本机对局状态，规则内容与 AI 配置不受影响。确定吗？', '清除');
   if(!ok) return;
-  S.seats=[]; S.events=[]; S.votes={}; S.abstain=0; S.deaths=[]; S.sheriff=0; S.candidates=[]; S.round=1; S.nightStep=0; S.nightActions={}; S.history=[];
+  S.seats=[]; S.events=[]; resetVote(); S.deaths=[]; S.sheriff=0; S.candidates=[]; S.round=1; S.nightStep=0; S.nightActions={}; S.history=[];
+  S.lastWords=[]; S.dawnHunterTarget=0; S.dawnBadgeTarget=null;
+  releaseAwake();
   toast('已清除本局'); go('home');
 };
 
@@ -2709,13 +2930,109 @@ $$('.as-role').forEach(b=>{
     $('#asRoleName').textContent = fmtRole(S.aiRole);
     $('#asIdentity').dataset.camp = AI_TIPS[S.aiRole][0]==='狼人' ? 'wolf' : 'good';
     $('#asSeal').innerHTML = roleAvatar(S.aiRole, 56);
+    renderAiContext();
   };
 });
-$('#btnAi').onclick = ()=>{ toast('AI 请求（原型仅示意，不发起真实请求）'); };
-$('#btnAiFail').onclick = ()=>{
-  $('#aiOut').innerHTML = `<div class="ai-sec"><h4 style="color:var(--danger)">请求失败</h4><p>Key 无效或额度不足（KEY_INVALID / QUOTA）。请检查模型配置后重试；主持与记录功能不受影响。</p></div>`;
-  toast('已模拟失败态');
+/* AI 状态：配置缺失/空闲/加载/取消/失败/成功（原型模拟，不发起真实请求） */
+const aiSuccessHTML = $('#aiOut').innerHTML;
+let aiTimer = null;
+function aiSetBusy(busy){
+  ['#btnAi','#btnAiFail'].forEach(sel=>{ const b=$(sel); if(b) b.disabled = busy; });
+}
+function aiConfigReady(){
+  const c = S.aiConfig;
+  return !!(c && c.endpoint && c.model && c.key);
+}
+function renderAiConfig(){
+  const c = S.aiConfig;
+  $('#aiEndpoint').value = c.endpoint;
+  $('#aiModel').value = c.model;
+  $('#aiKey').value = c.key;
+  $('#aiRemember').checked = !!c.remember;
+  const status = $('#aiConfigStatus');
+  status.textContent = aiConfigReady() ? `已配置（演示）：${c.model}` : '未配置：填写接口地址、模型名和 Key';
+  status.classList.toggle('ok', aiConfigReady());
+}
+function renderAiContext(){
+  const box = $('#aiContext'); if(!box) return;
+  const role = ROLES[S.aiRole];
+  const alive = S.seats.length ? S.seats.filter(s=>s.alive).length : 12;
+  const tags = Object.keys(S.aiTags).sort((a,b)=>a-b)
+    .filter(no=>S.aiTags[no] && S.aiTags[no].length)
+    .map(no=>`${no} 号：${S.aiTags[no].join('、')}`).join('；') || '暂无标签';
+  const notes = Object.keys(S.aiNotes).filter(no=>S.aiNotes[no]).sort((a,b)=>a-b)
+    .map(no=>`${no} 号：${S.aiNotes[no]}`).join('；') || '暂无记录';
+  const events = S.events.length ? S.events.slice(-2).map(e=>e.text).join('；') : '独立模式，暂无公开事件';
+  box.innerHTML = `
+    <div class="ctx-sec"><b>我的身份</b><span>${role.name} · ${role.camp==='wolf'?'狼人阵营':'好人阵营'}</span></div>
+    <div class="ctx-sec"><b>当前局势</b><span>第 ${S.round} 天 · 存活 ${alive} / 12 · ${esc(events)}</span></div>
+    <div class="ctx-sec"><b>玩家标签</b><span>${esc(tags)}</span></div>
+    <div class="ctx-sec"><b>信息与发言要点</b><span>${esc(notes)}</span></div>
+    <div class="ctx-sec"><b>自由描述</b><span>${esc(S.aiFree || '暂无')}</span></div>`;
+  $('#aiCtxLen').textContent = `${box.textContent.replace(/\s+/g,'').length} 字`;
+}
+function aiRender(kind){
+  const out = $('#aiOut');
+  if(kind==='config-missing'){
+    aiSetBusy(false);
+    out.innerHTML = `<div class="ai-sec"><h4>未配置 AI</h4><p>还没有配置 AI。填写上方的接口地址、模型名和 Key 后即可让军师整理；Key 默认仅本次会话使用。</p></div>`;
+  } else if(kind==='idle'){
+    aiSetBusy(false);
+    out.innerHTML = `<div class="ai-sec"><h4>还没有分析结果</h4><p>先补全身份、局势和玩家记录，再让军师整理。上方可预览将发送的上下文。</p></div>`;
+  } else if(kind==='loading'){
+    aiSetBusy(true);
+    out.innerHTML = `<div class="ai-loading" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      <div><b>正在整理局势…</b><small>最长等待 60 秒；不会阻塞主持与记录。</small></div>
+      <button class="btn ghost" data-ai="cancel">取消</button>
+    </div>`;
+  } else if(kind==='error'){
+    aiSetBusy(false);
+    out.innerHTML = `<div class="ai-sec" data-kind="error"><h4>请求失败</h4><p>Key 无效或额度不足（KEY_INVALID / QUOTA）。请检查模型配置后重试；主持与记录功能不受影响。</p><div class="btn-row" style="margin-top:10px"><button class="btn" data-ai="retry">重试</button></div></div>`;
+  } else if(kind==='cancel'){
+    aiSetBusy(false);
+    out.innerHTML = `<div class="ai-sec"><h4>已取消</h4><p>本次整理已取消，未产生结果。你可以随时重新发起。</p></div>`;
+  } else {
+    aiSetBusy(false);
+    out.innerHTML = aiSuccessHTML;
+  }
+}
+function aiRun(fail=false){
+  if(!aiConfigReady()){ aiRender('config-missing'); toast('请先完成 AI 配置'); return; }
+  clearTimeout(aiTimer);
+  aiRender('loading');
+  aiTimer = setTimeout(()=>aiRender(fail ? 'error' : 'success'), 900);
+}
+$('#btnAi').onclick = ()=>{ aiRun(false); toast('AI 请求（原型示意，不发起真实请求）'); };
+$('#btnAiFail').onclick = ()=>{ aiRun(true); toast('已模拟失败态'); };
+$('#aiOut').addEventListener('click', (e)=>{
+  const b = e.target.closest('[data-ai]'); if(!b) return;
+  if(b.dataset.ai==='cancel'){ clearTimeout(aiTimer); aiRender('cancel'); }
+  if(b.dataset.ai==='retry'){ aiRun(false); }
+});
+$('#btnAiSave').onclick = ()=>{
+  const endpoint = $('#aiEndpoint').value.trim();
+  const model = $('#aiModel').value.trim();
+  const key = $('#aiKey').value.trim();
+  const remember = $('#aiRemember').checked;
+  if(!/^https:\/\//i.test(endpoint)){ toast('接口地址必须使用 https://'); return; }
+  if(!model || !key){ toast('请填写模型名和 API Key'); return; }
+  S.aiConfig = { endpoint, model, key, remember };
+  if(remember) sessionStorage.setItem('lrs.ai.key.v1', key);
+  else sessionStorage.removeItem('lrs.ai.key.v1');
+  renderAiConfig(); renderAiContext(); aiRender('idle');
+  toast('AI 配置已保存（仅本会话）');
 };
+$('#btnAiClear').onclick = ()=>{
+  S.aiConfig = { endpoint:'', model:'', key:'', remember:false };
+  sessionStorage.removeItem('lrs.ai.key.v1');
+  renderAiConfig(); renderAiContext(); aiRender('config-missing');
+  toast('已清除 AI 配置');
+};
+$('#aiFree').addEventListener('input', (e)=>{
+  S.aiFree = e.target.value.slice(0,2000);
+  renderAiContext();
+});
 
 /* sheet */
 $('#railBtn').onclick = ()=>{ $('#sheet').classList.add('on'); renderRail(); renderLogs(); };
@@ -2736,6 +3053,9 @@ detectCaps();
 renderSetupSeats();
 renderBoardComp();
 renderRoleGallery();
+renderAiConfig();
+renderAiContext();
+aiRender('idle');
 refreshAll();
 window.addEventListener('keydown', (e)=>{
   if(e.key==='Escape'){ $('#cover').classList.remove('on'); $('#modal').classList.remove('on'); $('#sheet').classList.remove('on'); }
