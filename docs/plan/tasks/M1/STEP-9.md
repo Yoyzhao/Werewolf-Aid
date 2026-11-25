@@ -4,7 +4,7 @@
 
 - **里程碑**：M1（v1.3.1 P0）
 - **阶段**：9
-- **本轮基线**：PRD v1.3.1；tech-arch v1.2；ADR-005
+- **本轮基线**：PRD v1.3.2（含 CHG-20261125-02）；tech-arch v1.3；ADR-005
 - **进度入口**：[project-progress.md](../../project-progress.md)
 - **项目拓扑**：前后端分离
 

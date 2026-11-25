@@ -2,7 +2,7 @@
 
 - 版本：v1.0
 - 日期：2026-11-25
-- 基线：PRD v1.3.1（已验收）；tech-arch v1.2；api-contract v1.1
+- 基线：PRD v1.3.2（含 CHG-20261125-02）；tech-arch v1.3；api-contract v1.1
 - 说明：不提供时间估算；里程碑按验收节点推进。
 
 ## 里程碑

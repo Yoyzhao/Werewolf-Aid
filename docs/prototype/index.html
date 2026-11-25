@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0c10">
-<title>狼人杀助手 · 5A 可交互原型</title>
+<meta name="theme-color" content="#080A12">
+<title>狼人杀助手 · 月蚀俱乐部</title>
 <style>
   :root{
     --bg:#0a0c10;
@@ -359,8 +359,899 @@
   .toast.on{opacity:1;transform:translateX(-50%)}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
+<style id="moonlit-theme">
+  /* ============================================================
+     V2 · 月蚀俱乐部 / Moonlit Parlor
+     暗色社交推理游戏 App 视觉层；保留原有结构、ID 与交互
+     ============================================================ */
+  :root{
+    --bg:#080A12;
+    --bg-2:#0C0F1A;
+    --surface:#121626;
+    --surface-2:#171C2E;
+    --surface-3:#1E2439;
+    --line:rgba(231,182,90,.14);
+    --line-strong:rgba(231,182,90,.34);
+    --text:#F6F1E7;
+    --muted:#A9AFC0;
+    --faint:#6F778C;
+    --accent:#E7B65A;
+    --accent-2:#F6D794;
+    --accent-ink:#23180A;
+    --danger:#D8575B;
+    --good:#69D2A3;
+    --radius:22px;
+    --radius-sm:15px;
+    --shadow:0 22px 48px rgba(0,0,0,.5);
+    --font-display:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC",Georgia,"Times New Roman",serif;
+    --font:"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+
+  /* ---------- atmosphere ---------- */
+  body{
+    font-family:var(--font);
+    isolation:isolate;
+    background:
+      radial-gradient(1000px 620px at 84% -12%, rgba(231,182,90,.13), transparent 60%),
+      radial-gradient(760px 520px at 4% 6%, rgba(216,87,91,.07), transparent 62%),
+      radial-gradient(900px 700px at 50% 118%, rgba(105,210,163,.05), transparent 62%),
+      var(--bg);
+    color:var(--text);
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:
+      radial-gradient(1px 1px at 18% 22%, rgba(255,255,255,.55), transparent 100%),
+      radial-gradient(1px 1px at 72% 14%, rgba(255,255,255,.35), transparent 100%),
+      radial-gradient(1.4px 1.4px at 46% 64%, rgba(246,215,148,.45), transparent 100%),
+      radial-gradient(1px 1px at 86% 74%, rgba(255,255,255,.3), transparent 100%),
+      radial-gradient(1px 1px at 12% 84%, rgba(255,255,255,.28), transparent 100%);
+    background-size:260px 260px, 380px 380px, 310px 310px, 440px 440px, 520px 520px;
+    opacity:.7;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 42%, transparent 42%, rgba(0,0,0,.5) 100%);
+  }
+  .atmosphere{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .moon-disc{
+    position:absolute;top:-128px;right:-86px;width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle at 38% 34%, rgba(255,247,226,.95), rgba(231,182,90,.5) 42%, rgba(231,182,90,.08) 68%, transparent 72%);
+    box-shadow:0 0 120px rgba(231,182,90,.25), 0 0 260px rgba(231,182,90,.1);
+    animation:moonPulse 12s ease-in-out infinite;
+  }
+  .moon-disc::after{
+    content:"";position:absolute;inset:-18%;border-radius:50%;
+    border:1px solid rgba(231,182,90,.12);
+    box-shadow:0 0 0 40px rgba(231,182,90,.025), 0 0 0 90px rgba(231,182,90,.015);
+  }
+  .fog{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(70px);opacity:.5;animation:fogDrift 26s ease-in-out infinite alternate}
+  .fog-a{left:-220px;bottom:-190px;background:radial-gradient(circle,rgba(216,87,91,.15),transparent 66%)}
+  .fog-b{right:-190px;top:38%;background:radial-gradient(circle,rgba(105,210,163,.08),transparent 66%);animation-delay:-9s}
+  @keyframes moonPulse{
+    0%,100%{opacity:.72;transform:scale(1)}
+    50%{opacity:.95;transform:scale(1.035)}
+  }
+  @keyframes fogDrift{
+    from{transform:translate3d(0,0,0) scale(1)}
+    to{transform:translate3d(34px,-26px,0) scale(1.08)}
+  }
+
+  /* ---------- shell / topbar ---------- */
+  .shell{max-width:1200px;padding:0 16px}
+  .topbar{
+    background:linear-gradient(180deg,rgba(8,10,18,.94),rgba(8,10,18,.68));
+    border-bottom:1px solid var(--line);
+    backdrop-filter:blur(18px) saturate(125%);
+  }
+  .topbar-in{min-height:64px}
+  .brand{gap:10px}
+  .brand-mark{
+    width:36px;height:36px;padding:8px;border-radius:50%;
+    border:1px solid var(--line-strong);
+    background:radial-gradient(circle at 34% 28%,rgba(231,182,90,.26),rgba(231,182,90,.04) 70%);
+    color:var(--accent);
+    box-shadow:0 0 26px rgba(231,182,90,.18), inset 0 0 14px rgba(231,182,90,.12);
+  }
+  .brand-name{font-family:var(--font-display);font-size:17px;font-weight:700;letter-spacing:.12em}
+  .brand-sub{font-size:9px;letter-spacing:.3em;color:var(--faint)}
+  .phase-chip{
+    border:1px solid var(--line);
+    background:rgba(18,22,38,.72);
+    color:var(--muted);
+    padding:6px 10px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  .phase-chip b{color:var(--text)}
+  .dot{background:var(--accent);box-shadow:0 0 10px rgba(231,182,90,.85)}
+  .icon-btn{
+    border-radius:50%;
+    border-color:var(--line);
+    background:rgba(18,22,38,.72);
+  }
+  .icon-btn:hover{border-color:var(--line-strong);color:var(--accent);box-shadow:0 0 18px rgba(231,182,90,.12)}
+
+  /* ---------- type ---------- */
+  .screen{padding-top:22px}
+  h1{font-family:var(--font-display);font-size:31px;font-weight:700;letter-spacing:.035em;line-height:1.22}
+  h2{font-family:var(--font-display);font-size:21px;letter-spacing:.03em}
+  h3{font-family:var(--font);font-size:13px;letter-spacing:.1em;color:var(--muted);font-weight:600}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:4px 10px;margin:0 0 12px;
+    border:1px solid var(--line);border-radius:999px;
+    background:rgba(231,182,90,.05);
+    color:var(--accent);font-size:10px;letter-spacing:.22em;
+  }
+  .eyebrow::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+  .lead{color:var(--muted);font-size:13.5px;line-height:1.75;max-width:48ch;margin:0 0 22px}
+
+  /* ---------- cards ---------- */
+  .card{
+    position:relative;
+    background:linear-gradient(165deg,rgba(23,28,46,.94),rgba(14,17,29,.97));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow:0 18px 44px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+    overflow:hidden;
+  }
+  .card::after{
+    content:"";position:absolute;right:-56px;top:-72px;width:190px;height:190px;border-radius:50%;
+    background:radial-gradient(circle,rgba(231,182,90,.09),transparent 68%);pointer-events:none;
+  }
+  .card > *{position:relative;z-index:1}
+  .card + .card{margin-top:14px}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .card-head h3::before{
+    content:"";display:inline-block;width:14px;height:1px;margin-right:8px;
+    vertical-align:middle;background:linear-gradient(90deg,var(--accent),transparent)
+  }
+  .card-head .hint{
+    margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+    color:var(--accent);opacity:.8;border:1px solid var(--line);border-radius:999px;padding:3px 8px;
+    background:rgba(231,182,90,.04);white-space:nowrap;
+  }
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--line-strong),transparent);margin:18px 0}
+  .muted{color:var(--muted)}
+  .faint{color:var(--faint)}
+
+  /* ---------- chips / buttons ---------- */
+  .chip{
+    border:1px solid var(--line);
+    background:rgba(18,22,38,.7);
+    color:var(--muted);
+    padding:4px 10px;
+  }
+  .chip.ac{color:var(--accent);border-color:var(--line-strong);background:rgba(231,182,90,.06)}
+  .chip.priv{color:#FFB8BA;border-color:rgba(216,87,91,.32);background:rgba(216,87,91,.08)}
+  .chip.ok{color:#9FE7C6;border-color:rgba(105,210,163,.28);background:rgba(105,210,163,.07)}
+  .btn{
+    border-radius:15px;
+    border-color:var(--line-strong);
+    background:linear-gradient(180deg,rgba(30,36,57,.92),rgba(20,25,42,.92));
+    font-weight:600;letter-spacing:.02em;
+    transition:transform .08s, box-shadow .2s, border-color .2s, background .2s;
+  }
+  .btn:hover{background:linear-gradient(180deg,rgba(38,45,70,.95),rgba(24,30,50,.95));border-color:rgba(231,182,90,.46)}
+  .btn.primary{
+    position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#F7DB9C 0%,#E7B65A 52%,#C7953E 100%);
+    color:var(--accent-ink);
+    border-color:rgba(246,215,148,.72);
+    box-shadow:0 12px 30px rgba(231,182,90,.2), inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .btn.primary::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(112deg,transparent 30%,rgba(255,255,255,.42) 46%,transparent 62%);
+    transform:translateX(-130%);transition:transform .55s ease;
+  }
+  .btn.primary:hover::after{transform:translateX(130%)}
+  .btn.primary:hover{background:linear-gradient(135deg,#FBE5B4 0%,#EFC36C 52%,#D0A04A 100%)}
+  .btn.ghost{color:var(--muted)}
+  .btn.ghost:hover{color:var(--text);background:rgba(231,182,90,.06)}
+  .btn.danger{color:#FFD7D8;border-color:rgba(216,87,91,.4);background:rgba(216,87,91,.12)}
+  .btn[disabled]{opacity:.38}
+
+  .actionbar{
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(8,10,18,0),rgba(8,10,18,.94) 38%);
+  }
+  .actionbar .bar-in{
+    gap:10px;padding:8px;border-radius:22px;
+    border:1px solid var(--line);
+    background:rgba(18,22,38,.84);
+    backdrop-filter:blur(18px) saturate(120%);
+    box-shadow:0 -10px 32px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  @media (min-width:1024px){
+    .actionbar{background:none}
+    .actionbar .bar-in{
+      justify-content:flex-end;padding:9px 10px;border-radius:18px;
+      background:linear-gradient(180deg,rgba(23,28,46,.9),rgba(14,17,29,.96));
+    }
+  }
+
+  /* ---------- home ---------- */
+  .hero{position:relative;padding:26px 0 26px;isolation:isolate}
+  .hero::before{
+    content:"";position:absolute;z-index:-1;left:-40px;top:-70px;width:300px;height:300px;border-radius:50%;
+    background:radial-gradient(circle,rgba(231,182,90,.12),transparent 66%);filter:blur(8px);
+  }
+  .hero-wolf{
+    position:absolute;right:-4px;top:4px;width:172px;height:172px;
+    color:var(--accent);opacity:.07;pointer-events:none;z-index:-1;
+  }
+  .hero-kicker{
+    display:inline-flex;align-items:center;gap:8px;
+    color:var(--accent);font-size:10px;letter-spacing:.24em;
+    padding:4px 10px;border:1px solid var(--line);border-radius:999px;
+    background:rgba(231,182,90,.05);margin-bottom:16px;
+  }
+  .hero-kicker .live-dot{width:5px;height:5px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px var(--danger)}
+  .hero .hero-title{
+    font-family:var(--font-display);
+    font-size:clamp(33px,9.4vw,48px);
+    line-height:1.14;letter-spacing:.04em;margin:0 0 14px;max-width:14ch;
+  }
+  .hero-title em{font-style:normal;color:var(--accent);text-shadow:0 0 30px rgba(231,182,90,.28)}
+  .hero-lead{color:var(--muted);font-size:13.5px;line-height:1.8;max-width:42ch;margin:0 0 20px}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .hero-cta{
+    flex:1 1 230px;min-height:56px;justify-content:space-between;padding:0 18px;
+    font-size:15.5px;letter-spacing:.04em;
+  }
+  .hero-cta small{font-size:10.5px;font-weight:500;opacity:.72;letter-spacing:.04em}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:11px;color:var(--faint)}
+  .hero-meta span::before{content:"◆";font-size:7px;color:var(--accent);margin-right:6px;vertical-align:1px}
+
+  .entry-list{display:grid;gap:12px;margin-top:22px}
+  @media (min-width:720px){
+    .entry-list{grid-template-columns:1fr 1fr}
+    .entry-list .entry-featured{grid-column:1 / -1}
+  }
+  .entry{
+    position:relative;overflow:hidden;
+    border-radius:20px;border:1px solid var(--line);
+    background:linear-gradient(145deg,rgba(23,28,46,.94),rgba(13,16,28,.96));
+    padding:18px;gap:14px;
+    box-shadow:0 12px 30px rgba(0,0,0,.22);
+  }
+  .entry::after{
+    content:"";position:absolute;right:-56px;top:-56px;width:150px;height:150px;border-radius:50%;
+    background:radial-gradient(circle,rgba(231,182,90,.13),transparent 66%);
+    opacity:0;transition:opacity .25s;
+  }
+  .entry:hover{transform:translateY(-2px);border-color:var(--line-strong);box-shadow:0 20px 40px rgba(0,0,0,.34)}
+  .entry:hover::after{opacity:1}
+  .entry > *{position:relative;z-index:1}
+  .entry-featured{border-color:rgba(231,182,90,.26);background:linear-gradient(135deg,rgba(231,182,90,.1),rgba(18,22,38,.96) 52%,rgba(13,16,28,.98))}
+  .entry-mark{
+    width:54px;height:54px;border-radius:17px;
+    background:linear-gradient(150deg,rgba(231,182,90,.2),rgba(231,182,90,.04));
+    border:1px solid var(--line-strong);color:var(--accent);
+    box-shadow:inset 0 0 18px rgba(231,182,90,.08);
+  }
+  .entry-mark.green{background:linear-gradient(150deg,rgba(105,210,163,.16),rgba(105,210,163,.03));border-color:rgba(105,210,163,.3);color:var(--good)}
+  .entry-mark.grey{background:linear-gradient(150deg,rgba(169,175,192,.12),rgba(169,175,192,.03));border-color:rgba(169,175,192,.24);color:#C6CCDA}
+  .entry-title{font-family:var(--font-display);font-size:19px;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+  .entry-tag{
+    font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--accent);
+    border:1px solid var(--line);border-radius:999px;padding:2px 7px;background:rgba(231,182,90,.05);
+  }
+  .entry-desc{font-size:12.5px;line-height:1.6;color:var(--muted);margin-top:3px}
+  .entry-chev{color:var(--faint)}
+  .entry:hover .entry-chev{color:var(--accent)}
+
+  .ritual{
+    margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:20px;
+    background:rgba(18,22,38,.5);backdrop-filter:blur(6px);
+  }
+  .ritual-title{font-size:9.5px;letter-spacing:.24em;color:var(--faint);margin-bottom:14px}
+  .ritual-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+  .ritual-step{position:relative;text-align:center}
+  .ritual-step .ico{
+    width:30px;height:30px;margin:0 auto 6px;border-radius:50%;
+    border:1px solid var(--line);display:grid;place-items:center;color:var(--accent);
+    background:rgba(231,182,90,.05);
+  }
+  .ritual-step .lbl{font-size:9.5px;color:var(--muted);letter-spacing:.04em}
+  .ritual-step + .ritual-step::before{
+    content:"";position:absolute;left:-2px;top:15px;width:4px;height:1px;background:var(--line-strong);
+  }
+
+  .preflight li{font-size:12.5px;line-height:1.6}
+  .preflight svg{color:var(--accent)}
+
+  /* ---------- lobby table / bottom tabs ---------- */
+  .lobby-table{
+    position:relative;display:grid;grid-template-columns:minmax(0,1fr) 156px;gap:10px;align-items:center;
+    width:100%;text-align:left;margin-top:18px;padding:18px;border-radius:24px;overflow:hidden;
+    border:1px solid var(--line-strong);
+    background:
+      radial-gradient(120% 120% at 82% 8%,rgba(231,182,90,.17),transparent 58%),
+      linear-gradient(135deg,rgba(23,28,46,.96),rgba(12,15,26,.98));
+    box-shadow:0 22px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.04);
+    transition:transform .12s,border-color .18s,box-shadow .18s;
+  }
+  .lobby-table::after{
+    content:"";position:absolute;left:-60px;bottom:-90px;width:190px;height:190px;border-radius:50%;
+    background:radial-gradient(circle,rgba(216,87,91,.12),transparent 68%);pointer-events:none;
+  }
+  .lobby-table:hover{transform:translateY(-2px);border-color:rgba(231,182,90,.5);box-shadow:0 26px 54px rgba(0,0,0,.46)}
+  .lobby-info{position:relative;z-index:1;min-width:0}
+  .lobby-kicker{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--accent);margin-bottom:6px}
+  .lobby-title{display:block;font-family:var(--font-display);font-size:23px;letter-spacing:.06em;line-height:1.2}
+  .lobby-meta{display:block;font-size:11px;color:var(--muted);line-height:1.6;margin-top:5px}
+  .lobby-cta{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:11.5px;font-weight:600;color:var(--accent-2)}
+  .lobby-cta svg{transition:transform .2s}
+  .lobby-table:hover .lobby-cta svg{transform:translateX(3px)}
+  .table-visual{position:relative;width:156px;height:156px;justify-self:end;z-index:1}
+  .table-oval{
+    position:absolute;inset:20px;border-radius:50%;
+    border:1px solid rgba(231,182,90,.26);
+    background:radial-gradient(circle at 50% 40%,rgba(231,182,90,.12),rgba(10,13,23,.4) 68%);
+    box-shadow:0 0 32px rgba(231,182,90,.12), inset 0 0 26px rgba(0,0,0,.4);
+  }
+  .table-oval::after{content:"";position:absolute;inset:22%;border-radius:50%;border:1px dashed rgba(231,182,90,.18)}
+  .table-moon{
+    position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px;border-radius:50%;
+    background:radial-gradient(circle at 36% 30%,#FFF4D8,rgba(231,182,90,.5) 58%,rgba(231,182,90,.06) 74%);
+    box-shadow:0 0 28px rgba(231,182,90,.4);animation:moonPulse 8s ease-in-out infinite;
+  }
+  .table-seat{
+    position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-12px;border-radius:50%;
+    display:grid;place-items:center;font-family:var(--mono);font-size:8.5px;color:var(--muted);
+    border:1px solid var(--line);background:rgba(18,22,38,.92);
+    transform:rotate(calc(var(--i) * 30deg)) translateY(-66px) rotate(calc(var(--i) * -30deg));
+  }
+  .table-seat.hot{border-color:var(--accent);color:var(--accent-2);background:rgba(231,182,90,.14);box-shadow:0 0 12px rgba(231,182,90,.3)}
+
+  .app-tabbar{display:none}
+  @media (max-width:1023px){
+    .app-tabbar{
+      position:fixed;left:12px;right:12px;bottom:10px;z-index:46;
+      display:none;align-items:center;gap:4px;
+      padding:7px 7px calc(7px + env(safe-area-inset-bottom));
+      border:1px solid var(--line);border-radius:22px;
+      background:rgba(14,17,29,.9);backdrop-filter:blur(20px) saturate(130%);
+      box-shadow:0 16px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .app-tabbar.on{display:flex}
+    .app-tab{
+      flex:1;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+      border-radius:16px;color:var(--faint);font-size:9.5px;letter-spacing:.08em;
+    }
+    .app-tab svg{width:19px;height:19px}
+    .app-tab.on{color:var(--accent-2);background:rgba(231,182,90,.1);box-shadow:inset 0 0 0 1px rgba(231,182,90,.22)}
+    .app-tab.on::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  }
+  @media (min-width:1024px){ .app-tabbar{display:none!important} }
+  @media (max-width:359px){
+    .lobby-table{grid-template-columns:minmax(0,1fr) 126px;padding:15px}
+    .table-visual{width:126px;height:126px}
+    .table-seat{transform:rotate(calc(var(--i) * 30deg)) translateY(-53px) rotate(calc(var(--i) * -30deg))}
+    .table-moon{width:38px;height:38px;margin:-19px}
+    .lobby-title{font-size:20px}
+  }
+
+  /* ---------- role avatars ---------- */
+  .role-avatar{
+    --sz:40px;width:var(--sz);height:var(--sz);border-radius:50%;display:inline-grid;place-items:center;
+    flex:none;position:relative;color:var(--av,var(--accent));
+    border:1px solid rgba(231,182,90,.3);
+    background:radial-gradient(circle at 35% 30%,rgba(231,182,90,.2),rgba(10,13,23,.58) 72%);
+    box-shadow:0 0 18px rgba(231,182,90,.12), inset 0 0 14px rgba(231,182,90,.06);
+  }
+  .role-avatar::after{content:"";position:absolute;inset:3px;border-radius:50%;border:1px solid rgba(231,182,90,.1);pointer-events:none}
+  .role-avatar svg{width:62%;height:62%;position:relative;z-index:1}
+  .role-avatar.wolf{
+    color:#F08B8E;border-color:rgba(216,87,91,.42);
+    background:radial-gradient(circle at 35% 30%,rgba(216,87,91,.22),rgba(10,13,23,.58) 72%);
+    box-shadow:0 0 18px rgba(216,87,91,.14), inset 0 0 14px rgba(216,87,91,.06);
+  }
+  .role-avatar.wolf::after{border-color:rgba(216,87,91,.12)}
+  .role-avatar[data-role="SEER"]{--av:#9CC0FF}
+  .role-avatar[data-role="WITCH"]{--av:#8EE0BC}
+  .role-avatar[data-role="HUNTER"]{--av:#E9A46B}
+  .role-avatar[data-role="GUARD"]{--av:#A8C4D4}
+  .role-avatar[data-role="VILLAGER"]{--av:#D8CDB8}
+  .role-avatar[data-role="IDIOT"]{--av:#E4C0A0}
+
+  /* ---------- flow bar ---------- */
+  .flowbar{display:none;border-top:1px solid var(--line);padding:8px 16px 9px;background:rgba(8,10,18,.45)}
+  .flowbar.on{display:block}
+  .flow-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;max-width:1200px;margin:0 auto}
+  .flow-step{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;letter-spacing:.1em;color:var(--faint)}
+  .flow-step .dot{width:6px;height:6px;border-radius:50%;background:var(--line-strong);transition:background .2s,transform .2s,box-shadow .2s}
+  .flow-step.on{color:var(--accent-2)}
+  .flow-step.on .dot{background:var(--accent);transform:scale(1.45);box-shadow:0 0 10px var(--accent)}
+  .flow-step.done{color:var(--muted)}
+  .flow-step.done .dot{background:var(--good)}
+
+  /* ---------- day sub-flow ---------- */
+  .subflow{display:none;border-top:1px solid var(--line);padding:7px 16px;background:rgba(8,10,18,.26)}
+  .subflow.on{display:block}
+  .day-steps{display:flex;align-items:center;gap:6px;max-width:1200px;margin:0 auto}
+  .day-step{display:flex;align-items:center;gap:5px;font-size:10px;letter-spacing:.08em;color:var(--faint);white-space:nowrap}
+  .day-step b{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:600;border:1px solid var(--line-strong);color:var(--faint);transition:border-color .2s,background .2s,color .2s}
+  .day-step.on{color:var(--accent-2)}
+  .day-step.on b{border-color:var(--accent);background:rgba(231,182,90,.14);color:var(--accent-2);box-shadow:0 0 10px rgba(231,182,90,.2)}
+  .day-step.done{color:var(--muted)}
+  .day-step.done b{border-color:rgba(70,185,138,.4);color:var(--good)}
+  .ds-line{flex:1;height:1px;min-width:6px;background:var(--line-strong)}
+  @media (max-width:719px){
+    .flowbar{padding:6px 12px}
+    .flow-steps{gap:2px}
+    .flow-step{font-size:8px;gap:3px}
+    .subflow{padding:5px 12px 6px}
+    .day-steps{gap:4px}
+    .day-step{font-size:9px;gap:4px}
+    .day-step b{width:14px;height:14px;font-size:8px}
+    .ds-line{min-width:3px}
+  }
+
+  /* ---------- board composition ---------- */
+  .board-comp{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+  .comp-item{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 3px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);font-size:11px;color:var(--muted)}
+  .comp-item b{font-weight:600;color:var(--text)}
+  .comp-item em{font-style:normal;color:var(--accent-2);font-variant-numeric:tabular-nums}
+
+  /* ---------- role gallery ---------- */
+  .role-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 14px}
+  @media (min-width:720px){ .role-gallery{grid-template-columns:repeat(4,minmax(0,1fr))} }
+  .role-card{display:flex;align-items:center;gap:9px;padding:9px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(23,28,46,.9),rgba(14,17,28,.95))}
+  .role-card .rc-body{min-width:0}
+  .role-card .rc-name{display:block;font-size:13px;font-weight:650;letter-spacing:.03em}
+  .role-card .rc-camp{display:block;margin-top:1px;font-size:10px;letter-spacing:.1em;color:var(--faint)}
+  .role-card[data-camp="wolf"]{border-color:rgba(216,87,91,.24);background:linear-gradient(180deg,rgba(43,20,26,.55),rgba(14,17,28,.95))}
+  .role-card[data-camp="wolf"] .rc-name{color:#F3B0B2}
+
+  /* ---------- night queue ---------- */
+  .night-queue{display:flex;align-items:center;gap:4px;margin-left:auto;line-height:0}
+  .night-queue .nq{opacity:.32;transition:opacity .2s,transform .2s}
+  .night-queue .nq.done{opacity:.68}
+  .night-queue .nq.on{opacity:1;transform:translateY(-1px)}
+
+  /* ---------- deal focus ---------- */
+  .deal-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .deal-ring{
+    width:72px;height:72px;flex:none;border-radius:50%;display:grid;place-items:center;position:relative;
+    background:conic-gradient(var(--accent) var(--p,0%), rgba(231,182,90,.12) 0);
+    box-shadow:0 0 24px rgba(231,182,90,.12);
+  }
+  .deal-ring::before{content:"";position:absolute;inset:3px;border-radius:50%;background:linear-gradient(180deg,#151A2C,#0D101B)}
+  .deal-ring .no{position:relative;z-index:1;font-family:var(--font-display);font-size:27px;color:var(--accent-2);line-height:1}
+  .deal-head-copy{min-width:0}
+  .deal-head-copy .eyebrow{margin-bottom:4px}
+  .deal-head-copy h1{font-size:22px;margin-bottom:3px}
+  .deal-head-copy .lead{font-size:12px;line-height:1.55;margin:0}
+
+  /* ---------- night focus ---------- */
+  .night-copy{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .night-copy .role-line{margin:0}
+  .night-copy .sub-line{margin:4px 0 0}
+
+  /* ---------- cover avatar ---------- */
+  .cover-avatar{display:flex;justify-content:center;margin-bottom:12px}
+
+  /* ---------- setup ---------- */
+  @media (min-width:720px){
+    .entry-list .entry:first-child{grid-column:auto}
+  }
+  @media (max-width:1023px){
+    .layout{padding-bottom:140px}
+  }
+
+  .board-grid{gap:12px}
+  .board-opt{
+    position:relative;overflow:hidden;padding:16px;border-radius:18px;
+    border:1px solid var(--line);
+    background:linear-gradient(150deg,rgba(30,36,57,.82),rgba(16,20,34,.94));
+  }
+  .board-opt::after{
+    content:"";position:absolute;right:-40px;bottom:-70px;width:150px;height:150px;border-radius:50%;
+    background:radial-gradient(circle,rgba(231,182,90,.12),transparent 68%);
+  }
+  .board-opt > .t,.board-opt > .d,.board-opt > .board-meta{position:relative;z-index:1}
+  .board-opt[aria-pressed="true"]{
+    border-color:var(--accent);
+    background:linear-gradient(150deg,rgba(231,182,90,.13),rgba(18,22,38,.96));
+    box-shadow:inset 0 0 0 1px var(--accent), 0 14px 32px rgba(231,182,90,.1);
+  }
+  .board-opt .t{font-family:var(--font-display);font-size:20px;letter-spacing:.06em}
+  .board-opt .d{font-size:12px;color:var(--muted);line-height:1.6;margin-top:4px}
+  .board-badge{
+    position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+    color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:3px 8px;
+    background:rgba(231,182,90,.05);
+  }
+  .board-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;position:relative;z-index:1}
+
+  .mode-grid{display:grid;gap:8px}
+  @media (min-width:560px){ .mode-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .mode-opt{
+    position:relative;text-align:left;padding:12px;border-radius:16px;
+    border:1px solid var(--line);background:rgba(16,20,34,.72);
+    transition:border-color .18s,background .18s,transform .08s;
+  }
+  .mode-opt:hover{border-color:rgba(231,182,90,.3);transform:translateY(-1px)}
+  .mode-opt[aria-pressed="true"]{
+    border-color:var(--accent);background:rgba(231,182,90,.1);
+    box-shadow:inset 0 0 0 1px var(--accent), 0 8px 22px rgba(231,182,90,.1);
+  }
+  .mode-opt .mi{
+    width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
+    color:var(--accent);border:1px solid var(--line);background:rgba(231,182,90,.06);margin-bottom:8px;
+  }
+  .mode-opt .mt{display:block;font-size:13.5px;font-weight:600;letter-spacing:.02em}
+  .mode-opt .ms{display:block;font-size:10.5px;line-height:1.45;color:var(--faint);margin-top:2px}
+
+  .seg{background:rgba(10,13,23,.6);border-color:var(--line);border-radius:14px}
+  .seg button[aria-pressed="true"]{
+    background:rgba(231,182,90,.12);color:var(--accent-2);
+    box-shadow:inset 0 0 0 1px var(--line-strong);
+  }
+
+  .field{padding:14px 0}
+  .field .lab{font-size:14px}
+  .switch{background:rgba(30,36,57,.9);border-color:var(--line-strong)}
+  .switch::after{background:var(--faint)}
+  .switch[aria-checked="true"]{background:rgba(231,182,90,.22);border-color:var(--accent);box-shadow:0 0 16px rgba(231,182,90,.12)}
+  .switch[aria-checked="true"]::after{background:var(--accent-2);box-shadow:0 0 8px rgba(246,215,148,.5)}
+
+  /* ---------- seats ---------- */
+  .seat-grid{gap:8px}
+  .seat{
+    min-height:58px;border-radius:16px;
+    border:1px solid var(--line);
+    background:
+      radial-gradient(120% 120% at 50% 0%,rgba(231,182,90,.06),transparent 60%),
+      linear-gradient(160deg,rgba(30,36,57,.9),rgba(17,21,36,.95));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    transition:transform .12s,border-color .15s,box-shadow .18s;
+  }
+  .seat::before{
+    content:"";position:absolute;inset:6px;border-radius:12px;
+    border:1px solid rgba(231,182,90,.06);pointer-events:none;
+  }
+  .seat:hover{transform:translateY(-1px);border-color:rgba(231,182,90,.3);box-shadow:0 8px 20px rgba(0,0,0,.3)}
+  .seat .n{
+    width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+    font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--text);
+    border:1px solid rgba(231,182,90,.18);
+    background:radial-gradient(circle at 35% 28%,rgba(231,182,90,.16),rgba(10,13,23,.35) 70%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .seat.sel .n,.seat[aria-pressed="true"] .n{
+    border-color:rgba(231,182,90,.55);
+    background:radial-gradient(circle at 35% 28%,rgba(246,215,148,.34),rgba(48,42,29,.5) 72%);
+  }
+  .seat .r{font-size:9px;letter-spacing:.16em;color:var(--faint)}
+  .seat.sel,.seat[aria-pressed="true"]{
+    border-color:var(--accent);
+    background:
+      radial-gradient(120% 120% at 50% 0%,rgba(231,182,90,.2),transparent 64%),
+      linear-gradient(160deg,rgba(48,42,29,.95),rgba(24,26,38,.96));
+    box-shadow:0 0 0 1px var(--accent), 0 0 24px rgba(231,182,90,.18);
+  }
+  .seat.dead{opacity:.45;text-decoration:none;filter:grayscale(.35)}
+  .seat[data-setup].dead .n{text-decoration:line-through}
+  .seat .badge{
+    background:linear-gradient(135deg,var(--accent-2),var(--accent));color:var(--accent-ink);
+    box-shadow:0 0 10px rgba(231,182,90,.35);
+  }
+  .seat .badge.dead-b{background:var(--danger);color:#fff;box-shadow:none}
+  .seat .vote{color:var(--accent-2);text-shadow:0 0 8px rgba(231,182,90,.4)}
+  .seat-grid.compact .seat{min-height:52px}
+  #dealSeats .seat .r,#manualSeats .seat .r{display:block;font-size:9px;letter-spacing:.12em}
+
+  /* ---------- night step ---------- */
+  .step{
+    position:relative;overflow:hidden;border-radius:24px;
+    border:1px solid var(--line-strong);
+    background:
+      radial-gradient(130% 80% at 50% 0%,rgba(231,182,90,.1),transparent 55%),
+      linear-gradient(180deg,#151A2C,#0D101B);
+    box-shadow:0 28px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+    --role-accent:var(--accent);
+  }
+  .step::before{
+    content:"";position:absolute;left:50%;top:-150px;width:340px;height:340px;transform:translateX(-50%);
+    border-radius:50%;border:1px solid rgba(231,182,90,.12);
+    box-shadow:0 0 0 30px rgba(231,182,90,.03),0 0 0 62px rgba(231,182,90,.018);
+    pointer-events:none;
+  }
+  .step[data-role="SEER"]{--role-accent:#8FB4F2}
+  .step[data-role="WITCH"]{--role-accent:#7FD3AE}
+  .step[data-role="HUNTER"]{--role-accent:#E29A5B}
+  .step[data-role="GUARD"]{--role-accent:#9DB9C9}
+  .step[data-role="WOLF"],.step[data-role="WOLF_KING"]{--role-accent:#E07074}
+  .step-top{
+    position:relative;z-index:1;
+    padding:12px 16px;background:rgba(8,10,18,.38);
+    border-bottom:1px solid var(--line);letter-spacing:.06em;
+  }
+  .step-body{padding:24px 18px 20px;position:relative;z-index:1}
+  .role-line{font-family:var(--font-display);font-size:25px;line-height:1.4;letter-spacing:.04em}
+  .role-line .q{color:var(--role-accent);text-shadow:0 0 20px rgba(231,182,90,.2)}
+  .sub-line{color:var(--muted);font-size:13px;line-height:1.7}
+  .priv-line{
+    border:1px solid rgba(216,87,91,.28);background:rgba(216,87,91,.08);
+    color:#FFC2C4;border-radius:12px;
+  }
+  .step-progress i{background:rgba(231,182,90,.18)}
+  .step-progress i.on{background:var(--role-accent);box-shadow:0 0 8px var(--role-accent)}
+
+  /* ---------- deal ---------- */
+  #dealSys .card,#dealManual{
+    background:
+      radial-gradient(110% 80% at 50% -10%,rgba(231,182,90,.1),transparent 55%),
+      linear-gradient(165deg,rgba(23,28,46,.95),rgba(13,16,28,.98));
+  }
+  #manualEntry .role-line{font-size:21px}
+  #manualEntry .chips{gap:8px}
+  #manualEntry .tag{
+    display:inline-flex;align-items:center;gap:7px;
+    min-height:46px;border-radius:13px;padding:0 14px;
+    background:linear-gradient(160deg,rgba(30,36,57,.9),rgba(17,21,36,.95));
+    font-size:12.5px;letter-spacing:.02em;
+  }
+  #manualEntry .tag:hover{border-color:rgba(231,182,90,.4)}
+  #manualEntry .tag[data-camp="wolf"]{border-color:rgba(216,87,91,.26);color:#F0B7B9}
+  #manualEntry .tag[data-camp="wolf"]:hover{border-color:rgba(216,87,91,.5)}
+  #manualEntry .tag[data-camp="wolf"][aria-pressed="true"]{background:rgba(216,87,91,.14);border-color:var(--danger);color:#FFD7D8}
+  #manualEntry .tag[disabled]{opacity:.32}
+
+  /* ---------- cover / identity card ---------- */
+  .cover{background:rgba(5,6,12,.9);backdrop-filter:blur(16px)}
+  .cover-card{
+    position:relative;border-radius:26px;
+    border:1px solid var(--line-strong);
+    background:
+      radial-gradient(120% 80% at 50% 0%,rgba(231,182,90,.14),transparent 58%),
+      linear-gradient(180deg,#151A2C,#0C0F1A);
+    box-shadow:0 30px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .cover-card::before{
+    content:"";position:absolute;inset:9px;border-radius:20px;
+    border:1px solid rgba(231,182,90,.16);pointer-events:none;
+  }
+  .cover-card .lock{color:var(--accent)}
+  .cover-card h2{font-family:var(--font-display);font-size:22px;letter-spacing:.05em}
+  .idcard{
+    position:relative;border-radius:20px;padding:26px 20px;
+    border:1px solid rgba(231,182,90,.4);
+    background:
+      radial-gradient(120% 100% at 50% 0%,rgba(231,182,90,.24),rgba(16,19,32,.97) 64%);
+    box-shadow:inset 0 0 50px rgba(231,182,90,.08),0 18px 40px rgba(0,0,0,.42);
+  }
+  /* the role avatar now fills the identity-card seal */
+  .idcard .camp{color:var(--accent);letter-spacing:.24em}
+  .idcard .role{font-family:var(--font-display);font-size:34px;letter-spacing:.08em}
+  .idcard .skill{color:#D6DCEA;line-height:1.7}
+  .idcard.wolf{
+    border-color:rgba(216,87,91,.44);
+    background:radial-gradient(120% 100% at 50% 0%,rgba(216,87,91,.24),rgba(16,19,32,.97) 64%);
+    box-shadow:inset 0 0 50px rgba(216,87,91,.1),0 18px 40px rgba(0,0,0,.42);
+  }
+  .idcard.wolf::before{border-color:rgba(216,87,91,.4);background:radial-gradient(circle at 36% 30%,rgba(216,87,91,.4),transparent 68%)}
+  .idcard.wolf .camp{color:#FF9EA1}
+
+  /* ---------- rail / sheet ---------- */
+  .rail-card{
+    border-radius:22px;border:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(23,28,46,.92),rgba(13,16,28,.97));
+    box-shadow:0 18px 40px rgba(0,0,0,.3);
+    padding:16px;
+  }
+  .rail-title{font-size:9.5px;letter-spacing:.22em;color:var(--faint)}
+  .log li{font-size:12px;line-height:1.55}
+  .log .r{color:var(--faint)}
+  .log li[data-kind="death"]{color:#FFB4B6}
+  .log li[data-kind="win"]{color:#A9E8CD}
+  .sheet-panel{
+    background:linear-gradient(180deg,#151A2C,#0D101B);
+    border-top:1px solid var(--line-strong);
+    box-shadow:0 -24px 60px rgba(0,0,0,.6);
+  }
+
+  /* ---------- assistant ---------- */
+  .identity-hero{
+    position:relative;overflow:hidden;
+    display:flex;align-items:center;gap:14px;
+    padding:16px;border-radius:18px;
+    border:1px solid var(--line-strong);
+    background:
+      radial-gradient(120% 100% at 0% 0%,rgba(231,182,90,.16),transparent 60%),
+      linear-gradient(150deg,rgba(30,36,57,.9),rgba(15,18,30,.97));
+  }
+  .identity-hero[data-camp="wolf"]{
+    border-color:rgba(216,87,91,.4);
+    background:
+      radial-gradient(120% 100% at 0% 0%,rgba(216,87,91,.2),transparent 60%),
+      linear-gradient(150deg,rgba(45,28,36,.9),rgba(15,18,30,.97));
+  }
+  .identity-seal{width:auto;height:auto;flex:none;display:block}
+  .identity-seal .role-avatar{width:56px;height:56px}
+  .identity-hero[data-camp="wolf"] .identity-seal{color:#F08B8E;border-color:rgba(216,87,91,.4)}
+  .identity-copy{min-width:0}
+  .identity-label{display:block;font-size:9px;letter-spacing:.24em;color:var(--faint)}
+  .identity-role{display:block;font-family:var(--font-display);font-size:26px;letter-spacing:.06em;line-height:1.25;margin:2px 0}
+  .identity-camp{display:inline-flex;font-size:10px;color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:2px 8px;background:rgba(231,182,90,.05)}
+  .identity-hero[data-camp="wolf"] .identity-camp{color:#F0A0A3;border-color:rgba(216,87,91,.3);background:rgba(216,87,91,.08)}
+  .role-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+  .as-role{
+    min-height:42px;border-radius:12px;border:1px solid var(--line);
+    background:rgba(16,20,34,.7);color:var(--muted);font-size:12.5px;
+  }
+  .as-role[aria-pressed="true"]{
+    border-color:var(--accent);color:var(--accent-2);background:rgba(231,182,90,.1);
+    box-shadow:inset 0 0 0 1px var(--accent);
+  }
+  .prow{
+    border:1px solid var(--line);border-radius:16px;
+    background:linear-gradient(160deg,rgba(23,28,46,.85),rgba(14,17,29,.95));
+    padding:14px;margin-bottom:10px;
+  }
+  .prow-no{
+    width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--line);background:rgba(231,182,90,.06);
+    color:var(--accent);font-family:var(--font-display);
+  }
+  .tag{
+    border-color:var(--line);background:rgba(16,20,34,.7);
+  }
+  .tag[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-2);background:rgba(231,182,90,.12)}
+  .tag.hot[aria-pressed="true"]{border-color:rgba(216,87,91,.5);color:#FFC9CB;background:rgba(216,87,91,.14)}
+  .ta{
+    border-color:var(--line);background:rgba(10,13,23,.7);border-radius:12px;
+  }
+  .ta:focus{border-color:var(--line-strong);box-shadow:0 0 0 3px rgba(231,182,90,.1)}
+  .ai-out{
+    position:relative;border:1px solid var(--line-strong);border-radius:18px;
+    background:
+      radial-gradient(120% 100% at 100% 0%,rgba(231,182,90,.08),transparent 58%),
+      linear-gradient(160deg,rgba(23,28,46,.9),rgba(14,17,29,.97));
+    padding:18px 24px 18px 18px;
+  }
+  .ai-out::before{
+    content:"“";position:absolute;right:16px;top:4px;font-family:var(--font-display);
+    font-size:54px;line-height:1;color:rgba(231,182,90,.14);pointer-events:none;
+  }
+  .ai-sec h4{color:var(--accent);letter-spacing:.14em;font-size:10.5px;text-transform:uppercase}
+  .ai-sec p{line-height:1.7}
+  .ai-note{color:var(--faint)}
+
+  /* ---------- rules ---------- */
+  details.acc{
+    border-radius:16px;border-color:var(--line);
+    background:linear-gradient(160deg,rgba(23,28,46,.82),rgba(14,17,29,.94));
+  }
+  details.acc summary{font-family:var(--font-display);font-size:15.5px;letter-spacing:.04em}
+  details.acc summary::before{
+    content:"§";color:var(--accent);opacity:.6;font-family:var(--mono);font-size:12px;margin-right:2px;
+  }
+  details.acc[open] summary{background:rgba(231,182,90,.05);border-bottom-color:var(--line)}
+  details.acc summary .chev{color:var(--accent)}
+  .acc-body{line-height:1.8}
+  .rule-foot{border-top-color:var(--line)}
+
+  /* ---------- result ---------- */
+  .result-banner{
+    position:relative;overflow:hidden;
+    padding:30px 20px;border-radius:24px;border:1px solid var(--line-strong);
+    background:
+      radial-gradient(120% 120% at 50% 0%,rgba(231,182,90,.22),rgba(14,17,29,.98) 66%);
+    box-shadow:0 26px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .result-banner::before{
+    content:"FINAL VERDICT";display:block;font-family:var(--mono);font-size:9px;
+    letter-spacing:.3em;color:var(--faint);margin-bottom:10px;
+  }
+  .result-banner .w{font-family:var(--font-display);font-size:31px;letter-spacing:.08em}
+  .result-banner .why{color:var(--muted);font-size:13px;margin-top:6px}
+  .result-banner[data-winner="wolf"]{
+    border-color:rgba(216,87,91,.42);
+    background:radial-gradient(120% 120% at 50% 0%,rgba(216,87,91,.22),rgba(14,17,29,.98) 66%);
+  }
+  .result-banner[data-winner="wolf"] .w{color:#FFB3B5}
+  .result-banner[data-winner="good"] .w{color:var(--accent-2)}
+  .rv{
+    border-color:var(--line);border-radius:12px;
+    background:linear-gradient(160deg,rgba(23,28,46,.82),rgba(14,17,29,.94));
+  }
+  .rv[data-camp="wolf"]{border-color:rgba(216,87,91,.28);background:rgba(216,87,91,.06)}
+  .rv[data-camp="wolf"] .n{color:#F0A0A3}
+  .camp-dot.good{box-shadow:0 0 8px rgba(105,210,163,.6)}
+  .camp-dot.wolf{box-shadow:0 0 8px rgba(216,87,91,.6)}
+
+  /* ---------- modal / toast ---------- */
+  .modal{background:rgba(4,6,11,.78);backdrop-filter:blur(10px)}
+  .modal-card{
+    border-radius:22px;border-color:var(--line-strong);
+    background:linear-gradient(180deg,rgba(23,28,46,.98),rgba(13,16,28,.99));
+    box-shadow:0 30px 70px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .modal-card h3{font-family:var(--font-display);font-size:19px;letter-spacing:.04em}
+  .toast{
+    background:rgba(30,36,57,.96);border-color:var(--line-strong);color:var(--text);
+    box-shadow:0 14px 34px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+
+  /* ---------- speech / misc ---------- */
+  .speech-list{
+    list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:sp;
+    color:var(--muted);font-size:13.5px;
+  }
+  .speech-list li{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border:1px solid var(--line);border-radius:12px;
+    background:rgba(16,20,34,.6);
+    cursor:pointer;transition:border-color .15s,background .15s,color .15s;
+  }
+  .speech-list li:hover{border-color:var(--line-strong)}
+  .speech-list li.done{border-color:rgba(70,185,138,.3);background:rgba(70,185,138,.06);color:var(--faint)}
+  .speech-list li b{color:var(--text);font-weight:600}
+  .speech-list li.done b{color:var(--muted)}
+  .speech-list li .sp-tick{margin-left:auto;font-size:11px;letter-spacing:.06em;color:var(--faint);flex:none}
+  .speech-list li.done .sp-tick{color:var(--good)}
+  .speech-list li::before{
+    counter-increment:sp;content:counter(sp,decimal-leading-zero);
+    font-family:var(--mono);font-size:10px;color:var(--accent);opacity:.8;
+  }
+  .notice{
+    border-color:var(--line);border-radius:14px;
+    background:linear-gradient(160deg,rgba(23,28,46,.82),rgba(14,17,29,.94));
+  }
+  .notice svg{color:var(--accent)}
+  .kv{border-bottom-color:var(--line)}
+  .kv .k{color:var(--faint)}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:359px){
+    .brand-sub{display:none}
+    .brand-name{font-size:15px;letter-spacing:.06em}
+    .phase-chip{font-size:10.5px;padding:5px 8px}
+    h1{font-size:27px}
+    .hero .hero-title{font-size:30px}
+    .hero-lead{font-size:12.5px}
+    .ritual{padding:12px 10px}
+    .ritual-step .lbl{font-size:8.5px}
+    .seat .n{font-size:18px}
+    .card{padding:15px}
+  }
+  @media (min-width:1024px){
+    .screen{padding-top:26px}
+    h1{font-size:34px}
+    .hero{padding-top:34px}
+    .hero .hero-title{font-size:52px}
+    .hero-lead{font-size:14.5px}
+    .card{padding:22px}
+    .rail{top:108px}
+  }
+
+  /* ---------- motion ---------- */
+  @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .screen.on .card,.screen.on .step{animation:cardIn .42s ease both}
+  .screen.on .card:nth-of-type(2){animation-delay:.05s}
+  .screen.on .card:nth-of-type(3){animation-delay:.1s}
+  .screen.on .entry{animation:cardIn .45s ease both}
+  .screen.on .entry:nth-child(2){animation-delay:.06s}
+  .screen.on .entry:nth-child(3){animation-delay:.12s}
+  @media (prefers-reduced-motion:reduce){
+    .moon-disc,.fog,.hero,.screen.on .card,.screen.on .step,.screen.on .entry{animation:none!important}
+  }
+</style>
 </head>
 <body>
+
+<div class="atmosphere" aria-hidden="true">
+  <span class="moon-disc"></span>
+  <span class="fog fog-a"></span>
+  <span class="fog fog-b"></span>
+</div>
 
 <header class="topbar">
   <div class="shell topbar-in">
@@ -371,13 +1262,30 @@
       </svg>
       <div>
         <div class="brand-name">狼人杀助手</div>
-        <div class="brand-sub">5A prototype</div>
+        <div class="brand-sub">MOONLIT PARLOR</div>
       </div>
     </div>
     <div class="phase-chip" id="phaseChip"><span class="dot"></span><span id="phaseText">首页</span></div>
     <button class="icon-btn only-mobile" id="railBtn" aria-label="打开座位与事件">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
     </button>
+  </div>
+  <div class="flowbar" id="flowbar" aria-label="对局进度">
+    <div class="flow-steps">
+      <span class="flow-step" data-flow="0"><i class="dot"></i>设置</span>
+      <span class="flow-step" data-flow="1"><i class="dot"></i>发牌</span>
+      <span class="flow-step" data-flow="2"><i class="dot"></i>夜晚</span>
+      <span class="flow-step" data-flow="3"><i class="dot"></i>白天</span>
+      <span class="flow-step" data-flow="4"><i class="dot"></i>结算</span>
+    </div>
+  </div>
+  <div class="subflow" id="subflow" aria-label="白天进度">
+    <div class="day-steps">
+      <span class="day-step" data-day="0"><b>1</b>竞选</span><i class="ds-line"></i>
+      <span class="day-step" data-day="1"><b>2</b>死讯</span><i class="ds-line"></i>
+      <span class="day-step" data-day="2"><b>3</b>发言</span><i class="ds-line"></i>
+      <span class="day-step" data-day="3"><b>4</b>投票</span>
+    </div>
   </div>
 </header>
 
@@ -388,37 +1296,66 @@
       <!-- ======== HOME ======== -->
       <section class="screen on" id="v-home">
         <div class="hero">
-          <p class="eyebrow">线下面杀 · 移动优先 / PC 响应式</p>
-          <h1>不用会玩，也能当好上帝</h1>
-          <p class="lead">一台手机走完 12 人整局；每位玩家还能用自己的设备记录身份与发言，只看自己该看的。</p>
+          <svg class="hero-wolf" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+            <path d="M60 14c14 0 24 7.5 27 20.5 2.6 11.3-2.2 22.6-9.6 30.7l2.8 18.6c.3 2.1-2 3.6-3.9 2.6l-11-5.4c-1.6-.8-3.5-.8-5.1 0l-11 5.4c-1.9 1-4.2-.5-3.9-2.6l2.8-18.6C40.7 57.1 35.9 45.8 38.5 34.5 41.5 21.5 51.5 14 60 14Z" stroke="currentColor" stroke-width="1.2"/>
+            <circle cx="50" cy="39" r="2.1" fill="currentColor"/><circle cx="70" cy="39" r="2.1" fill="currentColor"/>
+            <path d="M55 51c1.6 1.8 3.3 1.8 5 0M52 58c3.2 2.6 12.8 2.6 16 0" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+          </svg>
+          <span class="hero-kicker"><span class="live-dot"></span>TONIGHT'S TABLE · 12 PLAYERS</span>
+          <h1 class="hero-title">今晚，<br><em>谁来当上帝？</em></h1>
+          <p class="hero-lead">一台手机带完 12 人整局。不会玩也能照着主持，玩家各自记录身份与发言，只看自己该看的信息。</p>
+          <div class="hero-actions">
+            <button class="btn primary hero-cta" data-go="setup">
+              <span>开始主持 <small>约 3 分钟开局</small></span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+            </button>
+            <button class="btn ghost" data-go="rules">先翻规则书</button>
+          </div>
+          <div class="hero-meta"><span>零门槛主持</span><span>本机记录</span><span>断网可继续</span></div>
         </div>
 
-        <div class="entry-list">
-          <button class="entry" data-go="setup">
-            <span class="entry-mark">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v3M12 18v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M3 12h3M18 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/><circle cx="12" cy="12" r="3.4"/></svg>
+        <button class="lobby-table" data-go="setup" aria-label="开一桌 12 人狼人杀">
+          <span class="lobby-info">
+            <span class="lobby-kicker">TONIGHT'S TABLE</span>
+            <strong class="lobby-title">今晚的牌局</strong>
+            <span class="lobby-meta">12 人 · 预女猎守<br>本机主持，无需登录</span>
+            <span class="lobby-cta">开一桌
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
             </span>
-            <span class="entry-body">
-              <span class="entry-title">我来主持</span>
-              <span class="entry-desc">选板子 → 发牌 → 按卡片逐步主持到结算</span>
-            </span>
-            <svg class="entry-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 6 6 6-6 6"/></svg>
-          </button>
+          </span>
+          <span class="table-visual" aria-hidden="true">
+            <span class="table-oval"></span>
+            <span class="table-moon"></span>
+            <span class="table-seat hot" style="--i:0">1</span>
+            <span class="table-seat" style="--i:1">2</span>
+            <span class="table-seat" style="--i:2">3</span>
+            <span class="table-seat" style="--i:3">4</span>
+            <span class="table-seat" style="--i:4">5</span>
+            <span class="table-seat" style="--i:5">6</span>
+            <span class="table-seat" style="--i:6">7</span>
+            <span class="table-seat" style="--i:7">8</span>
+            <span class="table-seat" style="--i:8">9</span>
+            <span class="table-seat" style="--i:9">10</span>
+            <span class="table-seat" style="--i:10">11</span>
+            <span class="table-seat" style="--i:11">12</span>
+          </span>
+        </button>
 
+        <div class="entry-list">
           <button class="entry" data-go="assistant">
             <span class="entry-mark green">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h14v11H9l-4 3.5v-14Z"/><path d="M9 9h6M9 12h4"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4.5h14v11H9l-4 3.5v-14Z"/><path d="M9 9h6M9 12h4"/></svg>
             </span>
             <span class="entry-body">
               <span class="entry-title">我的助手</span>
-              <span class="entry-desc">标记身份、打标签、记发言要点，AI 帮你整理</span>
+              <span class="entry-desc">标记身份、打标签、记发言要点，AI 军师帮你整理</span>
             </span>
             <svg class="entry-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 6 6 6-6 6"/></svg>
           </button>
 
           <button class="entry" data-go="rules">
             <span class="entry-mark grey">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M8 7h8M8 10.5h6"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M8 7h8M8 10.5h6"/></svg>
             </span>
             <span class="entry-body">
               <span class="entry-title">规则与攻略</span>
@@ -428,8 +1365,19 @@
           </button>
         </div>
 
+        <div class="ritual" aria-label="一局流程">
+          <div class="ritual-title">ONE NIGHT · 一局怎么走</div>
+          <div class="ritual-steps">
+            <div class="ritual-step"><span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6M9 15h6"/></svg></span><span class="lbl">选板子</span></div>
+            <div class="ritual-step"><span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16v12H4z"/><path d="M8 7V4h8v3M8 13h8"/></svg></span><span class="lbl">发牌</span></div>
+            <div class="ritual-step"><span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 15.5A8.5 8.5 0 1 1 8.5 4a7 7 0 0 0 11.5 11.5Z"/></svg></span><span class="lbl">夜晚</span></div>
+            <div class="ritual-step"><span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2"/></svg></span><span class="lbl">白天</span></div>
+            <div class="ritual-step"><span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 13 4 4L19 7"/></svg></span><span class="lbl">结算</span></div>
+          </div>
+        </div>
+
         <div class="card" style="margin-top:16px">
-          <div class="card-head"><h3>赛前 30 秒</h3><span class="hint">AC-5 / AC-16</span></div>
+          <div class="card-head"><h3>赛前仪式</h3><span class="hint">AC-5 / AC-16</span></div>
           <ul class="preflight">
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 13 4 4L19 7"/></svg><span>先打开页面并保持不关闭；页面加载后断网仍可继续主持。</span></li>
             <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 13 4 4L19 7"/></svg><span>游戏中不要清理浏览器数据；每步已自动保存在本机。</span></li>
@@ -448,14 +1396,19 @@
           <div class="card-head"><h3>选择板子</h3><span class="hint">AC-4</span></div>
           <div class="board-grid" role="group" aria-label="板子">
             <button class="board-opt" data-board="guard" aria-pressed="true">
+              <span class="board-badge">CLASSIC</span>
               <div class="t">预女猎守</div>
-              <div class="d">预言家 · 女巫 · 猎人 · 守卫 + 4 民 / 4 狼</div>
+              <div class="d">守卫 · 预言家 · 女巫 · 猎人<br>4 民 / 4 普狼</div>
+              <div class="board-meta"><span class="chip ok">8 好人</span><span class="chip priv">4 狼</span></div>
             </button>
             <button class="board-opt" data-board="idiot" aria-pressed="false">
+              <span class="board-badge">WHITE WOLF</span>
               <div class="t">预女猎白</div>
-              <div class="d">预言家 · 女巫 · 猎人 · 白痴 + 4 民 / 3 狼 + 白狼王</div>
+              <div class="d">白痴 · 预言家 · 女巫 · 猎人<br>4 民 / 3 狼 + 白狼王</div>
+              <div class="board-meta"><span class="chip ok">8 好人</span><span class="chip priv">4 狼</span></div>
             </button>
           </div>
+          <div class="board-comp" id="boardComp" aria-label="板子角色构成"></div>
         </div>
 
         <div class="card">
@@ -466,11 +1419,25 @@
 
         <div class="card">
           <div class="card-head"><h3>发牌模式</h3><span class="hint">AC-2 / AC-6</span></div>
-          <div class="seg" role="group" aria-label="发牌模式">
-            <button data-deal="A" aria-pressed="true">接力查看</button>
-            <button data-deal="B" aria-pressed="false">线下逐步确认</button>
+          <div class="mode-grid" role="group" aria-label="发牌模式">
+            <button class="mode-opt" data-deal="A" aria-pressed="true">
+              <span class="mi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5"/></svg></span>
+              <span class="mt">接力查看</span>
+              <span class="ms">系统随机 · 玩家传递查看</span>
+            </button>
+            <button class="mode-opt" data-deal="B" aria-pressed="false">
+              <span class="mi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.6"/></svg></span>
+              <span class="mt">线下逐步确认</span>
+              <span class="ms">系统随机 · 主持人控节奏</span>
+            </button>
+            <button class="mode-opt" data-deal="C" aria-pressed="false">
+              <span class="mi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16v12H4z"/><path d="M8 7V4h8v3M8 13h8"/><path d="m10 16 2 2 3-3"/></svg></span>
+              <span class="mt">实体牌录入</span>
+              <span class="ms">线下发牌 · 手动选身份</span>
+            </button>
           </div>
           <p class="faint" style="font-size:12.5px;margin:10px 0 0" id="dealHint">接力查看：全屏遮罩，玩家自己点开身份，看完回遮罩。</p>
+          <p class="faint" style="font-size:12px;margin:6px 0 0">模式 A/B 由系统随机发牌；模式 C 由主持人按实体牌手动选择身份。</p>
         </div>
 
         <div class="card">
@@ -493,19 +1460,39 @@
 
       <!-- ======== DEAL ======== -->
       <section class="screen" id="v-deal">
-        <p class="eyebrow">主持 · 第 2 步 / 共 4 步</p>
-        <h1 id="dealTitle">发牌 · 接力查看</h1>
-        <p class="lead" id="dealLead">全屏遮罩 → 玩家查看身份 → 交回下一位。</p>
-
-        <div class="card">
-          <div class="card-head"><h3>发牌进度</h3><span class="hint" id="dealCount">0 / 12</span></div>
-          <div class="seat-grid compact" id="dealSeats"></div>
-          <div class="divider"></div>
-          <div class="btn-row">
-            <button class="btn" id="btnNextSeat">下一位</button>
-            <button class="btn primary" id="btnShowId">显示身份</button>
+        <div class="deal-head">
+          <div class="deal-ring" id="dealRing" aria-hidden="true"><span class="no" id="dealFocusNo">1</span></div>
+          <div class="deal-head-copy">
+            <p class="eyebrow">主持 · 第 2 步 / 共 4 步</p>
+            <h1 id="dealTitle">发牌 · 接力查看</h1>
+            <p class="lead" id="dealLead">全屏遮罩 → 玩家查看身份 → 交回下一位。</p>
           </div>
-          <p class="faint" style="font-size:12px;margin:10px 0 0" id="dealNote">遮罩中不显示身份；需二次操作才展示。</p>
+        </div>
+
+        <div id="dealSys">
+          <div class="card">
+            <div class="card-head"><h3>发牌进度</h3><span class="hint" id="dealCount">0 / 12</span></div>
+            <div class="seat-grid compact" id="dealSeats"></div>
+            <div class="divider"></div>
+            <div class="btn-row">
+              <button class="btn" id="btnNextSeat">下一位</button>
+              <button class="btn primary" id="btnShowId">显示身份</button>
+            </div>
+            <p class="faint" style="font-size:12px;margin:10px 0 0" id="dealNote">遮罩中不显示身份；需二次操作才展示。</p>
+          </div>
+        </div>
+
+        <div class="card" id="dealManual" hidden>
+          <div class="card-head"><h3>实体牌录入</h3><span class="hint" id="manualCount">0 / 12</span></div>
+          <p class="faint" style="font-size:12.5px;margin:0 0 12px">线下发牌后，主持人按 1→12 手动选择身份；玩家不看屏，系统只做主持与判定。</p>
+          <div class="seat-grid compact" id="manualSeats"></div>
+          <div class="divider"></div>
+          <div id="manualEntry"></div>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn ghost" id="btnManualUndo" disabled>撤销上一位</button>
+            <button class="btn ghost" id="btnManualPeek">核对已录（防窥）</button>
+          </div>
+          <div id="manualPeek" hidden></div>
         </div>
 
         <div class="actionbar"><div class="bar-in">
@@ -588,7 +1575,7 @@
 
         <div class="card">
           <div class="card-head"><h3>发言顺序</h3><span class="hint" id="speechCount">0 / 0</span></div>
-          <ol id="speechList" style="margin:0;padding-left:20px;color:var(--muted);font-size:14px"></ol>
+          <ol id="speechList" class="speech-list"></ol>
         </div>
 
         <div class="actionbar"><div class="bar-in">
@@ -648,14 +1635,22 @@
       <!-- ======== ASSISTANT ======== -->
       <section class="screen" id="v-assistant">
         <p class="eyebrow">我的助手 · 独立模式</p>
-        <h1>个人记录</h1>
+        <h1>我的身份档案</h1>
         <p class="lead">只存在本机；不加入房间也能用。切换页面或刷新后仍保留。</p>
 
         <div class="two">
           <div>
             <div class="card">
               <div class="card-head"><h3>我的身份</h3><span class="hint">可自选</span></div>
-              <div class="seg" style="flex-wrap:wrap">
+              <div class="identity-hero" id="asIdentity" data-camp="good">
+                <span class="identity-seal" id="asSeal"></span>
+                <span class="identity-copy">
+                  <span class="identity-label">YOUR ROLE</span>
+                  <strong class="identity-role" id="asRoleName">预言家</strong>
+                  <span class="identity-camp" id="asCamp">好人</span>
+                </span>
+              </div>
+              <div class="role-picker">
                 <button class="as-role" data-role="SEER" aria-pressed="true">预言家</button>
                 <button class="as-role" data-role="WITCH" aria-pressed="false">女巫</button>
                 <button class="as-role" data-role="HUNTER" aria-pressed="false">猎人</button>
@@ -664,8 +1659,7 @@
                 <button class="as-role" data-role="WOLF" aria-pressed="false">狼人</button>
               </div>
               <div class="divider"></div>
-              <div class="kv"><span class="k">阵营</span><span id="asCamp">好人</span></div>
-              <div class="kv"><span class="k">玩法要点</span><span id="asTip" style="text-align:right;max-width:62%">白天报查验，带队归票</span></div>
+              <div class="kv"><span class="k">玩法要点</span><span id="asTip" style="text-align:right;max-width:66%">白天报查验，带队归票</span></div>
             </div>
 
             <div class="card">
@@ -683,9 +1677,9 @@
             </div>
 
             <div class="card">
-              <div class="card-head"><h3>AI 整理</h3><span class="hint">AC-9 / AC-10</span></div>
+              <div class="card-head"><h3>AI 军师 · 局势解读</h3><span class="hint">AC-9 / AC-10</span></div>
               <div class="btn-row" style="margin-bottom:12px">
-                <button class="btn primary" id="btnAi">AI 整理（示意）</button>
+                <button class="btn primary" id="btnAi">让军师整理（示意）</button>
                 <button class="btn" id="btnAiFail">模拟失败</button>
               </div>
               <div class="ai-out" id="aiOut">
@@ -705,7 +1699,7 @@
       <!-- ======== RULES ======== -->
       <section class="screen" id="v-rules">
         <p class="eyebrow">规则与攻略 · 只读</p>
-        <h1>临场速查</h1>
+        <h1>月蚀规则书</h1>
         <p class="lead">板子、角色、流程；冲突判定以开局约定为准。</p>
 
         <div class="two" style="grid-template-columns:1fr">
@@ -731,6 +1725,7 @@
             </details>
 
             <h3 style="margin:20px 0 10px;color:var(--faint);font-size:12px;letter-spacing:.14em;text-transform:uppercase">角色</h3>
+            <div class="role-gallery" id="roleGallery" aria-label="角色图鉴"></div>
             <details class="acc">
               <summary>预言家 / 女巫<span class="chev">›</span></summary>
               <div class="acc-body">
@@ -787,6 +1782,25 @@
   </div>
 </main>
 
+<nav class="app-tabbar on" id="appTabbar" aria-label="主导航">
+  <button class="app-tab on" data-go="home" data-tab="home" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m4 10 8-7 8 7v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M9 21v-7h6v7"/></svg>
+    <span>首页</span>
+  </button>
+  <button class="app-tab" data-go="setup" data-tab="host" aria-current="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 15.5A8.5 8.5 0 1 1 8.5 4a7 7 0 0 0 11.5 11.5Z"/><path d="M17 5.5 18.5 4M18 10l2-.5"/></svg>
+    <span>主持</span>
+  </button>
+  <button class="app-tab" data-go="assistant" data-tab="assistant" aria-current="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4.5h14v11H9l-4 3.5v-14Z"/><path d="M9 9h6M9 12h4"/></svg>
+    <span>助手</span>
+  </button>
+  <button class="app-tab" data-go="rules" data-tab="rules" aria-current="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M8 7h8M8 10.5h6"/></svg>
+    <span>规则</span>
+  </button>
+</nav>
+
 <!-- ======== overlays ======== -->
 <div class="cover" id="cover" role="dialog" aria-modal="true" aria-labelledby="coverTitle">
   <div class="cover-card">
@@ -800,6 +1814,7 @@
     </div>
     <div id="coverBack" hidden>
       <div class="idcard" id="coverIdCard">
+        <div class="cover-avatar" id="coverAvatar"></div>
         <div class="camp" id="coverCamp">好人阵营</div>
         <div class="role" id="coverRole">预言家</div>
         <div class="skill" id="coverSkill">每夜查验一人阵营，仅自己可见。</div>
@@ -836,7 +1851,7 @@
 
 <script>
 /* =========================================================
-   狼人杀助手 · 5A 原型
+   狼人杀助手 · 5A 原型（月蚀俱乐部视觉版）
    范围：主持闭环 + 助手 + 规则；移动优先，PC ≥1024 双栏
    说明：原型只验证页面结构/交互/状态，不含真实规则引擎与后端
    ========================================================= */
@@ -851,6 +1866,35 @@ const ROLES = {
   WOLF:      { name:'狼人',   camp:'wolf', skill:'与队友共同击杀一人；可空刀。' },
   WOLF_KING: { name:'白狼王', camp:'wolf', skill:'白天自爆时可带走一人。' }
 };
+
+const ROLE_AVATAR_PATHS = {
+  SEER:      `<path d="M6 24s7-10 18-10 18 10 18 10-7 10-18 10S6 24 6 24Z"/><circle cx="24" cy="24" r="5"/><path d="M24 6v3M38 10l-2 2"/>`,
+  WITCH:     `<path d="M20 8h8M22 8v9L15 29a8 8 0 0 0 7 12h4a8 8 0 0 0 7-12l-7-12V8"/><path d="M18 32h12"/><circle cx="24" cy="36" r="1.6" fill="currentColor"/>`,
+  HUNTER:    `<path d="M12 10c14 0 26 12 26 26"/><path d="M12 10v26h26"/><path d="m16 32 16-16M28 16h4v4"/>`,
+  GUARD:     `<path d="M24 6 40 12v11c0 10-7 16-16 19-9-3-16-9-16-19V12Z"/><path d="M24 17v9M24 30h.01"/>`,
+  IDIOT:     `<path d="M12 32c0-9 5-16 12-16s12 7 12 16"/><path d="M11 32h26l-4 7H15Z"/><circle cx="12" cy="18" r="3"/><circle cx="36" cy="18" r="3"/><circle cx="24" cy="12" r="3"/>`,
+  VILLAGER:  `<path d="M24 8c-7 0-12 6-12 13v17h24V21c0-7-5-13-12-13Z"/><path d="M18 38c0-4 3-7 6-7s6 3 6 7"/><path d="M20 21h.01M28 21h.01"/>`,
+  WOLF:      `<path d="M12 10 24 20 36 10l-2 12c0 8-4 14-10 18-6-4-10-10-10-18Z"/><circle cx="20" cy="24" r="1.6" fill="currentColor"/><circle cx="28" cy="24" r="1.6" fill="currentColor"/><path d="M21 31c1.8 1.6 4.2 1.6 6 0"/>`,
+  WOLF_KING: `<path d="M12 10 24 20 36 10l-2 12c0 8-4 14-10 18-6-4-10-10-10-18Z"/><path d="M16 8l4 5 4-6 4 6 4-5"/><circle cx="20" cy="24" r="1.6" fill="currentColor"/><circle cx="28" cy="24" r="1.6" fill="currentColor"/><path d="M21 31c1.8 1.6 4.2 1.6 6 0"/>`
+};
+function roleAvatar(roleId, size=40){
+  const camp = ROLES[roleId] ? ROLES[roleId].camp : 'good';
+  return `<span class="role-avatar ${camp}" data-role="${roleId}" style="--sz:${size}px"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ROLE_AVATAR_PATHS[roleId]||'<circle cx="24" cy="24" r="8"/>'}</svg></span>`;
+}
+const ROLE_ORDER = ['SEER','WITCH','HUNTER','GUARD','IDIOT','VILLAGER','WOLF','WOLF_KING'];
+function renderRoleGallery(){
+  const box = $('#roleGallery'); if(!box) return;
+  box.innerHTML = ROLE_ORDER.map(r=>`<div class="role-card" data-camp="${ROLES[r].camp}" title="${esc(ROLES[r].skill)}">
+    ${roleAvatar(r, 34)}
+    <div class="rc-body"><span class="rc-name">${ROLES[r].name}</span><span class="rc-camp">${ROLES[r].camp==='wolf'?'狼人阵营':'好人阵营'}</span></div>
+  </div>`).join('');
+}
+function renderBoardComp(){
+  const box = $('#boardComp'); if(!box) return;
+  const counts = {};
+  BOARDS[S.boardId].roles.forEach(r=>counts[r]=(counts[r]||0)+1);
+  box.innerHTML = ROLE_ORDER.filter(r=>counts[r]).map(r=>`<span class="comp-item">${roleAvatar(r,24)}<b>${ROLES[r].name}</b><em>×${counts[r]}</em></span>`).join('');
+}
 
 const BOARDS = {
   guard: {
@@ -880,8 +1924,10 @@ const S = {
   dealIdx:1, dealt:0, nightStep:0, nightActions:{},
   candidates:[], sheriff:0, elected:0,
   votes:{}, abstain:0, exiled:0,
+  spoken:[], spokenRound:0,
   deaths:[], events:[], history:[], aiRole:'SEER', aiTags:{}, aiNotes:{}
 };
+let manualPeekOn = false;
 
 const $  = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
@@ -914,6 +1960,47 @@ const PHASE_LABEL = {
 
 function go(view){
   S.view = view;
+  const flowMap = {setup:0, deal:1, night:2, sheriff:3, dawn:3, speech:3, vote:3, result:4};
+  const flowIdx = flowMap[view];
+  const flowbar = $('#flowbar');
+  if(flowbar){
+    flowbar.classList.toggle('on', flowIdx !== undefined);
+    if(flowIdx !== undefined){
+      $$('.flow-step', flowbar).forEach((el,i)=>{
+        el.classList.toggle('on', i===flowIdx);
+        el.classList.toggle('done', i<flowIdx);
+      });
+    }
+  }
+  const firstDay = S.round === 1 && S.sheriffOn;
+  const dayMap = firstDay ? {sheriff:0, dawn:1, speech:2, vote:3} : {dawn:0, speech:1, vote:2};
+  const dayIdx = dayMap[view];
+  const subflow = $('#subflow');
+  if(subflow){
+    subflow.classList.toggle('on', dayIdx !== undefined);
+    if(dayIdx !== undefined){
+      const labels = firstDay ? ['竞选','死讯','发言','投票'] : ['死讯','发言','投票'];
+      const stepsBox = $('.day-steps', subflow);
+      if(stepsBox.dataset.key !== labels.join('|')){
+        stepsBox.dataset.key = labels.join('|');
+        stepsBox.innerHTML = labels.map((t,i)=>`<span class="day-step" data-day="${i}"><b>${i+1}</b>${t}</span>`).join('<i class="ds-line"></i>');
+      }
+      $$('.day-step', subflow).forEach((el,i)=>{
+        el.classList.toggle('on', i===dayIdx);
+        el.classList.toggle('done', i<dayIdx);
+      });
+    }
+    subflow.setAttribute('aria-hidden', dayIdx === undefined ? 'true' : 'false');
+  }
+  const tabForView = {home:'home', assistant:'assistant', rules:'rules', setup:'host', deal:'host', night:'host', sheriff:'host', dawn:'host', speech:'host', vote:'host', result:'host'};
+  const activeTab = tabForView[view] || 'home';
+  const tabbar = $('#appTabbar');
+  if(tabbar) tabbar.classList.toggle('on', ['home','assistant','rules'].includes(view));
+  $$('.app-tabbar [data-tab]').forEach(b=>{
+    const on = b.dataset.tab === activeTab;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-current', on ? 'page' : 'false');
+  });
   $$('.screen').forEach(s=>s.classList.remove('on'));
   const target = $('#v-'+view); if(target) target.classList.add('on');
   const phase = view==='home' ? 'HOME' : view==='assistant' ? 'ASSISTANT' : view==='rules' ? 'RULES'
@@ -999,8 +2086,100 @@ function dealRoles(){
   S.seats = pool.map((roleId,i)=>({ no:i+1, roleId, alive:true }));
   S.dealIdx = 1; S.dealt = 0; S.phase='DEAL';
 }
+function startManualDeal(){
+  S.seats = Array.from({length:12},(_,i)=>({ no:i+1, roleId:null, alive:true }));
+  S.dealIdx = 1; S.dealt = 0; S.phase='DEAL'; manualPeekOn = false;
+}
+function manualRemaining(roleId){
+  const total = BOARDS[S.boardId].roles.filter(r=>r===roleId).length;
+  const used = S.seats.filter(s=>s.roleId===roleId).length;
+  return total - used;
+}
+function manualAssign(roleId){
+  if(S.dealt>=12) return;
+  if(manualRemaining(roleId)<=0){ toast('该身份已录满'); return; }
+  const seat = S.seats.find(s=>!s.roleId); if(!seat) return;
+  seat.roleId = roleId;
+  S.dealt++; S.dealIdx = Math.min(S.dealt+1, 12);
+  manualPeekOn = false;
+  renderManual();
+  toast(S.dealt===12 ? `${seat.no} 号已录入，12 位完成，请核对后进入天黑` : `${seat.no} 号已录入`);
+}
+function manualUndo(){
+  if(S.dealt<=0){ toast('没有可撤销的录入'); return; }
+  const seat = S.seats[S.dealt-1]; if(!seat) return;
+  seat.roleId = null; S.dealt--; S.dealIdx = S.dealt+1; manualPeekOn = false;
+  renderManual();
+  toast(`已撤销 ${seat.no} 号的录入`);
+}
+function updateDealFocus(){
+  const ring = $('#dealRing'); if(!ring) return;
+  const done = Math.min(S.dealt,12);
+  ring.style.setProperty('--p', `${Math.round(done/12*100)}%`);
+  const no = $('#dealFocusNo');
+  if(no) no.textContent = done>=12 ? '✓' : String(Math.min(done+1,12));
+}
+function renderManual(){
+  const total = 12;
+  $('#dealTitle').textContent = '发牌 · 实体牌录入';
+  $('#dealLead').textContent = '线下发实体牌 → 主持人按 1→12 手动选择身份 → 玩家不看屏。';
+  $('#manualCount').textContent = `${S.dealt} / ${total}`;
+
+  const box = $('#manualSeats'); box.innerHTML='';
+  S.seats.forEach(s=>{
+    const done = !!s.roleId;
+    const cell = el(`<button class="seat ${done?'':'dead'}" disabled>
+        <span class="n">${s.no}</span><span class="r">${done?'已录':'待录'}</span>
+        ${s.no===S.dealIdx && S.dealt<total ? '<span class="badge">当前</span>' : ''}
+      </button>`);
+    box.appendChild(cell);
+  });
+
+  const entry = $('#manualEntry');
+  const complete = S.dealt >= total;
+  if(complete){
+    entry.innerHTML = `<p class="role-line">12 位身份已录入完成</p>
+      <p class="sub-line">角色构成与“${esc(BOARDS[S.boardId].name)}”一致，可以进入天黑。</p>`;
+  } else {
+    const seat = S.seats.find(s=>!s.roleId);
+    const roleIds = Array.from(new Set(BOARDS[S.boardId].roles));
+    const makeGroup = (label, list)=> list.length ? `
+      <p class="faint" style="font-size:12px;margin:12px 0 6px">${label}</p>
+      <div class="chips">${list.map(r=>{
+        const left = manualRemaining(r);
+        return `<button class="tag" data-mrole="${r}" data-camp="${ROLES[r].camp}" ${left<=0?'disabled':''}>${roleAvatar(r,24)}<span>${fmtRole(r)} · 余 ${left}</span></button>`;
+      }).join('')}</div>` : '';
+    entry.innerHTML = `<p class="role-line">请为 <span class="q">${seat.no} 号</span> 手动选择身份</p>
+      <p class="sub-line">对照实体牌点选；已录明细默认不展示。</p>
+      ${makeGroup('好人阵营', roleIds.filter(r=>ROLES[r].camp!=='wolf'))}
+      ${makeGroup('狼人阵营', roleIds.filter(r=>ROLES[r].camp==='wolf'))}`;
+    $$('[data-mrole]', entry).forEach(b=>{
+      b.onclick = ()=> manualAssign(b.dataset.mrole);
+    });
+  }
+
+  const peek = $('#manualPeek');
+  if(manualPeekOn){
+    peek.hidden = false;
+    peek.innerHTML = `<div class="divider"></div>
+      <p class="faint" style="font-size:12px;margin:0 0 8px">防窥核对：请遮挡屏幕，勿让玩家看到</p>
+      <div class="chips">${S.seats.filter(s=>s.roleId).map(s=>`<span class="chip">${s.no} 号 ${fmtRole(s.roleId)}</span>`).join('') || '<span class="chip">暂无</span>'}</div>`;
+  } else {
+    peek.hidden = true; peek.innerHTML = '';
+  }
+  $('#btnManualPeek').textContent = manualPeekOn ? '收起核对' : '核对已录（防窥）';
+  $('#btnManualUndo').disabled = S.dealt <= 0;
+  $('#btnDealDone').disabled = !complete;
+  updateDealFocus();
+  renderRail();
+}
 
 function renderDeal(){
+  const modeC = S.dealMode==='C';
+  $('#dealSys').hidden = modeC;
+  $('#dealManual').hidden = !modeC;
+  if(modeC){ renderManual(); return; }
+
   const modeA = S.dealMode==='A';
   $('#dealTitle').textContent = `发牌 · ${modeA?'接力查看':'线下逐步确认'}`;
   $('#dealLead').textContent  = modeA ? '全屏遮罩 → 玩家查看身份 → 交回下一位。' : '默认遮罩，主持人二次点击才显示身份，确认后进入下一位。';
@@ -1026,6 +2205,7 @@ function renderDeal(){
   $('#btnNextSeat').disabled = S.dealt >= 12;
   $('#btnShowId').disabled = S.dealt >= 12;
   $('#btnDealDone').disabled = S.dealt < 12;
+  updateDealFocus();
   renderRail();
 }
 
@@ -1040,6 +2220,7 @@ function openCover(){
 }
 function revealCover(){
   const no = S.dealt + 1; const roleId = roleOf(no); const r = ROLES[roleId];
+  $('#coverAvatar').innerHTML = roleAvatar(roleId, 76);
   $('#coverCamp').textContent = r.camp==='wolf' ? '狼人阵营' : '好人阵营';
   $('#coverRole').textContent = r.name;
   $('#coverSkill').textContent = r.skill;
@@ -1061,6 +2242,7 @@ function renderNight(){
   const box = $('#nightStep');
   const step = currentNight();
   if(!step){ box.innerHTML=''; return; }
+  box.dataset.role = step.role;
   const total = BOARDS[S.boardId].night.length;
   const act = S.nightActions[S.round] || (S.nightActions[S.round]={});
   const chipped = step.role==='WOLF' ? 'AC-3 · 私密' : (step.role==='WITCH' ? 'AC-3 · 私密' : 'AC-4');
@@ -1075,11 +2257,16 @@ function renderNight(){
     <div class="step-top">
       <span class="chip ${step.role==='WOLF'||step.role==='WITCH'?'priv':'ac'}">${chipped}</span>
       <span>${fmtRole(step.role)}</span>
-      <span class="step-progress">${Array.from({length:total},(_,i)=>`<i class="${i<=S.nightStep?'on':''}"></i>`).join('')}</span>
+      <span class="night-queue" aria-label="夜间顺序">${BOARDS[S.boardId].night.map((n,i)=>`<span class="nq ${i===S.nightStep?'on':i<S.nightStep?'done':''}" title="${fmtRole(n.role)}">${roleAvatar(n.role,22)}</span>`).join('')}</span>
     </div>
     <div class="step-body">
-      <p class="role-line">${step.line.replace(/请选择/, '<span class="q">请选择</span>')}</p>
-      <p class="sub-line">${step.role==='WOLF'?'多狼由主持人代录；分歧按空刀。':'点编号选择目标，可跳过。'}</p>
+      <div class="night-copy">
+        ${roleAvatar(step.role, 56)}
+        <div>
+          <p class="role-line">${step.line.replace(/请选择/, '<span class="q">请选择</span>')}</p>
+          <p class="sub-line">${step.role==='WOLF'?'多狼由主持人代录；分歧按空刀。':'点编号选择目标，可跳过。'}</p>
+        </div>
+      </div>
       ${priv}
       <div class="seat-grid" id="nightSeats"></div>
       <div style="margin-top:12px" class="chips" id="nightPick"></div>
@@ -1197,15 +2384,31 @@ function updateSheriffBtns(){
 
 /* ---------- speech ---------- */
 function renderSpeech(){
+  if(S.spokenRound !== S.round){ S.spoken = []; S.spokenRound = S.round; }
   $('#speechEyebrow').textContent = `第 ${S.round} 天 · 发言`;
   const alive = aliveSeats();
-  $('#speechCount').textContent = `${alive.length} 人`;
+  $('#speechCount').textContent = `${S.spoken.length} / ${alive.length} 已发言`;
   const startNo = S.deaths.length ? S.deaths[0].no : 1;
   const ordered = alive.slice().sort((a,b)=>{
     const da=(a.no-startNo+12)%12, db=(b.no-startNo+12)%12;
     return da-db;
   });
-  $('#speechList').innerHTML = ordered.map((s,i)=>`<li>${i+1}. <b style="color:var(--text)">${s.no} 号</b> ${s.no===S.sheriff?'（警长）':''}</li>`).join('');
+  $('#speechList').innerHTML = ordered.map((s,i)=>{
+    const done = S.spoken.includes(s.no);
+    return `<li data-no="${s.no}" class="${done?'done':''}" role="button" tabindex="0" aria-pressed="${done}">
+      <b>${s.no} 号</b>${s.no===S.sheriff?'（警长）':''}
+      <span class="sp-tick">${done?'已发言':'点一下标记'}</span></li>`;
+  }).join('');
+  $$('#speechList li').forEach(li=>{
+    const toggle = ()=>{
+      const no = Number(li.dataset.no);
+      const i = S.spoken.indexOf(no);
+      if(i>=0) S.spoken.splice(i,1); else S.spoken.push(no);
+      renderSpeech();
+    };
+    li.onclick = toggle;
+    li.onkeydown = (ev)=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); toggle(); } };
+  });
   renderRail();
 }
 
@@ -1276,10 +2479,12 @@ function finishGame(reason){
   go('result');
 }
 function renderResult(winner, why){
-  $('#resultBanner').innerHTML = `<div class="w">${winner}</div><div class="why">${why}</div>`;
+  const banner = $('#resultBanner');
+  banner.dataset.winner = winner.includes('狼') ? 'wolf' : 'good';
+  banner.innerHTML = `<div class="w">${winner}</div><div class="why">${why}</div>`;
   $('#revealSeats').innerHTML = S.seats.map(s=>{
     const camp = ROLES[s.roleId].camp;
-    return `<div class="rv"><span class="n">${s.no}</span><span>${fmtRole(s.roleId)}</span><span class="camp-dot ${camp}"></span></div>`;
+    return `<div class="rv" data-camp="${camp}">${roleAvatar(s.roleId, 30)}<span class="n">${s.no}</span><span>${fmtRole(s.roleId)}</span><span class="camp-dot ${camp}"></span></div>`;
   }).join('');
   const log = S.events.slice().reverse().map(e=>`<li data-kind="${e.kind}"><span class="r">第${e.round}${e.kind==='death'?'天':'夜'}</span><span>${esc(e.text)}</span></li>`).join('');
   $('#resultLog').innerHTML = log || '<li><span>无事件</span></li>';
@@ -1295,6 +2500,9 @@ const AI_TIPS = {
 function renderAssistant(){
   $('#asCamp').textContent = AI_TIPS[S.aiRole][0];
   $('#asTip').textContent  = AI_TIPS[S.aiRole][1];
+  $('#asRoleName').textContent = fmtRole(S.aiRole);
+  $('#asIdentity').dataset.camp = AI_TIPS[S.aiRole][0]==='狼人' ? 'wolf' : 'good';
+  $('#asSeal').innerHTML = roleAvatar(S.aiRole, 56);
   $('#asRound').textContent = `第 1 天`;
   $('#asAlive').textContent = `12 / 12`;
   const box = $('#asPlayers'); box.innerHTML='';
@@ -1361,6 +2569,7 @@ $$('.board-opt').forEach(b=>{
     $$('.board-opt').forEach(x=>x.setAttribute('aria-pressed','false'));
     b.setAttribute('aria-pressed','true');
     S.boardId = b.dataset.board;
+    renderBoardComp();
     toast(`已选 ${b.querySelector('.t').textContent}`);
   };
 });
@@ -1369,20 +2578,30 @@ $$('[data-deal]').forEach(b=>{
     $$('[data-deal]').forEach(x=>x.setAttribute('aria-pressed','false'));
     b.setAttribute('aria-pressed','true');
     S.dealMode = b.dataset.deal;
-    $('#dealHint').textContent = S.dealMode==='A'
-      ? '接力查看：全屏遮罩，玩家自己点开身份，看完回遮罩。'
-      : '线下逐步确认：默认遮罩，主持人二次点击显示身份并逐个确认。';
+    manualPeekOn = false;
+    const hints = {
+      A:'接力查看：全屏遮罩，玩家自己点开身份，看完回遮罩。',
+      B:'线下逐步确认：默认遮罩，主持人二次点击显示身份并逐个确认。',
+      C:'实体牌录入：线下发牌后按 1→12 手动选择身份；玩家不看屏，系统只做主持与判定。'
+    };
+    $('#dealHint').textContent = hints[S.dealMode];
   };
 });
 $('#optSheriff').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked', on); S.sheriffOn=on; };
 $('#optSelfSave').onclick = (e)=>{ const b=e.currentTarget; const on=b.getAttribute('aria-checked')!=='true'; b.setAttribute('aria-checked', on); S.selfSaveOn=on; };
 
 $('#btnStartDeal').onclick = async ()=>{
-  const ok = await confirmAsk('开始发牌', '将随机分配两套板子的身份并进入发牌。开局后不可更改板子，确定吗？', '开始');
+  const isManual = S.dealMode==='C';
+  const ok = await confirmAsk('开始发牌', isManual
+    ? '将进入实体牌手动录入：请确认实体牌已按所选板子发放。开局后不可更改板子，确定吗？'
+    : '将按所选板子随机分配身份并进入发牌。开局后不可更改板子，确定吗？', '开始');
   if(!ok) return;
   S.history=[]; S.events=[]; S.round=1; S.nightStep=0; S.nightActions={}; S.candidates=[]; S.sheriff=0;
-  dealRoles();
-  pushEvent(`开局：${BOARDS[S.boardId].name} · ${S.dealMode==='A'?'接力查看':'逐步确认'}`);
+  S.spoken=[]; S.spokenRound=0;
+  manualPeekOn = false;
+  if(isManual) startManualDeal(); else dealRoles();
+  const modeName = {A:'接力查看',B:'线下逐步确认',C:'实体牌录入'}[S.dealMode];
+  pushEvent(`开局：${BOARDS[S.boardId].name} · ${modeName}`);
   keepAwake();
   go('deal'); renderDeal();
 };
@@ -1393,12 +2612,30 @@ $('#btnNextSeat').onclick = openCover;
 $('#coverReveal').onclick = revealCover;
 $('#coverDone').onclick = closeCover;
 $('#coverHide').onclick = ()=>{ $('#coverFront').hidden=false; $('#coverBack').hidden=true; $('#coverTitle').textContent='已重新遮罩，请交给下一位'; };
+$('#btnManualUndo').onclick = manualUndo;
+$('#btnManualPeek').onclick = async ()=>{
+  if(manualPeekOn){ manualPeekOn=false; renderManual(); return; }
+  const ok = await confirmAsk('核对已录身份','将显示 1–12 号已录身份，请先遮挡屏幕，避免玩家看到。','显示');
+  if(!ok) return;
+  manualPeekOn = true; renderManual();
+};
 $('#btnDealBack').onclick = async ()=>{
+  if(S.dealMode==='C'){
+    if(S.dealt>0){ manualUndo(); return; }
+    await back(); return;
+  }
   if(S.dealt===0 && !S.history.length){ toast('当前没有可回退的发牌'); return; }
   if(S.dealt>0){ S.dealt--; renderDeal(); toast('已退回上一位'); }
   else await back();
 };
 $('#btnDealDone').onclick = ()=>{
+  if(S.dealMode==='C'){
+    if(S.dealt<12){ toast('还有编号未录入'); return; }
+    const counts = {};
+    BOARDS[S.boardId].roles.forEach(r=>{ counts[r]=(counts[r]||0)+1; });
+    const bad = Object.keys(counts).some(r=>S.seats.filter(s=>s.roleId===r).length!==counts[r]);
+    if(bad){ toast('角色构成与板子不一致，请核对'); return; }
+  }
   S.phase='NIGHT'; S.nightStep=0;
   pushEvent('天黑请闭眼');
   go('night'); renderNight();
@@ -1469,6 +2706,9 @@ $$('.as-role').forEach(b=>{
     S.aiRole=b.dataset.role;
     $('#asCamp').textContent = AI_TIPS[S.aiRole][0];
     $('#asTip').textContent  = AI_TIPS[S.aiRole][1];
+    $('#asRoleName').textContent = fmtRole(S.aiRole);
+    $('#asIdentity').dataset.camp = AI_TIPS[S.aiRole][0]==='狼人' ? 'wolf' : 'good';
+    $('#asSeal').innerHTML = roleAvatar(S.aiRole, 56);
   };
 });
 $('#btnAi').onclick = ()=>{ toast('AI 请求（原型仅示意，不发起真实请求）'); };
@@ -1494,6 +2734,8 @@ $$('[data-close-sheet]').forEach(n=>n.onclick = ()=>$('#sheet').classList.remove
 /* init */
 detectCaps();
 renderSetupSeats();
+renderBoardComp();
+renderRoleGallery();
 refreshAll();
 window.addEventListener('keydown', (e)=>{
   if(e.key==='Escape'){ $('#cover').classList.remove('on'); $('#modal').classList.remove('on'); $('#sheet').classList.remove('on'); }

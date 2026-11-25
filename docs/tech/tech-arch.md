@@ -1,8 +1,8 @@
 # 技术架构
 
-- 版本：v1.2
+- 版本：v1.3
 - 日期：2026-11-25
-- PRD 基线：v1.3.1（P0 本轮；P1 下一迭代）
+- PRD 基线：v1.3.2（P0 本轮；P1 下一迭代）
 - 适用范围：移动端优先 Web 应用；P0 单机主持 + 个人助手 + AI 中转；P1 联机预留
 - 文档状态：活跃（步骤 3 已验收，2026-11-25）；阶段与验收状态以 [project-progress.md](../plan/project-progress.md) 为准
 - 关联：[API 契约](api-contract.md)、[开发环境信息](dev-info.md)、[ADR 索引](#14-adr-索引)
@@ -69,7 +69,7 @@ Browser ──HTTPS──> Node/Fastify ──┬── /            → apps/we
 | --- | --- | --- | --- | --- |
 | P0-1 规则与攻略 | AC-4 | `packages/rules-content` + `apps/web` 规则页 | 内容核对 + AC-4 | 已承接 |
 | P0-2 开局设置 | AC-1/AC-4 | `game-engine` SETUP + web | 单测 + E2E | 已承接 |
-| P0-3 双模式发牌 | AC-2/AC-6 | `game-engine` DEAL + web 遮罩/二次揭示 | E2E 侧视测试 | 已承接 |
+| P0-3 三种发牌模式 | AC-2/AC-6 | `game-engine` DEAL（随机/手动映射）+ web 遮罩/二次揭示/手动选择 | E2E 侧视测试 | 已承接 |
 | P0-4 夜间引导 | AC-3/AC-4 | `game-engine` NIGHT + web 步骤卡/口播 | 规则单测 + E2E | 已承接 |
 | P0-5 白天引导 | AC-3/AC-4 | `game-engine` SHERIFF/DAWN/SPEECH/VOTE/SETTLE | 规则单测 + E2E | 已承接 |
 | P0-6 自动判定 | AC-3 | `game-engine` 规则/冲突/胜负 | 附录 A 用例 | 已承接 |
@@ -86,7 +86,7 @@ Browser ──HTTPS──> Node/Fastify ──┬── /            → apps/we
 | P1 联机/PWA/术语/笔记 | AC-12~AC-15、AC-19 | `apps/api` rooms + Socket.IO + SQLite；web P1 | P1 验收 | 预留（下一迭代） |
 | 约束：无账号/非小程序/12 人/规则口径 | 走查 | 匿名会话、Web SPA、固定板子、附录 A | 架构评审 | 已承接 |
 
-未承接项：无。P1 项明确为下一迭代，不进入 v1.3.1 P0 验收。
+未承接项：无。P1 项明确为下一迭代，不进入 v1.3.2 P0 验收。
 
 ## 4. 模块划分与依赖方向
 
@@ -315,7 +315,7 @@ erDiagram
 | SQLite 原生驱动 | `better-sqlite3` 需原生构建，部署失败风险 | 验证 Node 24 预编译；否则评估 `node:sqlite` |
 | CSP 与内联样式 | Radix/Tailwind 可能需要 inline style，样式失效 | 实测 CSP；脚本严格，样式按需放宽 |
 | ICP/AI 合规 | 上线 | 上线前专项确认 |
-| P1 下一迭代 | 范围 | 不进入 v1.3.1 验收 |
+| P1 下一迭代 | 范围 | 不进入 v1.3.2 验收 |
 
 ## 14. ADR 索引
 
@@ -332,3 +332,4 @@ erDiagram
 | v1.0 | 2026-11-24 | 初始架构：前后端分离、共享规则引擎、AI 中转、P1 预留 | PRD v1.3.1 验收通过，进入步骤 3 |
 | v1.1 | 2026-11-25 | 部署形态调整为 Node 单进程（静态/API/WS）；不使用 Nginx/Docker；TLS 由 Node HTTPS 或云 LB；Node 更新至 24.22.3 | 用户决定 |
 | v1.2 | 2026-11-25 | 应用技术方案评审：P1 改为主持端发送完整 gameState、服务端校验并生成视图；新增 game_states；补 Node 请求限制/TLS/WS/AI 并发/测试 | 评审整改 |
+| v1.3 | 2026-11-25 | 承接 PRD v1.3.2：DEAL 增加实体牌手动映射输入，规则判定与结算不变；无接口/数据模型变化 | CHG-20261125-02 |

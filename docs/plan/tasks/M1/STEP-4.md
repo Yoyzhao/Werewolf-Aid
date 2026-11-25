@@ -4,7 +4,7 @@
 
 - **里程碑**：M1（v1.3.1 P0）
 - **阶段**：4
-- **本轮基线**：PRD v1.3.1（已验收）；tech-arch v1.2；api-contract v1.1
+- **本轮基线**：PRD v1.3.2（含 CHG-20261125-02）；tech-arch v1.3；api-contract v1.1
 - **进度入口**：[project-progress.md](../../project-progress.md)
 - **项目拓扑**：前后端分离（monorepo）
 
@@ -25,7 +25,7 @@
 | T-026 | 5C | 板子/角色配置与校验 | T-015 | [STEP-5C](STEP-5C.md#t-026) |
 | T-027 | 5C | 状态机、座位与动作 | T-026 | [STEP-5C](STEP-5C.md#t-027) |
 | T-028 | 5C | 冲突、技能与胜负（不含 P1 视图） | T-027 | [STEP-5C](STEP-5C.md#t-028) |
-| T-029 | 5C | 开局设置与双模式发牌 | T-015/T-027 | [STEP-5C](STEP-5C.md#t-029) |
+| T-029 | 5C | 开局设置与三种发牌模式 | T-015/T-027 | [STEP-5C](STEP-5C.md#t-029) |
 | T-030 | 5C | 夜间、竞选、死讯、发言 | T-029/T-028 | [STEP-5C](STEP-5C.md#t-030) |
 | T-031 | 5C | 投票、结算、本地存储、Wake Lock | T-030/T-028 | [STEP-5C](STEP-5C.md#t-031) |
 | T-032 | 5C | 规则内容编写与评审 | T-015 | [STEP-5C](STEP-5C.md#t-032) |
@@ -71,4 +71,4 @@
 - **外溢发现**：无。
 - **遗留项**：P1 联机按计划留到 M2。
 - **验收摘要**：待用户验收步骤 4；通过后进入 5A。
-- **关联记录**：PRD v1.3.1、tech-arch v1.2、api-contract v1.1。
+- **关联记录**：PRD v1.3.2（含 CHG-20261125-02）、tech-arch v1.3、api-contract v1.1。
