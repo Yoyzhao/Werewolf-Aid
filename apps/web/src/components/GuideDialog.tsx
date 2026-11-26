@@ -46,7 +46,11 @@ export function GuideDialog({ open, onDismiss }: GuideDialogProps) {
             {current.description}
           </Dialog.Description>
 
-          <div className="flex gap-1.5" aria-label={`引导进度 ${step + 1} / ${GUIDE_STEPS.length}`}>
+          <div
+            className="flex gap-1.5"
+            role="group"
+            aria-label={`引导进度 ${step + 1} / ${GUIDE_STEPS.length}`}
+          >
             {GUIDE_STEPS.map((item, index) => (
               <span
                 key={item.title}

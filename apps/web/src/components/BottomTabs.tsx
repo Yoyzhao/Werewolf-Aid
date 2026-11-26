@@ -1,5 +1,6 @@
 import { BookOpen, Home, UserRound } from 'lucide-react';
-import { toast } from 'sonner';
+
+import { useGameStore } from '../stores/game-store';
 
 export interface BottomTabsProps {
   readonly active: 'home' | 'assistant' | 'rules';
@@ -12,6 +13,9 @@ const TABS = [
 ] as const;
 
 export function BottomTabs({ active }: BottomTabsProps) {
+  const setView = useGameStore((state) => state.setView);
+  const goHome = useGameStore((state) => state.goHome);
+
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ink/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md"
@@ -30,8 +34,9 @@ export function BottomTabs({ active }: BottomTabsProps) {
               }`}
               aria-current={isActive ? 'page' : undefined}
               onClick={() => {
-                if (tab.id === 'assistant') toast('个人助手将在 T-018 接入');
-                if (tab.id === 'rules') toast('规则页将在 T-032 接入');
+                if (tab.id === 'home') goHome();
+                if (tab.id === 'assistant') setView('assistant');
+                if (tab.id === 'rules') setView('rules');
               }}
             >
               <Icon size={19} />

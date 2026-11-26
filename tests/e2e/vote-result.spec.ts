@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { enterVote, expectNoHorizontalOverflow } from './helpers';
 
-const EVIDENCE = 'docs/test/evidence/M1/T-031';
+const EVIDENCE = '.artifacts/e2e/T-031';
 
 const ROLE_SEQUENCE = [
   'GUARD',

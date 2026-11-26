@@ -1,7 +1,34 @@
 import type { BoardId, DealMode, GameOptions, GameState, RoleId } from '@lrs/game-engine';
 
 export type View =
-  'home' | 'setup' | 'deal' | 'night' | 'sheriff' | 'dawn' | 'speech' | 'vote' | 'result';
+  | 'home'
+  | 'assistant'
+  | 'rules'
+  | 'setup'
+  | 'deal'
+  | 'night'
+  | 'sheriff'
+  | 'dawn'
+  | 'speech'
+  | 'vote'
+  | 'result';
+
+export interface AssistantPlayerRecord {
+  readonly tags: readonly string[];
+  readonly info: string;
+  readonly speechByRound: Readonly<Record<number, string>>;
+}
+
+export interface AssistantRecord {
+  readonly schemaVersion: 1;
+  readonly roleId: RoleId | null;
+  readonly round: number;
+  readonly aliveSeats: readonly number[];
+  readonly publicEvents: string;
+  readonly players: Readonly<Record<number, AssistantPlayerRecord>>;
+  readonly freeText: string;
+  readonly updatedAt: number;
+}
 
 export interface DealDraft {
   readonly assignments: Readonly<Record<number, RoleId>>;

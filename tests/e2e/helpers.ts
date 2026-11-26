@@ -1,7 +1,5 @@
 import { expect, type Page } from '@playwright/test';
 
-export const EVIDENCE_DIR = 'docs/test/evidence/M1';
-
 export async function enterNight(page: Page): Promise<void> {
   await page.goto('/');
   await page.getByRole('button', { name: /开始主持/ }).click();

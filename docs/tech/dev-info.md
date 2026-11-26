@@ -63,7 +63,7 @@ docs/
   prototype/M1/ 5A 原型（按里程碑归档）
 ```
 
-测试产物统一写入 `.artifacts/`（Playwright 结果 `.artifacts/test-results/`、覆盖率 `.artifacts/coverage/`），已加入忽略规则。
+测试产物统一写入 `.artifacts/`（Playwright 结果 `.artifacts/test-results/`、e2e 截图 `.artifacts/e2e/`、覆盖率 `.artifacts/coverage/`），已加入忽略规则；`docs/test/evidence/` 只归档任务验收时的定稿证据，不被自动测试覆盖。
 
 工程基线：
 

@@ -6,7 +6,7 @@ const STORAGE_KEY = 'lrs.game.current.v1';
 
 let memoryRecord: StoredGameRecord | null = null;
 
-function hasIndexedDb(): boolean {
+export function hasIndexedDb(): boolean {
   return typeof indexedDB !== 'undefined';
 }
 

@@ -7,6 +7,14 @@ import { HomeScreen } from './features/home/HomeScreen';
 import { releaseWakeLock, requestWakeLock } from './lib/wake-lock';
 import { useGameStore } from './stores/game-store';
 
+const AssistantScreen = lazy(() =>
+  import('./features/assistant/AssistantScreen').then((module) => ({
+    default: module.AssistantScreen,
+  })),
+);
+const RulesScreen = lazy(() =>
+  import('./features/rules/RulesScreen').then((module) => ({ default: module.RulesScreen })),
+);
 const SetupScreen = lazy(() =>
   import('./features/setup/SetupScreen').then((module) => ({ default: module.SetupScreen })),
 );
@@ -99,6 +107,8 @@ export default function App() {
                 </div>
               }
             >
+              {view === 'assistant' ? <AssistantScreen /> : null}
+              {view === 'rules' ? <RulesScreen /> : null}
               {view === 'setup' ? <SetupScreen /> : null}
               {view === 'deal' ? <DealScreen /> : null}
               {view === 'night' ? <NightScreen /> : null}

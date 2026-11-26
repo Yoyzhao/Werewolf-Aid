@@ -2,7 +2,9 @@ import type { View } from '../lib/types';
 
 const STEPS = ['设置', '发牌', '夜晚', '白天', '结算'] as const;
 
-const ACTIVE_INDEX: Record<Exclude<View, 'home'>, number> = {
+type FlowView = Exclude<View, 'home' | 'assistant' | 'rules'>;
+
+const ACTIVE_INDEX: Record<FlowView, number> = {
   setup: 0,
   deal: 1,
   night: 2,
@@ -13,7 +15,7 @@ const ACTIVE_INDEX: Record<Exclude<View, 'home'>, number> = {
   result: 4,
 };
 
-export function FlowBar({ view }: { readonly view: Exclude<View, 'home'> }) {
+export function FlowBar({ view }: { readonly view: FlowView }) {
   const active = ACTIVE_INDEX[view];
   return (
     <nav className="flowbar" aria-label="对局流程">

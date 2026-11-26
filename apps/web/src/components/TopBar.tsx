@@ -2,6 +2,8 @@ import type { View } from '../lib/types';
 
 const PHASE_LABELS: Record<View, string> = {
   home: '大厅',
+  assistant: '助手 · 独立模式',
+  rules: '规则 · 只读',
   setup: 'SETUP · 设置',
   deal: 'DEAL · 发牌',
   night: 'NIGHT · 夜晚',

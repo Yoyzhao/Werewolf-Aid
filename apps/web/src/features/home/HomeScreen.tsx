@@ -1,6 +1,4 @@
-import { BookOpen, ChevronRight, Moon, Sparkles, Users } from 'lucide-react';
-import { toast } from 'sonner';
-
+import { BookOpen, ChevronRight, Moon, Sparkles, UserRound, Users } from 'lucide-react';
 import { CapabilityBanner } from '../../components/CapabilityBanner';
 import { ResumeBanner } from '../../components/ResumeBanner';
 import { BottomTabs } from '../../components/BottomTabs';
@@ -16,6 +14,7 @@ export function HomeScreen() {
   const resumeIncompatible = useGameStore((state) => state.resumeIncompatible);
   const capabilityDismissed = useGameStore((state) => state.capabilityDismissed);
   const goSetup = useGameStore((state) => state.goSetup);
+  const setView = useGameStore((state) => state.setView);
   const resumeGame = useGameStore((state) => state.resumeGame);
   const discardResume = useGameStore((state) => state.discardResume);
   const dismissCapability = useGameStore((state) => state.dismissCapability);
@@ -37,13 +36,13 @@ export function HomeScreen() {
               <Sparkles size={17} />
               开始主持
             </button>
-            <button
-              type="button"
-              className="btn ghost"
-              onClick={() => toast('规则页将在 T-032 接入')}
-            >
+            <button type="button" className="btn ghost" onClick={() => setView('rules')}>
               <BookOpen size={16} />
               先翻规则书
+            </button>
+            <button type="button" className="btn ghost" onClick={() => setView('assistant')}>
+              <UserRound size={16} />
+              我的助手
             </button>
           </div>
 

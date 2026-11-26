@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 import { enterNight, expectNoHorizontalOverflow, playFirstNight } from './helpers';
 
-const EVIDENCE = 'docs/test/evidence/M1/T-030';
+const EVIDENCE = '.artifacts/e2e/T-030';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
