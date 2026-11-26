@@ -5,10 +5,10 @@
 | 文档版本 | v1.1 |
 | 日期 | 2026-11-25 |
 | 阶段 | 5B / T-014 |
-| 状态 | 待验收（5B，评审修订版） |
+| 状态 | 已验收（5B，2026-11-26） |
 | 基线 | PRD v1.3.2；tech-arch v1.3；api-contract v1.1；5A 原型（2026-11-25 已验收） |
 | 适用 | 5C 前端实现、5D 后端实现、6 整合、7 联调、8 测试 |
-| 关联 | [PRD](../prd/prd.md)、[tech-arch](tech-arch.md)、[api-contract](api-contract.md)、[5A 原型](../prototype/index.html)、[STEP-5B](../plan/tasks/M1/STEP-5B.md) |
+| 关联 | [PRD](../prd/prd.md)、[tech-arch](tech-arch.md)、[api-contract](api-contract.md)、[5A 原型](../prototype/M1/index.html)、[STEP-5B](../plan/tasks/M1/STEP-5B.md) |
 
 > 本文件冻结 5C/5D 的页面结构、交互分支、状态、数据形状与文案；视觉延续 5A 原型「月蚀俱乐部」。P1 联机只保留接口引用，不进入本轮实现。
 >

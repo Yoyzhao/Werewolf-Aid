@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.artifacts/
+.vite/
+.screenshots/
+.trae-html-share-packages/
+.env
+.env.*
+!.env.example
+data/
+*.log
+.DS_Store

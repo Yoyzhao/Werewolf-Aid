@@ -9,7 +9,7 @@
 | --- | --- | --- |
 | [tech-arch.md](tech-arch.md) | 活跃 | 技术架构 v1.3：系统架构、模块边界、需求承接、数据模型、安全与非功能 |
 | [api-contract.md](api-contract.md) | 活跃 | API 契约 v1.1：完整 gameState + 服务端视图、P0 AI 中转、错误码、幂等与版本 |
-| [interaction-spec.md](interaction-spec.md) | 待验收（5B v1.1） | 交互与前端契约：视图/组件/状态矩阵/交互守卫/状态机/AI/本地存储/文案/API 对齐 |
+| [interaction-spec.md](interaction-spec.md) | 已验收（5B，2026-11-26） | 交互与前端契约 v1.1：视图/组件/状态矩阵/交互守卫/状态机/AI/本地存储/文案/API 对齐 |
 | [功能变更.md](功能变更.md) | 活跃 | CHG 索引：PC 端响应式适配（CHG-20261125-01）、发牌模式 C 实体牌录入（CHG-20261125-02） |
 | [dev-info.md](dev-info.md) | 活跃 | 技术栈、目录、端口、环境变量、测试与 AI Coding 环境 |
 | [research/tech-stack-2026.md](research/tech-stack-2026.md) | 活跃 | 技术栈候选对比与结论 |

@@ -1,8 +1,8 @@
 # 开发环境信息
 
-- 更新日期：2026-11-25
+- 更新日期：2026-11-26
 - 关联：[技术架构](tech-arch.md)、[ADR-001](arch/ADR-001-技术栈与项目拓扑.md)、[ADR-005](arch/ADR-005-部署与运行形态.md)
-- 说明：项目尚无代码；目录、端口、命令为步骤 3 计划值，实施时以本文件更新为准。未探测到的信息标记“待确认”，不猜测。
+- 说明：步骤 5C 已完成 T-015 工程骨架、T-026～T-028 规则引擎与 T-029 开局/发牌；未探测到的信息标记“待确认”，不猜测。
 
 ## 1. 技术栈说明
 
@@ -29,21 +29,25 @@
 | Git | 2.56.1 | 已探测 |
 | ripgrep | 15.2.0 | 已探测 |
 | Python | 3.12.7 | 已探测；本项目不使用 |
-| React / React DOM | 目标 19.x | 安装时锁定 |
-| Vite | 目标最新稳定 | 安装时锁定 |
-| TypeScript | 目标 5.x | 安装时锁定 |
-| Tailwind CSS | 目标 4.x | 安装时锁定 |
-| Radix Primitives | 目标最新稳定 | 安装时锁定 |
-| Fastify | 目标 5.x | 安装时锁定；验证 Node 24 兼容 |
-| Socket.IO | 目标 4.x | P1；安装时锁定 |
-| SQLite | 目标 3.x | P1；系统/驱动随安装锁定 |
-| Drizzle ORM | 目标最新稳定 | P1；安装时锁定 |
-| Zod | 目标最新稳定 | 安装时锁定 |
-| Vitest / Playwright | 目标最新稳定 | 安装时锁定 |
+| React / React DOM | 19.3.1 | 已安装并锁定（package-lock） |
+| Vite | 8.3.8 | 已安装 |
+| TypeScript | 5.9.3 | 已安装；strict |
+| Tailwind CSS | 4.3.5 | 已安装（`@tailwindcss/vite`，T-029） |
+| Radix Primitives | Dialog 1.3.1 / Switch 1.4.1 | 已安装（T-029） |
+| Zustand / idb-keyval | 5.1.0 / 6.3.0 | 已安装（T-029） |
+| Sonner / lucide-react | 2.0.8 / 1.80.0 | 已安装（T-029） |
+| Fastify | 5.12.8 | 已安装；Node 24 兼容 |
+| Socket.IO | 未安装 | P1 |
+| SQLite / Drizzle | 未安装 | P1 |
+| Zod | 未安装 | 5D 接入 |
+| Vitest | 5.1.2 | 已安装 |
+| Playwright | 1.65.1 | 已安装；Chromium 由 `npx playwright install chromium` 安装 |
+| ESLint | 10.15.0 | 已安装；flat config + typescript-eslint |
+| Prettier | 3.10.1 | 已安装 |
 
 ## 3. 目录与入口
 
-计划目录（尚未创建）：
+目录结构（2026-11-26 已按项目结构规范整理）：
 
 ```text
 apps/
@@ -53,22 +57,36 @@ packages/
   game-engine/  纯 TS 规则/状态机/胜负
   shared/       API 契约/DTO/错误码
   rules-content/板子/角色/流程/术语
+tests/
+  e2e/          Playwright 端到端用例（仓库级入口 playwright.config.ts）
 docs/
+  prototype/M1/ 5A 原型（按里程碑归档）
 ```
 
-计划命令：
+测试产物统一写入 `.artifacts/`（Playwright 结果 `.artifacts/test-results/`、覆盖率 `.artifacts/coverage/`），已加入忽略规则。
+
+工程基线：
+
+- 包名：`@lrs/web`、`@lrs/api`、`@lrs/game-engine`、`@lrs/shared`、`@lrs/rules-content`。
+- 根 `package.json` 使用 npm workspaces；`apps/*` 与 `packages/*` 均纳入。
+- TypeScript strict，包入口 `src/index.ts`，构建产物 `dist/`。
+- 角色头像资源位于 `apps/web/public/assets/avatar/`（2026-11-26 目录整理：移除根目录 `web/assets/avatar/` 的重复副本）。
+- 端到端用例位于 `tests/e2e/`；Playwright 产物按 `.artifacts/` 规则统一存放。
+
+命令：
 
 ```bash
 npm install
-npm run dev -w apps/web       # 前端开发（Vite proxy /api → 3000）
-npm run dev -w apps/api       # 后端开发
-npm run build                 # 构建 web/api
-npm start -w apps/api         # 生产：静态 + API + P1 WS 单进程
-npm test                      # 单测
-npm run e2e                   # Playwright
+npm run dev:web               # 前端开发（Vite 5173；proxy /api → 3000）
+npm run dev:api               # 后端开发（tsx watch，3000）
+npm run build                 # 构建 shared/game-engine/rules-content/web/api
+npm start -w @lrs/api         # 生产：静态 + API + P1 WS 单进程
+npm run lint                  # ESLint
+npm run format:check          # Prettier
+npm run typecheck             # 所有 workspace
+npm test                      # Vitest
+npm run e2e                   # Playwright（需先安装 Chromium）
 ```
-
-> 上述命令在步骤 4/5 创建 `package.json` 后生效；当前未创建，不宣称可运行。
 
 ## 4. 端口与地址
 
@@ -145,7 +163,6 @@ P0 无服务端数据库；AI 中转不持久化。
 
 ## 9. 待确认/未探测
 
-- React/Vite/Fastify 等精确版本：安装时锁定。
 - 生产服务器/域名/证书/ICP 备案：待部署阶段确认。
 - TLS 终止方式：Node HTTPS 直接终止，或云负载均衡/CDN 终止；不使用 Nginx/Docker（2026-11-25 用户决定）。
 - 真实 AI 供应商行为（超时/错误码/额度）：实现期用用户自备端点验证。
