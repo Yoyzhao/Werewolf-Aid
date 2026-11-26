@@ -1,0 +1,327 @@
+{
+  "base": "http://127.0.0.1:3440",
+  "viewports": [
+    {
+      "viewport": "320",
+      "pages": {
+        "home": {
+          "overflow": 0,
+          "touch": [],
+          "load": {
+            "requests": 4,
+            "scriptRequests": 1,
+            "scriptTransferKb": 136,
+            "totalTransferKb": 146
+          }
+        },
+        "setup": {
+          "overflow": 0,
+          "touch": []
+        },
+        "assistant": {
+          "overflow": 0,
+          "touch": []
+        },
+        "rules": {
+          "overflow": 0,
+          "touch": []
+        }
+      },
+      "errors": []
+    },
+    {
+      "viewport": "360",
+      "pages": {
+        "home": {
+          "overflow": 0,
+          "load": {
+            "requests": 4,
+            "scriptRequests": 1,
+            "scriptTransferKb": 136,
+            "totalTransferKb": 146
+          }
+        },
+        "setup": {
+          "overflow": 0
+        },
+        "assistant": {
+          "overflow": 0
+        },
+        "rules": {
+          "overflow": 0
+        }
+      },
+      "errors": []
+    },
+    {
+      "viewport": "390",
+      "pages": {
+        "home": {
+          "overflow": 0,
+          "touch": [],
+          "contrast": [],
+          "load": {
+            "requests": 4,
+            "scriptRequests": 1,
+            "scriptTransferKb": 136,
+            "totalTransferKb": 146
+          },
+          "fps": {
+            "fps": 60,
+            "p95FrameMs": 16.8,
+            "frames": 91
+          }
+        },
+        "setup": {
+          "overflow": 0,
+          "touch": [],
+          "contrast": []
+        },
+        "assistant": {
+          "overflow": 0,
+          "touch": [],
+          "contrast": [],
+          "fps": {
+            "fps": 60,
+            "p95FrameMs": 16.7,
+            "frames": 91
+          }
+        },
+        "rules": {
+          "overflow": 0,
+          "touch": [],
+          "contrast": []
+        }
+      },
+      "errors": []
+    },
+    {
+      "viewport": "393",
+      "pages": {
+        "home": {
+          "overflow": 0,
+          "load": {
+            "requests": 4,
+            "scriptRequests": 1,
+            "scriptTransferKb": 136,
+            "totalTransferKb": 146
+          }
+        },
+        "setup": {
+          "overflow": 0
+        },
+        "assistant": {
+          "overflow": 0
+        },
+        "rules": {
+          "overflow": 0
+        }
+      },
+      "errors": []
+    },
+    {
+      "viewport": "412",
+      "pages": {
+        "home": {
+          "overflow": 0,
+          "load": {
+            "requests": 4,
+            "scriptRequests": 1,
+            "scriptTransferKb": 136,
+            "totalTransferKb": 146
+          }
+        },
+        "setup": {
+          "overflow": 0
+        },
+        "assistant": {
+          "overflow": 0
+        },
+        "rules": {
+          "overflow": 0
+        }
+      },
+      "errors": []
+    },
+    {
+      "viewport": "430",
+      "pages": {
+        "home": {
+          "overflow": 0,
+          "load": {
+            "requests": 4,
+            "scriptRequests": 1,
+            "scriptTransferKb": 136,
+            "totalTransferKb": 146
+          }
+        },
+        "setup": {
+          "overflow": 0
+        },
+        "assistant": {
+          "overflow": 0
+        },
+        "rules": {
+          "overflow": 0
+        }
+      },
+      "errors": []
+    },
+    {
+      "viewport": "440",
+      "pages": {
+        "home": {
+          "overflow": 0,
+          "load": {
+            "requests": 4,
+            "scriptRequests": 1,
+            "scriptTransferKb": 136,
+            "totalTransferKb": 146
+          }
+        },
+        "setup": {
+          "overflow": 0
+        },
+        "assistant": {
+          "overflow": 0
+        },
+        "rules": {
+          "overflow": 0
+        }
+      },
+      "errors": []
+    },
+    {
+      "viewport": "1440",
+      "pages": {
+        "home": {
+          "overflow": 0,
+          "touch": [],
+          "load": {
+            "requests": 4,
+            "scriptRequests": 1,
+            "scriptTransferKb": 136,
+            "totalTransferKb": 146
+          }
+        },
+        "setup": {
+          "overflow": 0,
+          "touch": []
+        },
+        "assistant": {
+          "overflow": 0,
+          "touch": []
+        },
+        "rules": {
+          "overflow": 0,
+          "touch": []
+        }
+      },
+      "errors": []
+    }
+  ],
+  "flows": [
+    {
+      "viewport": "360",
+      "steps": [
+        {
+          "phase": "night",
+          "overflow": 0,
+          "touch": []
+        },
+        {
+          "phase": "sheriff",
+          "overflow": 0
+        },
+        {
+          "phase": "dawn",
+          "overflow": 0
+        },
+        {
+          "phase": "speech",
+          "overflow": 0
+        },
+        {
+          "phase": "vote",
+          "overflow": 0,
+          "touch": []
+        }
+      ],
+      "errors": []
+    },
+    {
+      "viewport": "390",
+      "steps": [
+        {
+          "phase": "night",
+          "overflow": 0,
+          "touch": []
+        },
+        {
+          "phase": "sheriff",
+          "overflow": 0
+        },
+        {
+          "phase": "dawn",
+          "overflow": 0
+        },
+        {
+          "phase": "speech",
+          "overflow": 0
+        },
+        {
+          "phase": "vote",
+          "overflow": 0,
+          "touch": []
+        }
+      ],
+      "errors": []
+    },
+    {
+      "viewport": "412",
+      "steps": [
+        {
+          "phase": "night",
+          "overflow": 0,
+          "touch": []
+        },
+        {
+          "phase": "sheriff",
+          "overflow": 0
+        },
+        {
+          "phase": "dawn",
+          "overflow": 0
+        },
+        {
+          "phase": "speech",
+          "overflow": 0
+        },
+        {
+          "phase": "vote",
+          "overflow": 0,
+          "touch": []
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "fontScale": {
+    "pages": {
+      "home": 0,
+      "setup": 0,
+      "assistant": 0
+    },
+    "errors": []
+  },
+  "dpr": [
+    {
+      "dpr": 2,
+      "errors": []
+    },
+    {
+      "dpr": 3,
+      "errors": []
+    }
+  ]
+}

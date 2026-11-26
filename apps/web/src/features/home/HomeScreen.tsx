@@ -1,4 +1,4 @@
-import { BookOpen, ChevronRight, Moon, Sparkles, UserRound, Users } from 'lucide-react';
+import { BookOpen, ChevronRight, Moon, Sparkles, UserRound, Users, Wifi } from 'lucide-react';
 import { CapabilityBanner } from '../../components/CapabilityBanner';
 import { ResumeBanner } from '../../components/ResumeBanner';
 import { BottomTabs } from '../../components/BottomTabs';
@@ -35,6 +35,10 @@ export function HomeScreen() {
             <button type="button" className="btn primary" onClick={goSetup}>
               <Sparkles size={17} />
               开始主持
+            </button>
+            <button type="button" className="btn" onClick={() => setView('host-room')}>
+              <Wifi size={16} />
+              联机主持
             </button>
             <button type="button" className="btn ghost" onClick={() => setView('rules')}>
               <BookOpen size={16} />

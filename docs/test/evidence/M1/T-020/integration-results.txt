@@ -1,0 +1,9 @@
+PASS 生产构建由 API 同源提供
+PASS 匿名会话 Cookie 为 HttpOnly，脚本不可读
+PASS 前端经真实 API 完成会话/CSRF/中转错误链路 | 该地址不被允许，请使用 HTTPS 公网地址
+PASS 390 宽度无横向滚动
+PASS 页面无非预期 console error
+PASS 页面无未捕获异常
+PASS 服务日志不含 API Key
+PASS 服务日志不含上下文内容
+PASS 服务日志不含 Cookie 明文

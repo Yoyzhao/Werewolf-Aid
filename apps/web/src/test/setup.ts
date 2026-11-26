@@ -6,7 +6,7 @@ afterEach(() => {
   cleanup();
 });
 
-if (!window.matchMedia) {
+if (typeof window !== 'undefined' && !window.matchMedia) {
   window.matchMedia = (query: string) =>
     ({
       matches: false,
@@ -20,11 +20,10 @@ if (!window.matchMedia) {
     }) as MediaQueryList;
 }
 
-const testWindow = window as unknown as {
-  ResizeObserver?: typeof ResizeObserver;
-};
+const testWindow = (typeof window === 'undefined' ? undefined : window) as
+  { ResizeObserver?: typeof ResizeObserver } | undefined;
 
-if (!testWindow.ResizeObserver) {
+if (testWindow && !testWindow.ResizeObserver) {
   testWindow.ResizeObserver = class {
     observe() {}
     unobserve() {}

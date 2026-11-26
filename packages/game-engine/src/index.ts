@@ -71,3 +71,22 @@ export {
   type NightDeath,
   type RuleViolation,
 } from './rules.js';
+
+export {
+  buildPrivateView,
+  buildPublicView,
+  buildViews,
+  isNightActionAllowed,
+  validateGameState,
+  type GameStateIssue,
+  type GameStateIssueCode,
+  type GameStateValidationResult,
+  type GameViews,
+  type GuardRecord,
+  type PlayerView,
+  type PrivateNightAction,
+  type PublicView,
+  type RevealedRole,
+  type SeerCheck,
+  type WitchPotions,
+} from './views.js';

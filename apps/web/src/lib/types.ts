@@ -4,6 +4,7 @@ export type View =
   | 'home'
   | 'assistant'
   | 'rules'
+  | 'host-room'
   | 'setup'
   | 'deal'
   | 'night'

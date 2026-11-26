@@ -1,0 +1,59 @@
+PASS 健康检查返回契约结构 | {"ok":true,"version":"0.1.0"}
+PASS 健康检查 Content-Type 与无 Cookie
+PASS Helmet 安全头 | default-src 'self';base-uri 'self';font-src 'self';form-action 'self';frame-ancestors 'none';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' 'unsafe-inline';connect-src 'self'
+PASS HTTP 模式不发送 HSTS
+PASS 会话返回 48 位 ID、64 位 CSRF 与过期时间 | lrs_anon=<redacted>
+PASS 会话 Cookie 属性正确 | lrs_anon=<redacted>; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax
+PASS 复用已有会话不重复下发 Cookie
+PASS 无会话中转返回 401 | 401 UNAUTHORIZED
+PASS 缺少 CSRF 返回 403 | 403 FORBIDDEN
+PASS 错误 CSRF 返回 403
+PASS CSRF 与会话绑定（跨会话 token 失败）
+PASS 非法 JSON 返回 400 INVALID_REQUEST | 400 INVALID_REQUEST
+PASS 空 JSON 请求体返回 400 INVALID_REQUEST | 400 INVALID_REQUEST
+PASS 缺字段返回 400 与明细
+PASS 空消息列表返回 400
+PASS 单条消息超长返回 400
+PASS temperature 越界返回 400
+PASS maxTokens 越界返回 400
+PASS 非法消息角色返回 400
+PASS 拒绝 http 地址 | 400 URL_NOT_ALLOWED
+PASS 拒绝 ftp 地址 | 400 URL_NOT_ALLOWED
+PASS 拒绝 URL 内嵌账号密码 | 400 URL_NOT_ALLOWED
+PASS 拒绝 localhost | 400 URL_NOT_ALLOWED
+PASS 拒绝 IPv4 环回 | 400 URL_NOT_ALLOWED
+PASS 拒绝 IPv4 私网 10/8 | 400 URL_NOT_ALLOWED
+PASS 拒绝 IPv4 私网 192.168/16 | 400 URL_NOT_ALLOWED
+PASS 拒绝云元数据 169.254.169.254 | 400 URL_NOT_ALLOWED
+PASS 拒绝 IPv6 环回 | 400 URL_NOT_ALLOWED
+PASS 拒绝 IPv6 私网 | 400 URL_NOT_ALLOWED
+PASS 拒绝十进制整数形式 IP（解析为私网或不可解析） | 400 URL_NOT_ALLOWED
+PASS 拒绝解析到私网的域名 | 400 URL_NOT_ALLOWED
+PASS 140KB 请求体返回 413 INVALID_REQUEST | 413 INVALID_REQUEST
+PASS 不支持的 Content-Type 返回 4xx 而非 500 | 415 INVALID_REQUEST
+PASS GET 中转路由返回 404 NOT_FOUND
+PASS GET / 返回构建入口
+PASS 入口 HTML no-cache
+PASS SPA 深链 fallback
+PASS 哈希静态资源长缓存
+PASS 静态资源启用压缩 | gzip
+PASS 缺失静态文件返回 JSON 404
+PASS 未知 API 返回 JSON 404，不被 SPA fallback 吞掉
+PASS Socket.IO 路径返回 JSON 404
+PASS 非 GET 前端路径返回 JSON 404
+PASS 前 10 次未触发限频 | 400,400,400,400,400,400,400,400,400,400
+PASS 第 11 次返回 429 RATE_LIMITED 与 Retry-After | 429 retry-after=60
+PASS 限频按会话隔离，新会话不受影响
+PASS 配置 PUBLIC_ORIGIN 后无 Origin 被拒绝 | 403
+PASS 错误 Origin 被拒绝
+PASS 匹配 Origin 放行到 SSRF 校验 | 400 URL_NOT_ALLOWED
+PASS 生产会话 Cookie 带 Secure | lrs_anon=<redacted>; Max-Age=604800; Path=/; HttpOnly; Secure; SameSite=Lax
+PASS HTTPS 模式发送 HSTS 与 upgrade-insecure-requests | max-age=31536000; includeSubDomains
+PASS 生产会话可正常调用中转（手动携带 Secure Cookie） | 400
+PASS 生产缺 SESSION_SECRET 拒绝启动 | exit=1
+PASS 日志包含常规请求记录（确认日志确实开启）
+PASS 日志不含 API Key
+PASS 日志不含对话内容
+PASS 日志不含会话 Cookie 明文
+
+结果：57 通过、0 失败、0 跳过（共 57）

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080A12">
+<title>狼人杀助手 · P1 联机原型</title>
+<style>
+  :root{
+    --bg:#080a12;
+    --surface:#12161d;
+    --surface-2:#171c25;
+    --surface-3:#1e2430;
+    --line:#252c38;
+    --line-strong:#36404f;
+    --text:#eef1f6;
+    --muted:#9aa4b4;
+    --faint:#748093;
+    --accent:#e8b44a;
+    --accent-ink:#1a1408;
+    --danger:#e5484d;
+    --good:#46b98a;
+    --radius:16px;
+    --radius-sm:11px;
+    --shadow:0 20px 50px rgba(0,0,0,.5);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    --serif:"Songti SC","Noto Serif SC",Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{scroll-padding-top:120px}
+  body{
+    background:
+      radial-gradient(760px 460px at 82% -10%,rgba(232,180,74,.12),transparent 64%),
+      radial-gradient(520px 360px at 4% 8%,rgba(70,185,138,.055),transparent 62%),
+      var(--bg);
+    color:var(--text);font-family:var(--font);font-size:15px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;min-height:100dvh;
+  }
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  ::selection{background:rgba(232,180,74,.28)}
+  .shell{max-width:1120px;margin:0 auto;padding:0 16px 84px}
+
+  /* topbar */
+  .topbar{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,rgba(8,10,18,.96),rgba(8,10,18,.8));backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .topbar-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:10px;min-height:56px;padding:env(safe-area-inset-top) 16px 0}
+  .brand{display:flex;align-items:center;gap:9px;min-width:0}
+  .brand-mark{width:26px;height:26px;color:var(--accent);flex:none}
+  .brand-name{font-weight:650;font-size:15px;white-space:nowrap}
+  .brand-sub{font-size:10.5px;color:var(--faint);letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+  .status-pill{margin-left:auto;display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);font-size:12px;color:var(--muted);white-space:nowrap}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px rgba(70,185,138,.15)}
+  .dot.warn{background:var(--accent);box-shadow:0 0 0 3px rgba(232,180,74,.16)}
+  .dot.bad{background:var(--danger);box-shadow:0 0 0 3px rgba(229,72,77,.16)}
+
+  .nav{position:sticky;top:56px;z-index:35;background:rgba(8,10,18,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-in{max-width:1120px;margin:0 auto;display:flex;gap:4px;padding:8px 16px;overflow-x:auto;scrollbar-width:none}
+  .nav-in::-webkit-scrollbar{display:none}
+  .nav button{flex:none;min-height:40px;padding:0 10px;border-radius:999px;border:1px solid transparent;color:var(--muted);font-size:12.5px;font-weight:600;white-space:nowrap}
+  .nav button[aria-selected="true"]{background:rgba(232,180,74,.12);border-color:rgba(232,180,74,.35);color:#f2d79e}
+
+  /* generic */
+  .screen{display:none;padding-top:20px;animation:rise .2s ease-out}
+  .screen.on{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){ .screen{animation:none} *{transition:none!important} }
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 6px}
+  h1{font-family:var(--serif);font-size:28px;line-height:1.22;margin:0 0 6px;font-weight:600;letter-spacing:.01em}
+  h2{font-size:17px;margin:0;font-weight:650}
+  h3{font-size:14px;margin:0;font-weight:650}
+  .lead{color:var(--muted);margin:0 0 18px;font-size:13.5px;max-width:60ch}
+  .card{background:linear-gradient(180deg,rgba(23,28,37,.9),rgba(18,22,29,.96));border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:0 1px 0 rgba(255,255,255,.02) inset}
+  .card + .card{margin-top:12px}
+  .card-head{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+  .card-head .hint{margin-left:auto;font-size:12px;color:var(--faint)}
+  .grid{display:grid;gap:12px;align-items:start}
+  @media (min-width:900px){ .grid.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .grid.wide{grid-template-columns:1.25fr .75fr} }
+  .muted{color:var(--muted)}.faint{color:var(--faint)}.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;border:1px solid var(--line-strong);font-size:11.5px;color:var(--muted);background:var(--surface-2);white-space:nowrap}
+  .chip.gold{color:#e9ce92;border-color:rgba(232,180,74,.35);background:rgba(232,180,74,.09)}
+  .chip.good{color:#9fe0c4;border-color:rgba(70,185,138,.32);background:rgba(70,185,138,.09)}
+  .chip.wolf{color:#ffb4b6;border-color:rgba(229,72,77,.32);background:rgba(229,72,77,.1)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:46px;padding:0 16px;border-radius:12px;font-weight:640;font-size:14.5px;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--text);transition:background .15s,border-color .15s,transform .06s}
+  .btn:hover{background:var(--surface-3);border-color:#3d4757}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .btn.primary:hover{background:#f2c163;border-color:#f2c163}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted);min-height:44px;padding:0 10px}
+  .btn.ghost:hover{color:var(--text);background:var(--surface-2)}
+  .btn.danger{color:#ffd9da;border-color:#5a2b2e;background:rgba(229,72,77,.12)}
+  .btn[disabled]{opacity:.42;pointer-events:none}
+  .btn-row{display:flex;gap:9px;flex-wrap:wrap}
+  .btn-row .btn{flex:1 1 auto}
+  .divider{height:1px;background:var(--line);border:0;margin:14px 0}
+
+  /* host pairing */
+  .code-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .code{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:38px;letter-spacing:.13em;color:var(--accent);line-height:1;text-shadow:0 0 22px rgba(232,180,74,.25)}
+  .qr-wrap{display:flex;align-items:center;gap:16px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+  .qr{width:116px;height:116px;flex:none;background:#f4efe2;border-radius:10px;padding:7px}
+  .qr svg{display:block;width:100%;height:100%}
+  .qr-note{font-size:12px;color:var(--muted);line-height:1.5}
+  .qr-note b{display:block;color:var(--text);font-size:13.5px;font-weight:650;margin-bottom:2px}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .meta div{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:12px;color:var(--muted)}
+  .meta b{display:block;color:var(--text);font-size:13.5px;font-weight:600;margin-top:1px}
+
+  /* seats */
+  .seat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  @media (min-width:560px){ .seat-grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+  @media (min-width:1024px){ .seat-grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .seat{position:relative;min-height:58px;padding:8px 6px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:border-color .12s,background .12s}
+  .seat:hover{border-color:var(--line-strong)}
+  .seat .n{font-family:var(--mono);font-size:17px;font-weight:600;line-height:1.1}
+  .seat .s{font-size:10.5px;color:var(--faint)}
+  .seat.bound{border-color:rgba(70,185,138,.3);background:rgba(70,185,138,.07)}
+  .seat.bound .s{color:#8ed8b8}
+  .seat.pending{border-color:rgba(232,180,74,.45);background:rgba(232,180,74,.1)}
+  .seat.pending .s{color:#e9ce92}
+  .seat.sel{box-shadow:inset 0 0 0 1px var(--accent)}
+  .seat .badge{position:absolute;top:-6px;right:-4px;font-size:10px;padding:1px 5px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:700}
+  .seat-detail{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+  .seat-detail .line{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .seat-detail .line b{font-size:14px}
+  .seat-detail .line .chip{margin-left:auto}
+
+  /* snapshot / status */
+  .metric{display:flex;align-items:baseline;gap:8px}
+  .metric .v{font-family:var(--mono);font-size:30px;color:var(--accent);line-height:1}
+  .metric .u{font-size:12px;color:var(--faint)}
+  .bar{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden;margin-top:10px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,rgba(232,180,74,.5),var(--accent));border-radius:3px;transition:width .3s}
+  .conn-banner{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);font-size:13px;color:var(--muted);margin-bottom:10px}
+  .conn-banner .dot{flex:none}
+  .conn-banner b{color:var(--text);font-weight:600}
+  .seg{display:flex;gap:5px;padding:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;flex-wrap:wrap}
+  .seg button{flex:1 1 86px;min-height:40px;border-radius:8px;font-size:12.5px;color:var(--muted);font-weight:600;padding:0 6px}
+  .seg button[aria-pressed="true"]{background:var(--surface-3);color:var(--text)}
+  .callout{display:flex;gap:9px;align-items:flex-start;padding:11px 12px;border-radius:11px;border:1px solid rgba(232,180,74,.28);background:rgba(232,180,74,.07);color:#e8d4a4;font-size:12.5px;margin-top:12px}
+  .callout svg{flex:none;margin-top:2px;color:var(--accent)}
+
+  /* player */
+  .player-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .player-head .room{font-family:var(--mono);letter-spacing:.1em;color:var(--accent)}
+  .identity{border:1px solid rgba(232,180,74,.3);border-radius:16px;padding:16px;background:radial-gradient(120% 130% at 50% 0%,rgba(232,180,74,.15),rgba(20,25,37,.92));position:relative;overflow:hidden}
+  .identity.masked .secret{filter:blur(9px);user-select:none}
+  .identity .camp{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+  .identity .role{font-family:var(--serif);font-size:30px;font-weight:600;margin:3px 0 5px}
+  .identity .skill{font-size:13px;color:#cfd6e2;max-width:40ch}
+  .identity .lock{position:absolute;inset:0;z-index:2;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;background:rgba(10,13,20,.72);backdrop-filter:blur(4px);text-align:center;padding:18px}
+  .identity.masked .lock{display:flex}
+  .identity .lock p{margin:0;color:var(--muted);font-size:12.5px}
+  .secret{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07)}
+  .checks{display:grid;gap:6px;margin-top:8px}
+  .check{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06);font-size:13px}
+  .check .who{margin-left:auto;font-weight:650}
+  .check .who.wolf{color:#ffb4b6}.check .who.good{color:#9fe0c4}
+  .alive-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+  @media (max-width:389px){ .alive-grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+  .alive{min-height:40px;display:grid;place-items:center;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);font-family:var(--mono);font-size:14px}
+  .alive.dead{opacity:.38;text-decoration:line-through}
+  .event-list{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+  .event-list li{display:flex;gap:8px;font-size:12.5px;color:var(--muted);line-height:1.45}
+  .event-list .r{font-family:var(--mono);color:var(--faint);flex:none;font-size:11px;padding-top:1px}
+  .event-list li[data-kind="death"]{color:#ffb4b6}
+  .event-list li[data-kind="win"]{color:#a7e6cb}
+
+  /* timeline */
+  .tl{list-style:none;margin:0;padding:0;position:relative}
+  .tl::before{content:"";position:absolute;left:13px;top:8px;bottom:8px;width:1px;background:var(--line-strong)}
+  .tl li{position:relative;padding:0 0 14px 38px}
+  .tl .mark{position:absolute;left:6px;top:4px;width:15px;height:15px;border-radius:50%;background:var(--surface-3);border:1px solid var(--line-strong);display:grid;place-items:center;font-size:9px;color:var(--faint);z-index:1}
+  .tl li[data-vis="private"] .mark{border-color:rgba(229,72,77,.45);color:#ffb4b6}
+  .tl .round{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
+  .tl .what{font-size:13.5px;color:var(--text)}
+  .tl .what .chip{margin-left:6px;transform:translateY(-1px)}
+  .tl .sub{font-size:12px;color:var(--muted);margin-top:1px}
+  .tl li.hidden{display:none}
+
+  /* terms */
+  .search{display:flex;align-items:center;gap:9px;padding:0 12px;min-height:48px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface-2)}
+  .search svg{color:var(--faint);flex:none}
+  .search input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font:inherit;font-size:16px}
+  .search input::placeholder{color:var(--faint)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+  .chips button{min-height:38px;padding:0 13px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted);font-size:12.5px;background:var(--surface-2)}
+  .chips button[aria-pressed="true"]{border-color:var(--accent);color:#f2d79e;background:rgba(232,180,74,.11)}
+  .term{border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:13px 14px;margin-bottom:8px}
+  .term h3{display:flex;align-items:center;gap:8px}
+  .term h3 .chip{margin-left:auto;font-weight:500}
+  .term p{margin:5px 0 0;font-size:13px;color:var(--muted)}
+  .term mark{background:rgba(232,180,74,.26);color:#ffe6b0;border-radius:3px;padding:0 2px}
+  .empty{padding:34px 16px;text-align:center;color:var(--faint);font-size:13px;border:1px dashed var(--line-strong);border-radius:12px}
+
+  /* notes */
+  .ta{width:100%;min-height:190px;resize:vertical;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font:inherit;font-size:16px;line-height:1.6}
+  .ta:focus{border-color:var(--line-strong);outline:none;box-shadow:0 0 0 3px rgba(232,180,74,.12)}
+  .save-state{font-size:12px;color:var(--faint);margin-left:auto}
+
+  /* pwa */
+  .checklist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .checklist li{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted)}
+  .checklist svg{flex:none;color:var(--good);margin-top:2px}
+  .phone{border:1px solid var(--line-strong);border-radius:18px;padding:12px;background:var(--surface-2);max-width:220px;margin:0 auto}
+  .phone .notch{width:60px;height:5px;border-radius:3px;background:var(--line-strong);margin:0 auto 10px}
+  .phone .app{border-radius:12px;border:1px solid var(--line);background:linear-gradient(180deg,#151a24,#0f131b);padding:14px;text-align:center}
+  .phone .app .moon{color:var(--accent);margin-bottom:6px}
+  .phone .app b{display:block;font-size:13px}
+  .phone .app span{font-size:11px;color:var(--faint)}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,14px);z-index:90;max-width:calc(100vw - 40px);padding:11px 15px;border-radius:11px;border:1px solid var(--line-strong);background:#1b212c;color:var(--text);font-size:13px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+  .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .mt12{margin-top:12px}.mt16{margin-top:16px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5 8.8 8.8 0 1 0 20.5 14.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/></svg>
+      <div>
+        <div class="brand-name">狼人杀助手</div>
+        <div class="brand-sub">P1 Online · Prototype</div>
+      </div>
+    </div>
+    <div class="status-pill" id="global-status"><span class="dot" id="global-dot"></span><span id="global-status-text">实时同步</span></div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="原型页面">
+  <div class="nav-in" id="nav">
+    <button data-target="host" aria-selected="true">主持端</button>
+    <button data-target="player" aria-selected="false">玩家端</button>
+    <button data-target="timeline" aria-selected="false">时间线</button>
+    <button data-target="terms" aria-selected="false">术语</button>
+    <button data-target="notes" aria-selected="false">笔记</button>
+    <button data-target="pwa" aria-selected="false">PWA</button>
+  </div>
+</nav>
+
+<main class="shell">
+  <!-- ================= HOST ================= -->
+  <section class="screen on" id="screen-host" aria-labelledby="host-title">
+    <p class="eyebrow">P1 · 联机主持</p>
+    <h1 id="host-title">今晚的房间</h1>
+    <p class="lead">同一台手机主持，愿意联机的玩家扫码加入；不加入的玩家继续纸质/口述，联机失败不影响主持。</p>
+
+    <div class="grid wide">
+      <div class="card">
+        <div class="card-head">
+          <h2>配对码</h2>
+          <span class="chip good">● 加入开放</span>
+          <span class="hint">10 分钟内有效</span>
+        </div>
+        <div class="code-row">
+          <div class="code" id="room-code">483920</div>
+          <button class="btn ghost" id="copy-code" aria-label="复制配对码">复制</button>
+        </div>
+        <div class="qr-wrap">
+          <div class="qr"><svg id="qr" viewBox="0 0 21 21" shape-rendering="crispEdges" role="img" aria-label="演示二维码"></svg></div>
+          <div class="qr-note">
+            <b>扫码加入</b>
+            玩家扫码后选择编号，等待主持人确认。<br>
+            同一浏览器完成绑定；换设备需解绑。
+          </div>
+        </div>
+        <div class="meta">
+          <div>板子<b>预女猎守</b></div>
+          <div>阶段<b>第二夜</b></div>
+          <div>已绑定<b id="bound-count">8 / 12</b></div>
+          <div>快照版本<b class="mono" id="meta-version">v12</b></div>
+        </div>
+        <div class="btn-row mt12">
+          <button class="btn" id="new-room">重新生成</button>
+          <button class="btn ghost" id="recover-host">恢复主持</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>座位绑定</h2>
+          <span class="hint" id="seat-hint">5 号待确认</span>
+        </div>
+        <div class="seat-grid" id="host-seats"></div>
+        <div class="seat-detail" id="seat-detail">
+          <div class="line"><b>5 号</b><span class="chip gold">待确认</span></div>
+          <p class="muted" style="margin:0 0 10px;font-size:12.5px">该玩家已提交申请，确认后绑定编号并接收本人身份。</p>
+          <div class="btn-row">
+            <button class="btn primary" id="confirm-seat">确认绑定</button>
+            <button class="btn ghost" id="reject-seat">拒绝</button>
+          </div>
+        </div>
+        <div class="callout">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>
+          <span>主持令牌只在本机保存；遗失后无法恢复房间，只能重建。联机同步失败时主持可继续。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid two mt12">
+      <div class="card">
+        <div class="card-head"><h2>阶段快照</h2><span class="chip mono">v<span id="version">12</span></span><span class="hint">每阶段自动写入</span></div>
+        <div class="metric"><span class="v" id="version-big">12</span><span class="u">当前版本 · 第二夜</span></div>
+        <div class="bar"><i id="version-bar" style="width:72%"></i></div>
+        <p class="muted" style="font-size:12.5px;margin:10px 0 0">上次写入：刚刚 · 5 号确认后，玩家将收到新的公开进度与本人身份。</p>
+        <div class="btn-row mt12">
+          <button class="btn primary" id="write-snapshot">写入快照</button>
+          <button class="btn ghost" id="view-public">查看公开视图</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>连接状态</h2><span class="hint">主持端</span></div>
+        <div class="conn-banner" id="host-conn"><span class="dot"></span><span><b>实时同步</b> · 8 位玩家在线</span></div>
+        <div class="seg" role="group" aria-label="模拟连接状态">
+          <button data-conn="online" aria-pressed="true">正常</button>
+          <button data-conn="reconnecting" aria-pressed="false">重连中</button>
+          <button data-conn="polling" aria-pressed="false">轮询降级</button>
+          <button data-conn="offline" aria-pressed="false">离线</button>
+        </div>
+        <p class="muted" style="font-size:12.5px;margin:12px 0 0">玩家端会自动重连 3 次；失败后切换 5 秒轮询。主持端写失败会进入待写队列，恢复后补写。</p>
+      </div>
+    </div>
+
+    <div class="card mt12">
+      <div class="card-head"><h2>房间操作</h2><span class="hint">危险操作需二次确认</span></div>
+      <div class="btn-row">
+        <button class="btn danger" id="settle-room">结算并揭晓</button>
+        <button class="btn ghost" id="delete-room">结束并删除房间</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PLAYER ================= -->
+  <section class="screen" id="screen-player" aria-labelledby="player-title">
+    <p class="eyebrow">P1 · 玩家端</p>
+    <h1 id="player-title">我的身份与进度</h1>
+    <div class="player-head">
+      <span class="chip gold">房间 <span class="room mono" id="player-room">483920</span></span>
+      <span class="chip">5 号</span>
+      <span class="chip good" id="player-conn-chip">实时同步</span>
+    </div>
+    <p class="lead" style="margin-bottom:14px">只显示你的身份与公开进度；其他玩家的身份、夜间刀口与用药不会下发到本机。</p>
+
+    <div class="grid two">
+      <div class="card" style="padding:0;background:none;border:none;box-shadow:none">
+        <div class="identity masked" id="identity">
+          <div class="lock">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+            <b>身份已遮罩</b>
+            <p>确认周围无人旁观后再查看</p>
+            <button class="btn primary" id="reveal-identity" style="margin-top:4px">查看我的身份</button>
+          </div>
+          <div class="camp">好人阵营 · 神职</div>
+          <div class="role">预言家</div>
+          <div class="skill secret">每夜查验一名玩家是“好人”还是“狼人”，不知具体身份。查验结果仅你可见。</div>
+          <div class="secret">
+            <div class="camp" style="margin-bottom:4px">我的查验</div>
+            <div class="checks">
+              <div class="check"><span>第 1 夜 · 3 号</span><span class="who good">好人</span></div>
+              <div class="check"><span>第 2 夜 · 9 号</span><span class="who wolf">狼人</span></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn ghost mt12" id="mask-identity">重新遮罩</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>公开进度</h2><span class="chip">第二夜</span><span class="hint">v<span id="player-version">12</span></span></div>
+        <p class="eyebrow" style="margin-bottom:8px">存活座位</p>
+        <div class="alive-grid" id="alive-grid"></div>
+        <hr class="divider">
+        <p class="eyebrow" style="margin-bottom:8px">公开事件</p>
+        <ul class="event-list">
+          <li data-kind="death"><span class="r">D1</span><span>3 号昨夜出局，遗言完成</span></li>
+          <li><span class="r">D1</span><span>5 号当选警长</span></li>
+          <li data-kind="death"><span class="r">D1</span><span>9 号被放逐</span></li>
+          <li data-kind="win"><span class="r">N2</span><span>第 2 夜开始，请闭眼</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card mt12">
+      <div class="card-head"><h2>连接与降级</h2><span class="hint">自动重连 3 次</span></div>
+      <div class="conn-banner" id="player-conn"><span class="dot"></span><span><b>实时同步</b> · 上次更新 1 秒前</span></div>
+      <div class="seg" role="group" aria-label="模拟玩家连接状态">
+        <button data-conn="online" aria-pressed="true">正常</button>
+        <button data-conn="reconnecting" aria-pressed="false">重连中</button>
+        <button data-conn="polling" aria-pressed="false">5 秒轮询</button>
+        <button data-conn="offline" aria-pressed="false">离线</button>
+      </div>
+      <div class="callout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v5M12 16.5v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>连不上时不要刷新页面：断线 3 次后自动改为每 5 秒拉取一次；恢复后从当前版本补齐。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TIMELINE ================= -->
+  <section class="screen" id="screen-timeline" aria-labelledby="tl-title">
+    <p class="eyebrow">P1 · 复盘</p>
+    <h1 id="tl-title">本局时间线</h1>
+    <p class="lead">主持端完整；玩家端只显示公开事件与本人私有动作。</p>
+    <div class="card">
+      <div class="card-head">
+        <h2>事件</h2>
+        <span class="hint">按轮次</span>
+      </div>
+      <div class="seg" style="margin-bottom:14px">
+        <button id="tl-host" aria-pressed="true">主持端完整</button>
+        <button id="tl-player" aria-pressed="false">玩家端可见</button>
+      </div>
+      <ul class="tl" id="timeline-list">
+        <li data-vis="private"><span class="mark">1</span><div class="round">第 1 夜</div><div class="what">守卫守护 5 号<span class="chip wolf">仅主持</span></div><div class="sub">守卫记录仅本人/主持可见</div></li>
+        <li data-vis="private"><span class="mark">2</span><div class="round">第 1 夜</div><div class="what">狼队刀 3 号<span class="chip wolf">仅主持</span></div><div class="sub">刀口不公开</div></li>
+        <li data-vis="private"><span class="mark">3</span><div class="round">第 1 夜</div><div class="what">预言家查验 3 号：好人<span class="chip wolf">私有</span></div><div class="sub">仅预言家本人可见</div></li>
+        <li data-vis="public"><span class="mark">4</span><div class="round">第 1 天</div><div class="what">3 号昨夜出局<span class="chip">公开</span></div><div class="sub">死讯与遗言</div></li>
+        <li data-vis="public"><span class="mark">5</span><div class="round">第 1 天</div><div class="what">5 号当选警长<span class="chip">公开</span></div><div class="sub">警徽 1.5 票</div></li>
+        <li data-vis="public"><span class="mark">6</span><div class="round">第 1 天</div><div class="what">9 号被放逐<span class="chip">公开</span></div><div class="sub">逐票 4.5 : 3</div></li>
+        <li data-vis="private"><span class="mark">7</span><div class="round">第 2 夜</div><div class="what">预言家查验 9 号：狼人<span class="chip wolf">私有</span></div><div class="sub">仅预言家本人可见</div></li>
+        <li data-vis="public"><span class="mark">8</span><div class="round">第 2 夜</div><div class="what">等待夜间行动<span class="chip">进行中</span></div><div class="sub">女巫药剂状态仅本人可见</div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= TERMS ================= -->
+  <section class="screen" id="screen-terms" aria-labelledby="terms-title">
+    <p class="eyebrow">P1 · 规则</p>
+    <h1 id="terms-title">术语速查</h1>
+    <p class="lead">临场听到不懂的词，输入关键词或直接浏览。</p>
+    <div class="card">
+      <label class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input id="term-input" type="search" placeholder="搜索术语、别名或解释，如：同守同救" autocomplete="off">
+      </label>
+      <div class="chips" id="term-chips">
+        <button data-cat="all" aria-pressed="true">全部</button>
+        <button data-cat="rule" aria-pressed="false">判定</button>
+        <button data-cat="role" aria-pressed="false">角色</button>
+        <button data-cat="slang" aria-pressed="false">口语</button>
+      </div>
+      <p class="faint" style="font-size:12px;margin:0 0 10px"><span id="term-count">10</span> 个词条 · 关键词跨角色/规则/术语</p>
+      <div id="term-list">
+        <article class="term" data-cat="rule"><h3>同守同救<span class="chip">判定</span></h3><p>守卫守护与女巫解药同时作用于同一目标时，目标仍然出局。</p></article>
+        <article class="term" data-cat="rule"><h3>连守<span class="chip">判定</span></h3><p>守卫不能连续两夜守护同一名玩家。</p></article>
+        <article class="term" data-cat="slang"><h3>警徽流<span class="chip">口语</span></h3><p>警长提前说明自己出局后警徽的移交顺序，用于传递信息。</p></article>
+        <article class="term" data-cat="slang"><h3>悍跳<span class="chip">口语</span></h3><p>狼人冒充预言家起跳，争夺警徽与好人信任。</p></article>
+        <article class="term" data-cat="rule"><h3>自爆<span class="chip">判定</span></h3><p>狼人白天翻开身份并出局，立即中断当前发言/投票，进入下一夜；白狼王可带走一人。</p></article>
+        <article class="term" data-cat="slang"><h3>金水<span class="chip">口语</span></h3><p>预言家查验结果为好人的玩家。</p></article>
+        <article class="term" data-cat="slang"><h3>查杀<span class="chip">口语</span></h3><p>预言家查验结果为狼人的玩家。</p></article>
+        <article class="term" data-cat="slang"><h3>银水<span class="chip">口语</span></h3><p>被女巫解药救下的玩家，通常被视为偏好。</p></article>
+        <article class="term" data-cat="slang"><h3>倒钩<span class="chip">口语</span></h3><p>狼人站边真预言家、隐藏自己，后期再反水。</p></article>
+        <article class="term" data-cat="role"><h3>白狼王<span class="chip">角色</span></h3><p>狼人阵营；白天自爆时可带走一名玩家，非自爆出局不可发动。</p></article>
+      </div>
+      <div class="empty" id="term-empty" hidden>没有找到相关术语，试试更短的关键词。</div>
+    </div>
+  </section>
+
+  <!-- ================= NOTES ================= -->
+  <section class="screen" id="screen-notes" aria-labelledby="notes-title">
+    <p class="eyebrow">P1 · 助手</p>
+    <h1 id="notes-title">私人笔记</h1>
+    <p class="lead">随手记下判断与复盘，自动保存在本机；不会自动发给 AI。</p>
+    <div class="card">
+      <div class="card-head"><h2>本局笔记</h2><span class="save-state" id="save-state">已保存</span></div>
+      <textarea class="ta" id="notes-input" placeholder="例如：9 号第二天发言回避刀口，像狼；5 号警徽流指向 2、7，先记下。"></textarea>
+      <div class="btn-row mt12">
+        <button class="btn ghost" id="clear-notes">清空笔记</button>
+        <button class="btn" id="cite-notes">引用到自由描述</button>
+      </div>
+      <div class="callout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>笔记仅存于本机 IndexedDB；清除浏览器数据会丢失。需要 AI 参考时，点击“引用到自由描述”。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PWA ================= -->
+  <section class="screen" id="screen-pwa" aria-labelledby="pwa-title">
+    <p class="eyebrow">P1 · 离线壳</p>
+    <h1 id="pwa-title">把牌桌装进口袋</h1>
+    <p class="lead">安装后离线也能打开应用壳、查看助手与笔记；AI 与联机需要网络。</p>
+    <div class="grid two">
+      <div class="card">
+        <div class="card-head"><h2>应用壳</h2><span class="chip good" id="pwa-state">已缓存</span></div>
+        <div class="phone" aria-hidden="true">
+          <div class="notch"></div>
+          <div class="app">
+            <svg class="moon" width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5 8.8 8.8 0 1 0 20.5 14.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <b>狼人杀助手</b>
+            <span>离线可用 · 本机记录</span>
+          </div>
+        </div>
+        <div class="btn-row mt12">
+          <button class="btn primary" id="install-pwa">添加到主屏幕</button>
+          <button class="btn ghost" id="toggle-offline">模拟离线</button>
+        </div>
+        <p class="faint" style="font-size:12px;margin:10px 0 0">iOS 需 Safari 分享菜单“添加到主屏幕”；微信内可能不支持安装。</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>离线检查</h2><span class="hint">AC-15</span></div>
+        <ul class="checklist">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>应用壳与静态资源已缓存</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>助手记录与笔记可离线读取</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>不缓存 /api、AI 与 WebSocket</span></li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>新版本提示后刷新生效</span></li>
+        </ul>
+        <div class="conn-banner mt16" id="pwa-banner"><span class="dot"></span><span><b>在线</b> · 可获取最新规则与房间状态</span></div>
+        <p class="muted" style="font-size:12.5px;margin:0">离线冷启动时，AI 与联机入口显示“不可用”，不阻塞本机主持与记录。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  let toastTimer;
+
+  function toast(message) {
+    const el = $('toast');
+    el.textContent = message;
+    el.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('on'), 1900);
+  }
+
+  // nav
+  $$('#nav button').forEach((button) => {
+    button.addEventListener('click', () => {
+      $$('#nav button').forEach((item) => item.setAttribute('aria-selected', String(item === button)));
+      $$('.screen').forEach((screen) => screen.classList.toggle('on', screen.id === `screen-${button.dataset.target}`));
+      const toastEl = $('toast');
+      toastEl.classList.remove('on');
+      clearTimeout(toastTimer);
+      window.scrollTo(0, 0);
+    });
+  });
+
+  // host state
+  const state = {
+    code: '483920',
+    version: 12,
+    bound: new Set([1, 2, 3, 4, 9, 10, 11, 12]),
+    pending: new Set([5]),
+    selected: 5,
+    conn: 'online',
+  };
+
+  function renderQR(code) {
+    const n = 21;
+    const svg = $('qr');
+    svg.innerHTML = '';
+    let seed = [...code].reduce((acc, char) => acc * 31 + char.charCodeAt(0), 7) >>> 0;
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+    const inFinder = (x, y) =>
+      (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+    const cells = [];
+    for (let y = 0; y < n; y += 1) {
+      for (let x = 0; x < n; x += 1) {
+        if (inFinder(x, y)) continue;
+        if (rand() > 0.55) cells.push([x, y]);
+      }
+    }
+    const finder = (x, y) => {
+      const rects = [[x, y, 7, 7], [x + 1, y + 1, 5, 5], [x + 2, y + 2, 3, 3]];
+      return rects
+        .map(([rx, ry, rw, rh], index) =>
+          `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="${index === 1 ? '#f4efe2' : '#10131a'}"/>`,
+        )
+        .join('');
+    };
+    svg.innerHTML =
+      `<rect width="${n}" height="${n}" fill="#f4efe2"/>` +
+      cells.map(([x, y]) => `<rect x="${x}" y="${y}" width="1" height="1" fill="#10131a"/>`).join('') +
+      finder(0, 0) + finder(n - 7, 0) + finder(0, n - 7);
+  }
+
+  function statusLabel(conn) {
+    return {
+      online: ['实时同步', ''],
+      reconnecting: ['重连中 1/3', 'warn'],
+      polling: ['5 秒轮询', 'warn'],
+      offline: ['离线模式', 'bad'],
+    }[conn];
+  }
+
+  function renderConnection() {
+    const [label, tone] = statusLabel(state.conn);
+    const dotClass = tone ? `dot ${tone}` : 'dot';
+    $('global-status-text').textContent = label;
+    $('global-dot').className = dotClass;
+
+    const hostText = {
+      online: '<b>实时同步</b> · 8 位玩家在线',
+      reconnecting: '<b>连接中断，正在重连</b> · 本地主持继续',
+      polling: '<b>实时连接不可用</b> · 已切换 5 秒刷新',
+      offline: '<b>离线</b> · 联机与 AI 暂停，本机流程可继续',
+    }[state.conn];
+    $('host-conn').innerHTML = `<span class="${dotClass}"></span><span>${hostText}</span>`;
+    $('player-conn').innerHTML = `<span class="${dotClass}"></span><span>${hostText.replace('8 位玩家在线', '上次更新 1 秒前')}</span>`;
+    $('player-conn-chip').textContent = label;
+    $('pwa-banner').innerHTML =
+      state.conn === 'offline'
+        ? '<span class="dot bad"></span><span><b>离线</b> · 应用壳与本地记录可用；AI 与联机不可用</span>'
+        : '<span class="dot"></span><span><b>在线</b> · 可获取最新规则与房间状态</span>';
+    $('write-snapshot').disabled = state.conn === 'offline';
+    $$('[data-conn]').forEach((button) =>
+      button.setAttribute('aria-pressed', String(button.dataset.conn === state.conn)),
+    );
+  }
+
+  function renderSeats() {
+    const grid = $('host-seats');
+    grid.innerHTML = '';
+    for (let no = 1; no <= 12; no += 1) {
+      const isBound = state.bound.has(no);
+      const isPending = state.pending.has(no);
+      const button = document.createElement('button');
+      button.className = `seat${isBound ? ' bound' : ''}${isPending ? ' pending' : ''}${state.selected === no ? ' sel' : ''}`;
+      button.setAttribute('aria-pressed', String(state.selected === no));
+      button.innerHTML = `<span class="n">${no}</span><span class="s">${isBound ? '已绑定' : isPending ? '待确认' : '未加入'}</span>${isPending ? '<span class="badge">!</span>' : ''}`;
+      button.addEventListener('click', () => {
+        state.selected = no;
+        renderSeats();
+        renderSeatDetail();
+      });
+      grid.appendChild(button);
+    }
+    $('bound-count').textContent = `${state.bound.size} / 12`;
+    $('seat-hint').textContent = state.pending.size ? `${[...state.pending].join('、')} 号待确认` : '全部已确认';
+  }
+
+  function renderSeatDetail() {
+    const no = state.selected;
+    const detail = $('seat-detail');
+    if (state.pending.has(no)) {
+      detail.innerHTML = `<div class="line"><b>${no} 号</b><span class="chip gold">待确认</span></div>
+        <p class="muted" style="margin:0 0 10px;font-size:12.5px">该玩家已提交申请，确认后绑定编号并接收本人身份。</p>
+        <div class="btn-row"><button class="btn primary" id="confirm-seat">确认绑定</button><button class="btn ghost" id="reject-seat">拒绝</button></div>`;
+    } else if (state.bound.has(no)) {
+      detail.innerHTML = `<div class="line"><b>${no} 号</b><span class="chip good">已绑定</span></div>
+        <p class="muted" style="margin:0 0 10px;font-size:12.5px">玩家只接收本人视图；解绑后需重新申请。</p>
+        <div class="btn-row"><button class="btn danger" id="unbind-seat">解绑 ${no} 号</button></div>`;
+    } else {
+      detail.innerHTML = `<div class="line"><b>${no} 号</b><span class="chip">未加入</span></div>
+        <p class="muted" style="margin:0 0 10px;font-size:12.5px">暂无申请。可让玩家扫码或输入配对码加入。</p>
+        <div class="btn-row"><button class="btn" id="simulate-apply">模拟申请</button></div>`;
+    }
+    bindSeatActions();
+  }
+
+  function bindSeatActions() {
+    const no = state.selected;
+    $('confirm-seat')?.addEventListener('click', () => {
+      state.pending.delete(no);
+      state.bound.add(no);
+      renderSeats();
+      renderSeatDetail();
+      bumpVersion();
+      toast(`${no} 号已绑定`);
+    });
+    $('reject-seat')?.addEventListener('click', () => {
+      state.pending.delete(no);
+      renderSeats();
+      renderSeatDetail();
+      toast(`已拒绝 ${no} 号的申请`);
+    });
+    $('unbind-seat')?.addEventListener('click', () => {
+      state.bound.delete(no);
+      renderSeats();
+      renderSeatDetail();
+      toast(`已解绑 ${no} 号`);
+    });
+    $('simulate-apply')?.addEventListener('click', () => {
+      state.pending.add(no);
+      renderSeats();
+      renderSeatDetail();
+      toast(`${no} 号提交了申请`);
+    });
+  }
+
+  function renderVersion() {
+    $('version').textContent = state.version;
+    $('version-big').textContent = state.version;
+    $('meta-version').textContent = `v${state.version}`;
+    $('player-version').textContent = state.version;
+    $('version-bar').style.width = `${Math.min(96, 40 + (state.version % 12) * 5)}%`;
+  }
+
+  function bumpVersion() {
+    state.version += 1;
+    renderVersion();
+    toast(`快照已写入 · v${state.version}`);
+  }
+
+  $('copy-code').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(state.code);
+      toast('配对码已复制');
+    } catch {
+      toast(`配对码：${state.code}`);
+    }
+  });
+  $('new-room').addEventListener('click', () => {
+    state.code = String(Math.floor(100000 + Math.random() * 900000));
+    state.version = 1;
+    state.bound = new Set();
+    state.pending = new Set();
+    $('room-code').textContent = state.code;
+    $('player-room').textContent = state.code;
+    renderQR(state.code);
+    renderVersion();
+    renderSeats();
+    state.selected = 1;
+    renderSeatDetail();
+    toast('新房间已创建');
+  });
+  $('recover-host').addEventListener('click', () => toast('已从本机读取主持令牌'));
+  $('write-snapshot').addEventListener('click', bumpVersion);
+  $('view-public').addEventListener('click', () => {
+    $$('#nav button').find((button) => button.dataset.target === 'player')?.click();
+  });
+  $('settle-room').addEventListener('click', () => toast('结算后玩家将看到全部身份'));
+  $('delete-room').addEventListener('click', () => toast('需二次确认：房间与快照将删除'));
+
+  // player
+  $('reveal-identity').addEventListener('click', () => {
+    $('identity').classList.remove('masked');
+    toast('身份仅你可见，注意遮挡屏幕');
+  });
+  $('mask-identity').addEventListener('click', () => $('identity').classList.add('masked'));
+
+  const alive = new Set([1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  $('alive-grid').innerHTML = Array.from({ length: 12 }, (_, index) => {
+    const no = index + 1;
+    return `<span class="alive${alive.has(no) ? '' : ' dead'}">${no}</span>`;
+  }).join('');
+
+  // timeline
+  $('tl-host').addEventListener('click', () => {
+    $('tl-host').setAttribute('aria-pressed', 'true');
+    $('tl-player').setAttribute('aria-pressed', 'false');
+    $$('#timeline-list li').forEach((item) => item.classList.remove('hidden'));
+  });
+  $('tl-player').addEventListener('click', () => {
+    $('tl-host').setAttribute('aria-pressed', 'false');
+    $('tl-player').setAttribute('aria-pressed', 'true');
+    $$('#timeline-list li').forEach((item) =>
+      item.classList.toggle('hidden', item.dataset.vis !== 'public'),
+    );
+  });
+
+  // terms
+  let termCat = 'all';
+  function filterTerms() {
+    const query = $('term-input').value.trim().toLowerCase();
+    let shown = 0;
+    $$('#term-list .term').forEach((term) => {
+      const text = term.textContent.toLowerCase();
+      const cats = term.dataset.cat;
+      const match = (termCat === 'all' || cats === termCat) && (!query || text.includes(query));
+      term.hidden = !match;
+      if (match) shown += 1;
+    });
+    $('term-count').textContent = shown;
+    $('term-empty').hidden = shown !== 0;
+  }
+  $('term-input').addEventListener('input', filterTerms);
+  $$('#term-chips button').forEach((button) => {
+    button.addEventListener('click', () => {
+      termCat = button.dataset.cat;
+      $$('#term-chips button').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      filterTerms();
+    });
+  });
+
+  // notes
+  const noteKey = 'lrs.prototype.p1.notes';
+  const notesInput = $('notes-input');
+  try {
+    notesInput.value = localStorage.getItem(noteKey) ?? '';
+  } catch {}
+  let noteTimer;
+  notesInput.addEventListener('input', () => {
+    $('save-state').textContent = '保存中…';
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(noteKey, notesInput.value);
+        $('save-state').textContent = '已保存';
+      } catch {
+        $('save-state').textContent = '保存失败';
+      }
+    }, 500);
+  });
+  $('clear-notes').addEventListener('click', () => {
+    notesInput.value = '';
+    try {
+      localStorage.removeItem(noteKey);
+    } catch {}
+    $('save-state').textContent = '已清空';
+    toast('笔记已清空');
+  });
+  $('cite-notes').addEventListener('click', () => {
+    $$('#nav button').find((button) => button.dataset.target === 'player')?.click();
+    toast('已引用到自由描述（跳到玩家端预览）');
+  });
+
+  // pwa
+  $('install-pwa').addEventListener('click', () => toast('已加入主屏幕（演示）'));
+  $('toggle-offline').addEventListener('click', () => {
+    state.conn = state.conn === 'offline' ? 'online' : 'offline';
+    $('toggle-offline').textContent = state.conn === 'offline' ? '恢复在线' : '模拟离线';
+    $('pwa-state').textContent = state.conn === 'offline' ? '离线可用' : '已缓存';
+    $('pwa-state').className = state.conn === 'offline' ? 'chip' : 'chip good';
+    renderConnection();
+    toast(state.conn === 'offline' ? '已切换离线模式' : '已恢复在线');
+  });
+
+  // connection segmented
+  $$('[data-conn]').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.conn = button.dataset.conn;
+      $('toggle-offline').textContent = state.conn === 'offline' ? '恢复在线' : '模拟离线';
+      renderConnection();
+      toast(statusLabel(state.conn)[0]);
+    });
+  });
+
+  // init
+  renderQR(state.code);
+  renderSeats();
+  renderSeatDetail();
+  renderVersion();
+  renderConnection();
+})();
+</script>
+</body>
+</html>

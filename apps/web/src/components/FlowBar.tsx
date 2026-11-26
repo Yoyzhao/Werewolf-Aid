@@ -2,7 +2,7 @@ import type { View } from '../lib/types';
 
 const STEPS = ['设置', '发牌', '夜晚', '白天', '结算'] as const;
 
-type FlowView = Exclude<View, 'home' | 'assistant' | 'rules'>;
+type FlowView = Exclude<View, 'home' | 'assistant' | 'rules' | 'host-room'>;
 
 const ACTIVE_INDEX: Record<FlowView, number> = {
   setup: 0,

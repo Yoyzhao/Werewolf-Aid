@@ -221,6 +221,12 @@ h3 {
   background: var(--line);
 }
 
+.room-code {
+  font-family: var(--mono);
+  letter-spacing: 0.24em;
+  font-variant-numeric: tabular-nums;
+}
+
 .muted {
   color: var(--muted);
 }

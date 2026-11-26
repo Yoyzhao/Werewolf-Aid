@@ -1,0 +1,11 @@
+
+Running 6 tests using 6 workers
+
+  ✓  6 [chromium] › tests\e2e\system.spec.ts:171:1 › AC-2/AC-6：模式 B 默认遮罩，二次点击才揭示 (1.5s)
+  ✓  5 [chromium] › tests\e2e\system.spec.ts:249:1 › AC-11：清空助手记录保留 AI 配置 (1.6s)
+  ✓  4 [chromium] › tests\e2e\system.spec.ts:136:1 › AC-2/AC-6/AC-18：模式 A 遮罩、二次揭示与回退 (1.8s)
+  ✓  2 [chromium] › tests\e2e\system.spec.ts:230:1 › AC-5：页面加载后断网可完成开局、发牌、首夜与白天投票 (2.9s)
+  ✓  1 [chromium] › tests\e2e\system.spec.ts:222:1 › AC-1/AC-4：预女猎守 12 人全流程到结算 (3.5s)
+  ✓  3 [chromium] › tests\e2e\system.spec.ts:226:1 › AC-1/AC-4：预女猎白 12 人全流程到结算 (3.5s)
+
+  6 passed (6.6s)

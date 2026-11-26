@@ -50,3 +50,18 @@
 
 - 证书/443/`TRUST_PROXY` 属部署阶段；本任务只保证 HTTP 内部端口与同源行为。
 - Node 24 + Fastify 5 兼容性首日验证；`better-sqlite3` 不在 P0 启用。
+
+### 完成结果（2026-11-26）
+
+- **实际产出**：`apps/api` 已实现 Fastify 5 配置与启动、匿名会话/CSRF、`POST /api/v1/ai/relay`、`GET /api/v1/session`、`GET /api/v1/health`、SSRF（DNS 校验 + 固定已验证 IP）、超时/响应上限、按会话限频与在途并发、Helmet CSP、静态资源与 SPA fallback、统一错误包络与日志脱敏；`packages/shared` 补齐 Zod 契约与常量。
+- **测试**：新增 114 个 API 单测（SSRF 57、AI 中转 22、会话 6、应用集成 24、配置 5）；全量 214 个单测通过；`apps/api/src` 覆盖率 91.37% statements / 87.76% branches / 91.48% functions / 92.70% lines。
+- **功能检查（2026-11-26）**：对生产构建做独立黑盒测试 57/57 通过（健康检查、会话/CSRF、Schema、SSRF、413、静态/API 隔离、限频、`PUBLIC_ORIGIN`、生产模式属性、启动保护、日志脱敏）；发现并修复非法 JSON/不支持 Content-Type 落入 500 的错误映射缺陷，复测为 400/415 `INVALID_REQUEST`；详见 [functional-check-20261126.md](../../../test/evidence/M1/T-019/functional-check-20261126.md)。
+- **门控**：`npm run lint`、`format:check`、`typecheck`、`build`、`verify:dist` 通过；HTTP 内部冒烟 17/17（静态/API 路由隔离、私网 SSRF 拒绝、CSRF、413、安全头、日志无 Key/上下文/Cookie）。
+- **证据**：[verification.md](../../../test/evidence/M1/T-019/verification.md)。
+
+## 阶段完成结果
+
+- **实际产出**：`apps/api` P0 服务与测试；`packages/shared` API 契约；依赖新增 `@fastify/static`、`cookie`、`helmet`、`compress`、`rate-limit` 与 `zod`。
+- **方案偏差**：`buildApp` 改为异步，确保 `@fastify/rate-limit` 的 `onRoute` 钩子在路由声明前完成注册；统一错误处理器提前到插件/路由注册前设置，避免静态插件注册路由后错误包络失效。Node 24 + Fastify 5 兼容性正常；`better-sqlite3` 未启用。
+- **遗留项**：P1 房间/WS/SQLite 不在本阶段；TLS/443/`TRUST_PROXY` 在 T-024；真实 AI 供应商联调在 T-020/步骤 7。
+- **验收状态**：待用户 5D 阶段验收。

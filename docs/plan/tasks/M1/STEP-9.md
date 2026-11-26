@@ -50,3 +50,19 @@
 
 - 证书/443 权限：DNS-01 或云 LB；systemd capability；失败回退 HTTP 内网+云 LB。
 - P1 WS/SQLite 未启用：明确 M2 再开，P0 验收不覆盖。
+
+### 完成结果（2026-11-26）
+
+- **实际产出**：[项目部署文档](../../../deploy/项目部署文档.md)、[systemd 单元](../../../deploy/werewolf-aid.service)、[环境变量模板](../../../deploy/env.production.example)、[冒烟脚本](../../../../scripts/deploy/smoke.mjs)。
+- **代码变更**：`config.ts` 增加 TLS 路径与 `HTTP_REDIRECT_PORT`、缺证书保护；`app.ts` 支持 `node:https` 服务器；`server.ts` 支持 HTTPS 监听、80→443 301 与 SIGTERM 优雅关闭。
+- **演练**：自签证书 + 生产构建在本机 HTTPS 3443/HTTP 3080 完成 22/22 冒烟（HSTS/CSP/Secure Cookie/静态缓存/SPA/API/跳转）；重启、发布 A→B→回滚 A、后端产物恢复、缺证书启动保护、配置/证书备份恢复均通过。
+- **测试**：245 单测、24 e2e、lint/format/typecheck/build/verify:dist 全部通过；首屏 JS 136.45 kB gzip。
+- **阻塞（需线上环境）**：真实服务器与 443、域名与证书签发/续期、ICP 备案、云 LB 模式、真机矩阵、真实 AI 供应商。
+- **证据**：[T-024 部署报告](../../../test/evidence/M1/T-024/verification.md)。
+
+## 阶段完成结果
+
+- **实际产出**：Node 单进程 HTTPS 部署能力、部署文档与资产、22 项部署冒烟脚本、本地发布/回滚/备份演练记录。
+- **方案偏差**：无 Nginx/Docker；Node 直连 TLS 为默认路径，云 LB 作为备选（文档给出两种环境变量组合）。
+- **遗留项**：真实服务器/域名/证书/ICP/云 LB 需拿到环境后执行；真机与真实 AI 沿用 T-023 阻塞项。
+- **验收状态**：本地部署演练通过；已验收（2026-11-26，用户“验收 T-024，继续下一个任务”）；真实线上部署待环境。

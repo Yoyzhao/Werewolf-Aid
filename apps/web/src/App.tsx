@@ -1,52 +1,40 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
 
 import { GuideDialog } from './components/GuideDialog';
 import { TopBar } from './components/TopBar';
+import { AssistantScreen } from './features/assistant/AssistantScreen';
+import { DawnScreen } from './features/dawn/DawnScreen';
+import { DealScreen } from './features/deal/DealScreen';
 import { HomeScreen } from './features/home/HomeScreen';
+import { HostRoomScreen } from './features/host/HostRoomScreen';
+import { NightScreen } from './features/night/NightScreen';
+import { PlayerRoot } from './features/player/PlayerRoot';
+import { ResultScreen } from './features/result/ResultScreen';
+import { RulesScreen } from './features/rules/RulesScreen';
+import { SetupScreen } from './features/setup/SetupScreen';
+import { SheriffScreen } from './features/sheriff/SheriffScreen';
+import { SpeechScreen } from './features/speech/SpeechScreen';
+import { VoteScreen } from './features/vote/VoteScreen';
+import { primeAiSession } from './lib/ai-client';
 import { releaseWakeLock, requestWakeLock } from './lib/wake-lock';
 import { useGameStore } from './stores/game-store';
-
-const AssistantScreen = lazy(() =>
-  import('./features/assistant/AssistantScreen').then((module) => ({
-    default: module.AssistantScreen,
-  })),
-);
-const RulesScreen = lazy(() =>
-  import('./features/rules/RulesScreen').then((module) => ({ default: module.RulesScreen })),
-);
-const SetupScreen = lazy(() =>
-  import('./features/setup/SetupScreen').then((module) => ({ default: module.SetupScreen })),
-);
-const DealScreen = lazy(() =>
-  import('./features/deal/DealScreen').then((module) => ({ default: module.DealScreen })),
-);
-const NightScreen = lazy(() =>
-  import('./features/night/NightScreen').then((module) => ({ default: module.NightScreen })),
-);
-const SheriffScreen = lazy(() =>
-  import('./features/sheriff/SheriffScreen').then((module) => ({
-    default: module.SheriffScreen,
-  })),
-);
-const DawnScreen = lazy(() =>
-  import('./features/dawn/DawnScreen').then((module) => ({ default: module.DawnScreen })),
-);
-const SpeechScreen = lazy(() =>
-  import('./features/speech/SpeechScreen').then((module) => ({
-    default: module.SpeechScreen,
-  })),
-);
-const VoteScreen = lazy(() =>
-  import('./features/vote/VoteScreen').then((module) => ({ default: module.VoteScreen })),
-);
-const ResultScreen = lazy(() =>
-  import('./features/result/ResultScreen').then((module) => ({
-    default: module.ResultScreen,
-  })),
-);
+import { startHostSync, useHostRoomStore } from './stores/host-room-store';
 
 const ACTIVE_GAME_VIEWS = new Set(['deal', 'night', 'sheriff', 'dawn', 'speech', 'vote']);
+
+type JoinRoute =
+  | { readonly kind: 'entry' }
+  | { readonly kind: 'code'; readonly code: string }
+  | { readonly kind: 'invalid'; readonly code: string };
+
+function readJoinRoute(pathname: string): JoinRoute | null {
+  if (pathname === '/join' || pathname === '/join/') return { kind: 'entry' };
+  if (!pathname.startsWith('/join/')) return null;
+  const code = decodeURIComponent(pathname.slice('/join/'.length)).replace(/\/$/, '');
+  if (/^\d{6}$/.test(code)) return { kind: 'code', code };
+  return { kind: 'invalid', code };
+}
 
 export default function App() {
   const initialized = useGameStore((state) => state.initialized);
@@ -56,10 +44,31 @@ export default function App() {
   const init = useGameStore((state) => state.init);
   const dismissGuide = useGameStore((state) => state.dismissGuide);
   const retrySave = useGameStore((state) => state.retrySave);
+  const initHostRoom = useHostRoomStore((state) => state.init);
+
+  const [joinRoute, setJoinRoute] = useState<JoinRoute | null>(() =>
+    readJoinRoute(window.location.pathname),
+  );
+
+  useEffect(() => {
+    const onPopState = (): void => setJoinRoute(readJoinRoute(window.location.pathname));
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  useEffect(() => {
+    if (joinRoute) return;
+    void initHostRoom();
+    return startHostSync();
+  }, [joinRoute, initHostRoom]);
+
+  useEffect(() => {
+    void primeAiSession();
+  }, []);
 
   useEffect(() => {
     if (!ACTIVE_GAME_VIEWS.has(view)) return;
@@ -75,6 +84,29 @@ export default function App() {
       releaseWakeLock();
     };
   }, [view]);
+
+  if (joinRoute) {
+    const navigateJoin = (code: string): void => {
+      window.history.pushState({}, '', `/join/${code}`);
+      setJoinRoute({ kind: 'code', code });
+    };
+    const exitJoin = (): void => {
+      window.history.pushState({}, '', '/');
+      setJoinRoute(null);
+    };
+
+    return (
+      <>
+        <PlayerRoot
+          code={joinRoute.kind === 'code' ? joinRoute.code : null}
+          invalidCode={joinRoute.kind === 'invalid' ? joinRoute.code : null}
+          onNavigate={navigateJoin}
+          onExit={exitJoin}
+        />
+        <Toaster theme="dark" position="top-center" richColors />
+      </>
+    );
+  }
 
   return (
     <>
@@ -98,26 +130,17 @@ export default function App() {
         ) : (
           <>
             {view === 'home' ? <HomeScreen /> : null}
-            <Suspense
-              fallback={
-                <div className="screen-body">
-                  <div className="placeholder-card">
-                    <p className="text-sm text-muted">正在加载页面…</p>
-                  </div>
-                </div>
-              }
-            >
-              {view === 'assistant' ? <AssistantScreen /> : null}
-              {view === 'rules' ? <RulesScreen /> : null}
-              {view === 'setup' ? <SetupScreen /> : null}
-              {view === 'deal' ? <DealScreen /> : null}
-              {view === 'night' ? <NightScreen /> : null}
-              {view === 'sheriff' ? <SheriffScreen /> : null}
-              {view === 'dawn' ? <DawnScreen /> : null}
-              {view === 'speech' ? <SpeechScreen /> : null}
-              {view === 'vote' ? <VoteScreen /> : null}
-              {view === 'result' ? <ResultScreen /> : null}
-            </Suspense>
+            {view === 'assistant' ? <AssistantScreen /> : null}
+            {view === 'rules' ? <RulesScreen /> : null}
+            {view === 'host-room' ? <HostRoomScreen /> : null}
+            {view === 'setup' ? <SetupScreen /> : null}
+            {view === 'deal' ? <DealScreen /> : null}
+            {view === 'night' ? <NightScreen /> : null}
+            {view === 'sheriff' ? <SheriffScreen /> : null}
+            {view === 'dawn' ? <DawnScreen /> : null}
+            {view === 'speech' ? <SpeechScreen /> : null}
+            {view === 'vote' ? <VoteScreen /> : null}
+            {view === 'result' ? <ResultScreen /> : null}
           </>
         )}
       </main>

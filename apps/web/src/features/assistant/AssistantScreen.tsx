@@ -15,8 +15,11 @@ import {
   createEmptyPlayerRecord,
 } from '../../lib/assistant';
 import { buildAssistantContext } from '../../lib/assistant-context';
+import { useAiStore } from '../../stores/ai-store';
 import { useAssistantStore } from '../../stores/assistant-store';
 import { useGameStore } from '../../stores/game-store';
+import { AIConfigForm } from './AIConfigForm';
+import { AIPanel } from './AIPanel';
 import { AssistantPlayerRow } from './AssistantPlayerRow';
 
 const SEATS = Array.from({ length: ASSISTANT_SEAT_COUNT }, (_, index) => index + 1);
@@ -41,12 +44,25 @@ export function AssistantScreen() {
   const clearRecord = useAssistantStore((state) => state.clearRecord);
   const retrySave = useAssistantStore((state) => state.retrySave);
   const goHome = useGameStore((state) => state.goHome);
+  const aiConfigLoaded = useAiStore((state) => state.configLoaded);
+  const aiStatus = useAiStore((state) => state.status);
+  const aiConfig = useAiStore((state) => state.config);
+  const aiHasKey = useAiStore((state) => state.hasKey);
+  const aiResult = useAiStore((state) => state.result);
+  const aiErrorCode = useAiStore((state) => state.errorCode);
+  const aiErrorMessage = useAiStore((state) => state.errorMessage);
+  const initAi = useAiStore((state) => state.init);
+  const saveAiConfig = useAiStore((state) => state.saveConfig);
+  const clearAiConfig = useAiStore((state) => state.clearConfig);
+  const analyzeAi = useAiStore((state) => state.analyze);
+  const cancelAi = useAiStore((state) => state.cancel);
 
   const [clearOpen, setClearOpen] = useState(false);
 
   useEffect(() => {
     void init();
-  }, [init]);
+    void initAi();
+  }, [init, initAi]);
 
   useEffect(
     () => () => {
@@ -303,8 +319,24 @@ export function AssistantScreen() {
             <p className="mt-2 text-[11.5px] text-faint">
               上下文将发往你自配的第三方模型；Key 默认仅本次会话使用。
             </p>
-            <p className="mt-1 text-[11.5px] text-faint">AI 配置与请求将在 AI 接入阶段提供。</p>
           </section>
+
+          <AIConfigForm
+            config={aiConfig}
+            hasKey={aiHasKey}
+            onSave={saveAiConfig}
+            onClear={clearAiConfig}
+          />
+
+          <AIPanel
+            status={aiStatus}
+            configLoaded={aiConfigLoaded}
+            result={aiResult}
+            errorCode={aiErrorCode}
+            errorMessage={aiErrorMessage}
+            onAnalyze={() => void analyzeAi(preview.text)}
+            onCancel={cancelAi}
+          />
         </div>
       </div>
 

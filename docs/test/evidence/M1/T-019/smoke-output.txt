@@ -1,0 +1,19 @@
+PASS GET /api/v1/health | {"ok":true,"version":"0.1.0"}
+PASS 健康检查带安全头
+PASS 未启用 HTTPS 时不发 HSTS
+PASS GET /api/v1/session 下发匿名会话 | lrs_anon=<redacted>
+PASS 会话 Cookie 属性 | lrs_anon=<redacted>; Max-Age=604800; Path=/; HttpOnly; SameSite=Lax
+PASS GET / 返回构建入口
+PASS SPA 深链 fallback 返回 HTML
+PASS 哈希静态资源长缓存
+PASS API 404 不被 SPA fallback 吞掉 | {"error":{"code":"NOT_FOUND","message":"资源不存在"}}
+PASS 缺失静态文件返回 JSON 404
+PASS 私网地址被 SSRF 拦截 | {"error":{"code":"URL_NOT_ALLOWED","message":"接口地址不允许指向内网或本机"}}
+PASS 缺少 CSRF 被拒绝
+PASS 非 https 地址被拒绝
+PASS 非法参数返回 INVALID_REQUEST
+PASS 日志不含 API Key
+PASS 日志不含对话内容
+PASS 日志不含 Cookie 明文
+
+结果：17/17 通过；日志 E:\Desktop\Workspace2\Werewolf-Aid\.artifacts\t019-smoke\server.log

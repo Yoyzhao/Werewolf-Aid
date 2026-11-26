@@ -1,0 +1,40 @@
+[Unit]
+Description=Werewolf Aid (P0 single-process Node)
+Documentation=file:///opt/werewolf-aid/current/docs/deploy/项目部署文档.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=werewolf
+Group=werewolf
+WorkingDirectory=/opt/werewolf-aid/current
+EnvironmentFile=/etc/werewolf-aid/env
+ExecStart=/usr/bin/node apps/api/dist/server.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+KillSignal=SIGTERM
+UMask=0027
+LimitNOFILE=65535
+
+# 绑定 443/80 所需能力；仅 Node 直连 TLS 时需要
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+# 加固
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

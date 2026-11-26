@@ -9,12 +9,20 @@ export default defineConfig({
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
   },
-  webServer: {
-    command: 'npm run dev -w @lrs/web',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: 'npm run dev -w @lrs/web',
+      url: 'http://localhost:5173',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
+      command: 'npm run dev:api',
+      url: 'http://127.0.0.1:3000/api/v1/health',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+  ],
   projects: [
     {
       name: 'chromium',

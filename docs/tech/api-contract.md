@@ -6,6 +6,7 @@
 - 关联：[技术架构](tech-arch.md)；[ADR-003](arch/ADR-003-联机同步与匿名身份.md)；[ADR-004](arch/ADR-004-AI中转与安全边界.md)
 - 状态：活跃（步骤 3 已验收，2026-11-25）；实现前以本文档为准，变更按兼容策略处理
 - 变更：v1.1 快照改为完整 `gameState`，服务端生成视图；补 `INVALID_STATE`、快照/WS 大小上限
+- 补记（2026-11-26，T-038/T-039，向后兼容）：`GET /rooms/{code}` 增加 `seats`；新增 `GET /rooms/{code}/public` 与 `POST /rooms/{code}/leave`；既有字段与语义不变
 
 ## 1. 通用约定
 
@@ -109,6 +110,7 @@
 | POST | `/rooms` | 主持人会话 | 创建房间，返回配对码 + hostToken |
 | POST | `/rooms/recover` | hostToken/恢复码 | 恢复主持权限 |
 | POST | `/rooms/{code}/join` | 玩家会话 | 申请绑定编号 |
+| POST | `/rooms/{code}/leave` | 玩家会话 | 取消待确认申请 |
 | POST | `/rooms/{code}/confirm` | 主持人 | 确认绑定 |
 | POST | `/rooms/{code}/unbind` | 主持人 | 解绑/重置编号 |
 | PUT | `/rooms/{code}/snapshot` | 主持人 | 写入阶段快照（带 version） |
@@ -239,6 +241,36 @@
 
 - 结算/解散删除 `rooms`、`room_seats`、`snapshots`；删除后不可恢复。
 - 过期房间由服务端 TTL 清理（`expires_at`）。
+
+### 3.8 P1 实现补充（T-038/T-039）
+
+`GET /rooms/{code}` 响应新增 `seats`（不含 `sessionId`）：
+
+```json
+{
+  "roomId": "r_...",
+  "code": "483920",
+  "boardId": "pre-witch-hunter-guard",
+  "phase": "NIGHT",
+  "status": "active",
+  "version": 12,
+  "expiresAt": 1764086400000,
+  "joinExpiresAt": 1764000600000,
+  "seats": [
+    {
+      "seatNo": 5,
+      "status": "bound",
+      "applicantId": "s_...",
+      "appliedAt": 1764000000000,
+      "boundAt": 1764000010000
+    }
+  ]
+}
+```
+
+`GET /api/v1/rooms/{code}/public`（无需会话）：返回 `{ code, boardId, phase, status, joinExpiresAt, expiresAt }`，用于玩家加入页；房间不存在/过期/已结束时 `404`。
+
+`POST /api/v1/rooms/{code}/leave`（会话 + CSRF）：玩家取消尚未确认的申请，返回 `{ "status": "cancelled" }`；已绑定返回 `409 CONFLICT`（需主持人解绑）；重复取消幂等返回 `cancelled`。
 
 ## 4. WebSocket（P1）
 

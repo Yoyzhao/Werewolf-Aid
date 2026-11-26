@@ -15,12 +15,16 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./apps/web/src/test/setup.ts'],
-    include: ['apps/web/src/**/*.test.{ts,tsx}', 'packages/**/*.test.ts'],
+    include: [
+      'apps/web/src/**/*.test.{ts,tsx}',
+      'apps/api/src/**/*.test.ts',
+      'packages/**/*.test.ts',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
       reportsDirectory: '.artifacts/coverage',
-      include: ['apps/web/src/**', 'packages/**/src/**'],
+      include: ['apps/web/src/**', 'apps/api/src/**', 'packages/**/src/**'],
     },
   },
 });
