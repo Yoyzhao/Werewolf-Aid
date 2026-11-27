@@ -316,7 +316,8 @@ export const useHostRoomStore = create<HostRoomStore>((set, get) => {
         });
         writer.start(summary.version, true);
         const game = useGameStore.getState().game;
-        if (game) writer.schedule(game);
+        // 新房间不继承上一局已结束的结算状态，避免玩家加入时先看到旧结果。
+        if (game?.status === 'active') writer.schedule(game);
         return true;
       } catch (error) {
         set({ status: 'error', error: messageOf(error, '创建房间失败，请稍后重试') });

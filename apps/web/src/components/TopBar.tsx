@@ -1,3 +1,5 @@
+import { Wifi } from 'lucide-react';
+
 import type { View } from '../lib/types';
 
 const PHASE_LABELS: Record<View, string> = {
@@ -15,7 +17,13 @@ const PHASE_LABELS: Record<View, string> = {
   result: 'RESULT · 结算',
 };
 
-export function TopBar({ view }: { readonly view: View }) {
+export interface TopBarProps {
+  readonly view: View;
+  readonly hostRoomCode?: string | null;
+  readonly onOpenHostRoom?: () => void;
+}
+
+export function TopBar({ view, hostRoomCode, onOpenHostRoom }: TopBarProps) {
   return (
     <header className="topbar">
       <div className="shell topbar-in">
@@ -30,7 +38,18 @@ export function TopBar({ view }: { readonly view: View }) {
           <div className="brand-name">狼人杀助手</div>
           <div className="brand-sub">Eclipse Club</div>
         </div>
-        <span className="phase-chip">
+        {hostRoomCode && onOpenHostRoom ? (
+          <button
+            type="button"
+            className="icon-btn ml-auto"
+            aria-label={`打开联机房间 ${hostRoomCode}`}
+            title="联机房间"
+            onClick={onOpenHostRoom}
+          >
+            <Wifi size={17} />
+          </button>
+        ) : null}
+        <span className={`phase-chip ${hostRoomCode ? 'ml-1.5' : 'ml-auto'}`}>
           <span className="dot" aria-hidden="true" />
           <b>{PHASE_LABELS[view]}</b>
         </span>

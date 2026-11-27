@@ -190,6 +190,21 @@ describe('联机主持端', () => {
     expect(recoverBody.hostToken).toBe('host-token');
   });
 
+  it('房间创建后可进入开局设置，且板子锁定为房间板子', async () => {
+    installFetch({ seats: [], version: 0 });
+    await openHostRoom();
+
+    await userEvent.click(screen.getByRole('button', { name: /创建房间/ }));
+    expect(await screen.findByText('483920')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: '进入开局设置' }));
+
+    expect(await screen.findByRole('heading', { name: '开局设置' })).toBeInTheDocument();
+    expect(document.querySelector('[data-board="pre-witch-hunter-guard"]')).toBeDisabled();
+    expect(document.querySelector('[data-board="pre-witch-hunter-idiot"]')).toBeDisabled();
+    expect(screen.getByText(/联机房间已锁定板子/)).toBeInTheDocument();
+  });
+
   it('对局状态变化后自动写入快照', async () => {
     const host: MockHost = { seats: [], version: 0 };
     const mock = installFetch(host);

@@ -118,6 +118,37 @@ test('投票进度刷新后可恢复', async ({ page }) => {
   await quickVote(page, 9);
   await expect(page.getByText('9 号 · 11 票')).toBeVisible();
 
+  // 等待 IndexedDB 落盘完成，避免并发负载下刷新读到旧快照。
+  await page.waitForFunction(async () => {
+    const record = await new Promise<{ state?: { ballots?: unknown[] } } | undefined>((resolve) => {
+      const open = indexedDB.open('keyval-store');
+      open.onupgradeneeded = () => {
+        if (!open.result.objectStoreNames.contains('keyval')) {
+          open.result.createObjectStore('keyval');
+        }
+      };
+      open.onsuccess = () => {
+        const db = open.result;
+        try {
+          const request = db
+            .transaction('keyval', 'readonly')
+            .objectStore('keyval')
+            .get('lrs.game.current.v1');
+          request.onsuccess = () => {
+            resolve(request.result as { state?: { ballots?: unknown[] } } | undefined);
+            db.close();
+          };
+          request.onerror = () => resolve(undefined);
+        } catch {
+          db.close();
+          resolve(undefined);
+        }
+      };
+      open.onerror = () => resolve(undefined);
+    });
+    return record?.state?.ballots?.length === 11;
+  });
+
   await page.reload();
   await expect(page.getByText(/继续上一局/)).toBeVisible();
   await page.getByRole('button', { name: '继续' }).click();

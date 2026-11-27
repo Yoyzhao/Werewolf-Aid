@@ -1,8 +1,8 @@
 # 开发环境信息
 
-- 更新日期：2026-11-26
+- 更新日期：2026-11-27
 - 关联：[技术架构](tech-arch.md)、[ADR-001](arch/ADR-001-技术栈与项目拓扑.md)、[ADR-005](arch/ADR-005-部署与运行形态.md)
-- 说明：步骤 5C 已完成 T-015 工程骨架、T-026～T-028 规则引擎、T-029～T-031 主持闭环、T-018/T-034 助手与规则页；步骤 5D T-019 已完成后端 API 与 AI 中转；步骤 6 T-020 已完成 AI 前端接入与同源整合；步骤 8 T-023 已完成 P0 测试计划与全量回归；步骤 9 T-024 已完成 Node HTTPS 部署能力、部署资产与本地演练；M1 已验收（2026-11-26）；M2 T-010/T-033/T-035/T-036/T-037 已验收；T-038 联机主持端与 T-039 玩家端已完成、待验收。未探测到的信息标记“待确认”，不猜测。
+- 说明：步骤 5C 已完成 T-015 工程骨架、T-026～T-028 规则引擎、T-029～T-031 主持闭环、T-018/T-034 助手与规则页；步骤 5D T-019 已完成后端 API 与 AI 中转；步骤 6 T-020 已完成 AI 前端接入与同源整合；步骤 8 T-023 已完成 P0 测试计划与全量回归；步骤 9 T-024 已完成 Node HTTPS 部署能力、部署资产与本地演练；M1 已验收（2026-11-26）；M2 T-010/T-033/T-035～T-045 已验收；T-046 P1 测试与全量回归已完成、待验收。未探测到的信息标记“待确认”，不猜测。
 
 ## 1. 技术栈说明
 
@@ -73,17 +73,22 @@ docs/
 - 根 `package.json` 使用 npm workspaces；`apps/*` 与 `packages/*` 均纳入。
 - TypeScript strict，包入口 `src/index.ts`，构建产物 `dist/`。
 - 角色头像资源位于 `apps/web/public/assets/avatar/`（2026-11-26 目录整理：移除根目录 `web/assets/avatar/` 的重复副本）。
-- 断网继续（AC-5）：P0 页面不做路由级懒加载，统一首屏包；当前首屏 JS 203.88 kB gzip（2026-11-26，T-039 socket.io-client/qrcode + T-040/T-041 时间线/术语/笔记后，仍低于 250 kB 预算）。
+- 断网继续（AC-5）：P0 页面不做路由级懒加载，统一首屏包；当前首屏 JS 207.14 kB gzip（2026-11-27，含联机、时间线/术语/笔记、AI 过滤与 PWA 提示，仍低于 250 kB 预算）。
 - 端到端用例位于 `tests/e2e/`；Playwright 产物按 `.artifacts/` 规则统一存放。
 - 测试计划/用例：[docs/test/test-cases.md](../test/test-cases.md)；T-023 回归：242 单测、24 e2e、首屏 136.45 kB gzip；证据见 [T-023 报告](../test/evidence/M1/T-023/verification.md)。
 - 部署：[项目部署文档](../deploy/项目部署文档.md)；Node HTTPS 直连/云 LB 两种模式；冒烟 `node scripts/deploy/smoke.mjs https://<域名>`（22 项）；证据见 [T-024 报告](../test/evidence/M1/T-024/verification.md)。
-- M2 P1 规划：[M2 STEP-4](../plan/tasks/M2/STEP-4.md)；T-036/T-037 已启用 SQLite 与 Socket.IO；T-040/T-041 已完成时间线、术语与笔记；PWA 仍待 T-043。
+- M2 P1 规划：[M2 STEP-4](../plan/tasks/M2/STEP-4.md)；T-036/T-037 已启用 SQLite 与 Socket.IO；T-040/T-041 已完成时间线、术语与笔记；T-042/T-043 已完成 AI 过滤与 PWA；T-044 P1 整合、T-045 系统联调已完成并验收；T-046 测试与全量回归已完成、待验收；剩余 T-047。
 - 服务端视图（T-033）：`@lrs/game-engine` 提供 `validateGameState`、`buildPublicView`、`buildPrivateView`、`buildViews`；玩家视图不含他人身份/夜间私密信息。
 - 房间 API（T-036）：`POST /api/v1/rooms`、`/rooms/recover`、`/rooms/{code}/join|confirm|unbind`、`PUT /snapshot`、`GET /rooms/{code}`、`GET /view`、`POST /settle`、`DELETE /rooms/{code}`；会话 Cookie `lrs_anon=<id>.<hmac>`；主持令牌通过 `X-Host-Token` 提交，仅创建响应返回一次，服务端存 SHA-256。
 - 实时（T-037）：Socket.IO 路径 `/ws/rooms?code=`；事件 `room.view`/`room.closed`/`room.error`；单条消息上限 `WS_MAX_PAYLOAD_BYTES`（默认 64KB）；未绑定会话拒绝。Vite dev/preview 通过 `/ws` 代理（`ws: true`）。
 - 联机 UI（T-038/T-039）：首页“联机主持” → `host-room` 面板；玩家路由 `/join`、`/join/:code`；玩家页无底部 Tab；主持端 3s 刷新座位、300ms 合并写快照、失败退避与 409 补写；玩家端 1.5s 等待确认、WS 失败 3 次后 5s 轮询。
 - 复盘时间线（T-040）：`lib/timeline.ts` 统一生成分组；主持端含夜间私密动作 + 公开事件，玩家端仅 `PlayerView.privateActions` + `events`；默认展开最近一夜；`Timeline` 组件用于结算页与玩家绑定/结束页。
 - 术语与笔记（T-041）：`rules-content.TERMS` 14 条（板子/角色/流程/判定/口语）；规则页统一搜索并 `<mark>` 高亮；助手“笔记”Tab 使用独立 `lrs.notes.v1`（IndexedDB）、500ms 防抖、手动“引用到自由描述”，不进入 `buildAssistantContext` 自动上下文。
+- AI 输入过滤（T-042）：`lib/input-filter.ts` 去除零宽/控制字符、统一换行与连续空行；识别手机号/身份证/银行卡；AI 提交上限 500 字（自由描述存储上限仍 2000 字），超限禁用 AI。
+- PWA（T-043）：`public/manifest.webmanifest`、`public/sw.js`；`apps/web/scripts/generate-precache.mjs` 在构建后生成 `dist/precache.js` 与 SW 版本；预缓存应用壳/静态资源，跳过 `/api`、`/ws` 与跨域；更新通过 `SKIP_WAITING` + `controllerchange` 刷新；安装/iOS/微信提示由 `PwaBanners` 统一承载。
+- P1 整合（T-044）：主持房间页操作区（回到当前对局/继续上一局/进入开局设置/下一局设置）并把最新快照立即写入；联机存在时开局设置锁定房间板子；顶栏“打开联机房间”按钮与结算页“去结算房间”入口；`returnToGame` 按阶段恢复主持视图；集成 e2e 覆盖双浏览器主链路、API 失败隔离、刷新恢复与结算删除。
+- P1 验收（T-045）：[p1-acceptance.spec.ts](../../tests/e2e/p1-acceptance.spec.ts) 5 条用例覆盖 AC-12 加入/轮询/重连、AC-13 服务端视图隔离与越权、AC-14 结算/解散四表删除、AC-19 版本 409/递增/补齐；测试将原始输出写入 `.artifacts/e2e/T-045/raw/`，证据归档见 [T-045 报告](../test/evidence/M2/T-045/verification.md)。单独运行命令：`npx playwright test tests/e2e/p1-acceptance.spec.ts`。
+- P1 测试（T-046）：[test-cases.md](../test/test-cases.md) 升级为 P0+P1；`npm run test:p1-security` 校验 Cookie 签名/CSRF/Origin/hostToken 哈希/日志脱敏；`npm run test:p1-load` 启动临时 Fastify + SQLite（3112），压测 10 房间/130 会话/120 WS，记录 WS 与 5s 轮询 P95；结果见 [T-046 报告](../test/evidence/M2/T-046/verification.md)。
 - SQLite 默认 `data/lrs.sqlite`（`NODE_ENV=test` 默认关闭，测试显式传 `:memory:` 或临时文件）；WAL、外键、`expires_at` TTL 每分钟清理。
 - 移动端审计需同时启动 API：Vite 预览复用 `server.proxy`，仅启动 4173 时 `/api/v1/session` 会 502。
 
@@ -93,12 +98,15 @@ docs/
 npm install
 npm run dev:web               # 前端开发（Vite 5173；proxy /api → 3000）
 npm run dev:api               # 后端开发（tsx watch，3000）
-npm run build                 # 构建 shared/game-engine/rules-content/web/api
+npm run preview -w @lrs/web   # 生产预览（4173，PWA/Service Worker 验证入口）
+npm run build                 # 构建 shared/game-engine/rules-content/web/api（web 含 PWA 预缓存）
 npm start -w @lrs/api         # 生产：静态 + API + P1 WS 单进程
 npm run lint                  # ESLint
 npm run format:check          # Prettier
 npm run typecheck             # 所有 workspace
 npm test                      # Vitest
+npm run test:p1-security      # P1 安全黑盒（临时 API 3111）
+npm run test:p1-load          # P1 压测（临时 API 3112；10 房间/130 会话）
 npm run e2e                   # Playwright（自动启动 Web 5173 + API 3000；需先安装 Chromium）
 ```
 

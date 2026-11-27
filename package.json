@@ -22,6 +22,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:p1-security": "node scripts/test-script/p1-security-check.mjs",
+    "test:p1-load": "node scripts/test-script/p1-load.mjs",
     "verify:dist": "node scripts/verify-dist.mjs",
     "e2e": "playwright test"
   },

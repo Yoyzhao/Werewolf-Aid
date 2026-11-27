@@ -1,6 +1,7 @@
 import { ROLE_DEFINITIONS } from '@lrs/game-engine';
 
 import { ASSISTANT_CONTEXT_LIMIT } from './assistant';
+import { sanitizeFreeText } from './input-filter';
 import type { AssistantRecord } from './types';
 
 export interface AssistantContextPreview {
@@ -66,7 +67,7 @@ export function buildAssistantContext(record: AssistantRecord): AssistantContext
   lines.push(...(speechLines.length ? speechLines : ['暂无']));
 
   lines.push('', '【自由描述】');
-  lines.push(record.freeText.trim() || '暂无');
+  lines.push(sanitizeFreeText(record.freeText).trim() || '暂无');
 
   const raw = lines.join('\n');
   const truncated = raw.length > ASSISTANT_CONTEXT_LIMIT;

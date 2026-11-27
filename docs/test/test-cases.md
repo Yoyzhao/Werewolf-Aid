@@ -1,20 +1,22 @@
-# P0 测试计划与用例（T-023）
+# P0 + P1 测试计划与用例（T-023 / T-046）
 
-- 版本：v1.0（2026-11-26）
-- 任务：T-023（阶段 8 测试）
-- 基线：P0 验收通过后的工作区；PRD v1.3.2、api-contract v1.1、interaction-spec v1.1
-- 范围：M1 P0（单机主持闭环、助手、规则、AI 中转与前端接入、移动端/PC 响应式）
-- 范围外：P1 联机/PWA/SQLite/WS（M2）；真人 12 人局（用户侧验收项，见 §9）
+- 版本：v1.1（2026-11-27）
+- 任务：T-023（P0 阶段 8）、T-046（P1 阶段 8）
+- 基线：P0 验收（T-023）+ P1 验收（T-045）；PRD v1.3.2、api-contract v1.1、interaction-spec v1.2
+- 范围：M1 P0（单机主持闭环、助手、规则、AI 中转与前端接入、移动端/PC 响应式）+ M2 P1（联机、服务端视图、时间线、术语/笔记、AI 输入过滤、PWA）
+- 范围外：P2；真机、真实 AI 供应商与线上服务器不可用时按阻塞记录
 
 ## 1. 测试策略与分层
 
 | 层级 | 工具 | 资产 | 覆盖目标 |
 | --- | --- | --- | --- |
 | 规则单测 | Vitest | `packages/game-engine/src/*.test.ts` | 状态机、夜间结算、技能冲突、投票、胜负（AC-3/AC-4） |
-| 内容单测 | Vitest | `packages/rules-content/src/*.test.ts` | 板子/角色/流程与引擎口径一致（AC-4） |
-| 组件/页面测试 | Vitest + RTL + jsdom | `apps/web/src/**/*.test.tsx` | 页面流程、遮罩、助手、AI 四态、存储恢复（AC-2/5/6/7/8/10/11/18） |
-| API 单测 | Vitest + Fastify inject | `apps/api/src/*.test.ts` | 契约、CSRF、SSRF、限频、超时、静态资源、日志脱敏（AC-9/10） |
-| 端到端 | Playwright Chromium | `tests/e2e/*.spec.ts` | 真实浏览器串联的 P0 主持闭环、断网、离线、响应式（AC-1~AC-11/16/18） |
+| 内容单测 | Vitest | `packages/rules-content/src/*.test.ts` | 板子/角色/流程/术语与引擎口径一致（AC-4、P1-5） |
+| 组件/页面测试 | Vitest + RTL + jsdom | `apps/web/src/**/*.test.tsx` | 页面流程、遮罩、助手、AI 四态、存储恢复、房间状态（AC-2/5/6/7/8/10/11/18、P1-1/2/4/6/7） |
+| API 单测 | Vitest + Fastify inject | `apps/api/src/*.test.ts` | 契约、CSRF、SSRF、限频、超时、静态资源、日志脱敏；房间生命周期、视图、版本、Origin、结算删除（AC-9/10、AC-12/13/14/19） |
+| 端到端 | Playwright Chromium | `tests/e2e/*.spec.ts` | 真实浏览器串联的 P0 主持闭环、断网、离线、响应式；P1 联机主链路与 AC 验收（AC-1～AC-19、P1-1～P1-8） |
+| 安全黑盒 | Node 脚本 | `scripts/test-script/p1-security-check.mjs` | Cookie 签名、CSRF、Origin、hostToken 哈希、日志脱敏 |
+| 性能压测 | Node 脚本 | `scripts/test-script/p1-load.mjs` | 10 房间 / 130 会话 / 120 WS；WS P95 与轮询 P95 |
 | 移动端实验室审计 | Playwright 脚本 + Lighthouse | `scripts/test-script/audit-mobile.mjs`、T-021/T-022 数据 | 8 视口横向滚动/触控/console/对比度、首屏预算（AC-16/17） |
 | 真机矩阵 | 人工 | 本文 §7.2 | AC-16 设备×浏览器；缺设备记阻塞 |
 
@@ -26,6 +28,7 @@
 | Node / npm | v24.22.3 / 11.19.1 |
 | 浏览器 | Playwright Chromium（桌面内核）；真机矩阵见 §7.2 |
 | Web/API | Vite 5173 + Fastify 3000（`npm run e2e` 自动启动）；生产同源由 API `WEB_DIST_DIR` 提供 |
+| P1 后端 | SQLite（WAL）`apps/api/data/lrs.sqlite`；Socket.IO `/ws/rooms` |
 | 视口 | 320/360/390/393/412/430/440 CSS 宽，DPR 2–3；PC 1440×900 |
 | 数据 | 12 座位固定夹具；两套板子（预女猎守 = 4 狼，预女猎白 = 3 狼 + 白狼王）；模式 A/B/C |
 | AI | 假端点/Mock 验证成功链路；真实私网地址验证拒绝链路；真实供应商由用户自备端点 |
@@ -148,6 +151,58 @@
 | TC-AC18-01 | Given 发牌/投票/结算/自爆前误触；When 回退；Then 二次确认、可取消、状态与存储一致 | E+U | 通过 | 模式 A 回退用例、`App.vote.test.tsx` |
 | TC-AC18-02 | Given 回退一步；When 连续回退/刷新；Then 无重复记录、快照一致 | U | 通过 | T-031 快照用例 |
 
+### AC-12 联机加入、降级与重连
+
+| 用例 | Given/When/Then | 方式 | 结果 | 证据 |
+| --- | --- | --- | --- | --- |
+| TC-AC12-01 | Given 房间已有 v1 快照；When 玩家输码加入、主持确认；Then 2s 内看到公开快照 | E | 通过（1539ms） | `p1-acceptance.spec.ts`、[ac12-timings.json](evidence/M2/T-045/raw/ac12-timings.json) |
+| TC-AC12-02 | Given WS 与 Socket.IO HTTP 传输不可用；When 主持写入新快照；Then 应用层 5s 轮询可见，P95 ≤5s | E | 通过（单独 4571ms；并行全量 5581ms，5s 周期 + 负载抖动） | [ac12-polling-isolated.json](evidence/M2/T-045/raw/ac12-polling-isolated.json)、[ac12-polling.json](evidence/M2/T-045/raw/ac12-polling.json) |
+| TC-AC12-03 | Given 玩家断线/刷新；When 恢复连接；Then 版本不回退并补齐最新视图 | E | 通过 | T-045、`p1-integration.spec.ts` |
+
+### AC-13 服务端视图隔离
+
+| 用例 | Given/When/Then | 方式 | 结果 | 证据 |
+| --- | --- | --- | --- | --- |
+| TC-AC13-01 | Given 5 号平民已绑定；When 直接调 `/view`（含 `?seatNo=9`）；Then 只返回本人视图且无 `gameState/stateJson/roleId/hostToken` | API | 通过 | [ac13-player-view.json](evidence/M2/T-045/raw/ac13-player-view.json) |
+| TC-AC13-02 | Given 未绑定/无令牌/错误令牌；When 读摘要、写快照、结算、抢座；Then 403 或 409，座位不变 | API | 通过 | [ac13-unauthorized.json](evidence/M2/T-045/raw/ac13-unauthorized.json) |
+| TC-AC13-03 | Given 狼人 9 号；When 读取视图；Then 仅见本人阵营与狼队友 10/11/12 | API | 通过 | 同上 |
+
+### AC-14 结算/解散删除
+
+| 用例 | Given/When/Then | 方式 | 结果 | 证据 |
+| --- | --- | --- | --- | --- |
+| TC-AC14-01 | Given 房间有座位、状态与快照；When 主持结算；Then SQLite 四表计数归零且 API 404 | E+DB | 通过 | [ac14-db-check.json](evidence/M2/T-045/raw/ac14-db-check.json) |
+| TC-AC14-02 | Given 同上；When 主持解散；Then DELETE 204、四表归零、public 404 | E+DB | 通过 | 同上 |
+
+### AC-15 PWA 离线
+
+| 用例 | Given/When/Then | 方式 | 结果 | 证据 |
+| --- | --- | --- | --- | --- |
+| TC-AC15-01 | Given 已在线访问并安装 SW；When 断网冷启动；Then 应用壳可开、助手记录可读 | E | 通过 | [T-043 报告](evidence/M2/T-043/verification.md)、`pwa.spec.ts` |
+| TC-AC15-02 | Given 生产构建；When 读取 manifest/SW；Then manifest 可读、SW 激活、预缓存 16 项 | E | 通过 | T-043、`pwa.spec.ts` |
+| TC-AC15-03 | Given iOS/微信；When 安装/离线；Then 降级提示可见 | R | **阻塞（无真机）** | §7.2 |
+
+### AC-19 版本控制
+
+| 用例 | Given/When/Then | 方式 | 结果 | 证据 |
+| --- | --- | --- | --- | --- |
+| TC-AC19-01 | Given 已写入 v1；When 再写 v1/v0；Then 409 `STALE_VERSION`（v0 为 400 参数校验） | API | 通过 | [ac19-version.json](evidence/M2/T-045/raw/ac19-version.json) |
+| TC-AC19-02 | Given 连续 v1→v2→v3；When 玩家重连读取；Then 版本递增且读到最新 | API+E | 通过 | 同上；T-044 双浏览器用例 |
+| TC-AC19-03 | Given 10 房间 120 WS；When 主持写入 v2；Then WS P95 24ms、max 24ms（≤2s） | 压测 | 通过 | [load-check.json](evidence/M2/T-046/load-check.json) |
+
+### P1-1～P1-8 功能矩阵
+
+| 用例 | 范围 | 方式 | 结果 | 证据 |
+| --- | --- | --- | --- | --- |
+| TC-P1-01 | P1-1 创建/加入/确认/解绑/主持恢复 | API+U+E | 通过 | `rooms.test.ts`、T-038/T-039、`p1-integration.spec.ts` |
+| TC-P1-02 | P1-2 WS 推送、轮询降级、断线重连、房间关闭 | API+E | 通过 | `realtime.test.ts`、T-044/T-045 |
+| TC-P1-03 | P1-3 服务端视图过滤（公开/私有/狼队/预言家/女巫/守卫） | U+API | 通过 | `views.test.ts` 13 例、AC-13 |
+| TC-P1-04 | P1-4 复盘时间线（主持完整、玩家仅本人私有动作） | U+E | 通过 | T-040、`timeline.spec.ts` |
+| TC-P1-05 | P1-5 术语表 14 条与跨范围搜索高亮 | U+E | 通过 | T-041、`p1-rules-notes.spec.ts` |
+| TC-P1-06 | P1-6 私人笔记自动保存、刷新保留、手动引用、不自动进 AI 上下文 | U+E | 通过 | T-041、`App.notes.test.tsx` |
+| TC-P1-07 | P1-7 零宽/控制字符过滤、敏感信息提示、500 字 AI 上限 | U+E | 通过 | T-042、`p1-ai-filter.spec.ts` |
+| TC-P1-08 | P1-8 manifest/SW/预缓存/更新提示/离线冷启动 | U+E | 通过 | T-043、`pwa.spec.ts` |
+
 ## 4. 安全与 API 用例
 
 | 用例 | 场景 | 方式 | 结果 | 证据 |
@@ -159,6 +214,19 @@
 | TC-SEC-05 | 请求体上限 413、非法 JSON 400、不支持 Content-Type 415 | U+黑盒 | 通过 | T-019 功能测试（已修复缺陷） |
 | TC-SEC-06 | Helmet/CSP、生产 Cookie 属性、HSTS、API 404 与 SPA fallback 隔离 | U+黑盒 | 通过 | T-019 证据 |
 | TC-SEC-07 | 日志脱敏：无 Key、Prompt 上下文、Cookie | 黑盒 | 通过 | T-019 功能测试 |
+| TC-SEC-08 | P1 Cookie：`lrs_anon=<48hex>.<64hex>` HMAC 签名；篡改 Cookie 写入返回 401 | 黑盒 | 通过 | `p1-security-check.mjs` |
+| TC-SEC-09 | P1 Origin/CSRF：缺 CSRF/错误 CSRF/跨源 API 均 403；WS 无 Origin 或错误 Origin 拒绝 | 黑盒 | 通过 | 同上、`realtime.test.ts` |
+| TC-SEC-10 | P1 hostToken：服务端仅存 SHA-256，不下发明文；日志无 hostToken/Cookie | 黑盒 | 通过 | 同上、`rooms.test.ts` |
+| TC-SEC-11 | P1 房间鉴权：未绑定读视图 403、无令牌写快照/结算 403、抢座 409 | 黑盒 | 通过 | AC-13 |
+
+## 4.1 P1 性能与压测用例
+
+| 用例 | Given/When/Then | 方式 | 结果 | 证据 |
+| --- | --- | --- | --- | --- |
+| TC-PERF-01 | Given 10 房间、10 主持 + 120 玩家（130 会话）；When 120 个玩家 WS 连接；Then 全部连接成功 | 压测 | 通过（120/120） | [load-check.json](evidence/M2/T-046/load-check.json) |
+| TC-PERF-02 | Given 120 WS 已连接；When 10 个房间同时写入 v2；Then WS 端到端 P95 ≤2s | 压测 | 通过（P95 24ms、max 24ms） | 同上 |
+| TC-PERF-03 | Given 120 玩家按 5s 周期轮询（相位分散）；When 10 个房间写入 v3；Then 轮询可见 P95 ≤5s | 压测 | 通过（P95 4773ms、max 4976ms） | 同上 |
+| TC-PERF-04 | Given 压测完成；When 检查错误；Then 连接/推送/轮询错误为 0 | 压测 | 通过（0） | 同上 |
 
 ## 5. 执行方式与门控命令
 
@@ -170,11 +238,14 @@ npm test
 npm run e2e
 npm run build
 npm run verify:dist
+npm run test:p1-security
+npm run test:p1-load
 node scripts/test-script/audit-mobile.mjs http://localhost:4173
 ```
 
 - 单测/组件测试随任务交付，本任务执行全量回归；e2e 自动启动 Web 5173 + API 3000。
-- 移动端审计产物写入 `.artifacts/audit/`，定稿证据复制到 `docs/test/evidence/M1/T-023/`。
+- P1 安全/压测脚本自行启动临时 Fastify + SQLite（3111/3112），不污染开发数据库。
+- 移动端审计产物写入 `.artifacts/audit/`，定稿证据复制到对应任务证据目录。
 
 ## 6. 缺陷分级与出口准则
 
@@ -214,17 +285,21 @@ node scripts/test-script/audit-mobile.mjs http://localhost:4173
 | 同上 | 微信内置浏览器 | **阻塞** | 无真机环境 |
 | 同上 | UC / QQ 浏览器 | **阻塞** | 未安装/无法验证 |
 
-- 真机项须在 T-024 部署前完成；当前沿用 2026-11-26 风险接受（用户批准）。
-- 若届时仍无设备，由用户在 T-024 验收时决定：预发布环境抽测或继续风险接受。
+- 真机项须在 T-047 发布前完成；当前沿用 2026-11-26 风险接受（用户批准）。
+- 若届时仍无设备，由用户在 T-047 验收时决定：预发布环境抽测或继续风险接受。
 
 ## 8. 本轮执行记录
 
 | 项 | 结果 | 备注 |
 | --- | --- | --- |
-| 单元/组件/API 测试 | 见 T-023 报告 | 全量 `npm test` |
-| E2E | 见 T-023 报告 | 全量 `npm run e2e` |
-| 门控 | 见 T-023 报告 | lint/format/typecheck/build/verify:dist |
-| 移动端审计 | 见 T-023 报告 | 8 视口 + 全流程抽查 |
+| P0 单元/组件/API 测试 | 见 T-023 报告 | 242 例基线 |
+| P0 E2E | 见 T-023 报告 | 24 例基线 |
+| P1 单元/组件/API/WS | 见 T-046 报告 | 全量 340 例 |
+| P1 E2E | 见 T-046 报告 | 全量 41 例（含 AC-12/13/14/19、PWA） |
+| 门控 | 见 T-046 报告 | lint/format/typecheck/test/e2e/build/verify:dist |
+| P1 安全黑盒 | 通过 | Cookie/CSRF/Origin/hostToken/日志 |
+| P1 压测 | 通过 | 10 房间 / 130 会话 / 120 WS；WS P95 24ms、轮询 P95 4773ms |
+| 移动端审计 | 见 T-046 报告 | P0 8 视口 + 全流程抽查；P1 320/390 已由 e2e 覆盖 |
 | 真机矩阵 | 阻塞 | §7.2 |
 | 真实 AI 供应商 | 未执行 | 用户自备端点 |
 
@@ -233,12 +308,15 @@ node scripts/test-script/audit-mobile.mjs http://localhost:4173
 1. **真人 12 人局（AC-1）**：需用户组织一次预女猎守正式验收，确认新手主持可完成。
 2. **真机矩阵（AC-16/AC-17）**：需设备或预发布环境；当前记阻塞。
 3. **真实 AI 供应商（AC-9）**：需用户提供可用端点/Key；不在仓库保存。
-4. **P1 联机相关（AC-12～AC-15、AC-19）**：M2 范围，不进入本轮。
+4. **P1 联机（AC-12～AC-15、AC-19）**：已由 T-045/T-046 自动化覆盖；PWA 的 iOS/微信真机行为仍随 §7.2 阻塞。
+5. **线上服务器/域名/证书/ICP**：部署前置条件，见 T-024/T-047。
 
 ## 10. 参考
 
 - [PRD v1.3.2](../prd/prd.md)（AC 与附录 A）
 - [api-contract v1.1](../tech/api-contract.md)
-- [interaction-spec v1.1](../tech/interaction-spec.md)
+- [interaction-spec v1.2](../tech/interaction-spec.md)
 - [T-022 联调报告](evidence/M1/T-022/verification.md)
 - [T-021 实验室报告](evidence/M1/T-021/verification.md)
+- [T-045 验收报告](evidence/M2/T-045/verification.md)
+- [T-046 测试报告](evidence/M2/T-046/verification.md)

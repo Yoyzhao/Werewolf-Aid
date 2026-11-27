@@ -1,0 +1,44 @@
+{
+  "settledRoom": {
+    "roomId": "r_561f50c2023d7d719c",
+    "code": "839762",
+    "before": {
+      "rooms": 1,
+      "room_seats": 1,
+      "game_states": 1,
+      "snapshots": 1
+    },
+    "after": {
+      "rooms": 0,
+      "room_seats": 0,
+      "game_states": 0,
+      "snapshots": 0
+    },
+    "api": {
+      "summary": 404,
+      "view": 404,
+      "public": 404
+    }
+  },
+  "deletedRoom": {
+    "roomId": "r_fd6391fbf867460b64",
+    "code": "061232",
+    "before": {
+      "rooms": 1,
+      "room_seats": 1,
+      "game_states": 1,
+      "snapshots": 1
+    },
+    "after": {
+      "rooms": 0,
+      "room_seats": 0,
+      "game_states": 0,
+      "snapshots": 0
+    },
+    "api": {
+      "deleteStatus": 204,
+      "public": 404
+    }
+  },
+  "databaseFile": "E:\\Desktop\\Workspace2\\Werewolf-Aid\\apps\\api\\data\\lrs.sqlite"
+}

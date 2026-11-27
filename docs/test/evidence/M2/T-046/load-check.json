@@ -1,0 +1,28 @@
+{
+  "environment": {
+    "base": "http://127.0.0.1:3112",
+    "rooms": 10,
+    "seatsPerRoom": 12,
+    "sessions": 130,
+    "wsConnections": 120,
+    "database": "E:\\Desktop\\Workspace2\\Werewolf-Aid\\.artifacts\\p1\\T-046\\db-load\\load.sqlite"
+  },
+  "setupMs": 321,
+  "ws": {
+    "count": 120,
+    "p50": 13,
+    "p95": 24,
+    "max": 24,
+    "pass": true
+  },
+  "polling": {
+    "count": 120,
+    "intervalMs": 5000,
+    "p50": 2379,
+    "p95": 4773,
+    "max": 4976,
+    "pass": true
+  },
+  "errors": [],
+  "pass": true
+}

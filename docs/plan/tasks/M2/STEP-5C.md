@@ -83,12 +83,27 @@
 
 **验收**：过滤有单测；超长/异常输入不阻断其他功能；提示文案可关闭/理解。
 
+**完成结果（2026-11-27）**：
+- `apps/web/src/lib/input-filter.ts`：零宽/控制字符剔除、换行归一、连续空行合并；手机号/身份证/银行卡格式识别（不返回原值）；去首尾空白后按 500 字判定。
+- 助手页：字数计数 `n / 500`、超限告警、敏感信息提示、固定内容安全文案；超限时禁用 AI 整理/重试；自由描述存储仍保留 2000 字上限。
+- `buildAssistantContext` 再次过滤后组装；未改动 AI 中转协议。
+- 测试：input-filter 9 例、App.ai-filter 3 例、e2e 1 例（敏感提示、超限禁用、320/430 无横向滚动）。
+- 证据：[T-042 报告](../../../test/evidence/M2/T-042/verification.md)。
+
 <a id="t-043"></a>
 ## T-043 PWA 离线壳
 
 **范围内**：manifest、Service Worker、应用壳与静态资源预缓存、版本更新提示；不缓存 `/api`、AI、WS；离线冷启动读取本地记录；iOS/微信降级提示。
 
 **验收**：AC-15 离线冷启动可打开应用壳并读取助手记录；在线更新可获取新版本；P0 包体预算不超 250 kB gzip（首屏）。
+
+**完成结果（2026-11-27）**：
+- `manifest.webmanifest` + 192/512/maskable 图标；`sw.js` 预缓存应用壳、JS/CSS、头像与 manifest，导航 network-first + 缓存兜底，静态资源 cache-first，跳过 `/api`、`/ws` 和跨域请求。
+- 构建脚本生成 `precache.js` 与 `sw.js` 版本注释；`verify-dist` 增加 manifest/SW/precache 校验。
+- `pwa.ts` + `PwaBanners`：生产注册、更新提示与刷新、离线提示、安装按钮、iOS/微信降级说明（关闭后不重复）。
+- 测试：pwa 6 例、PwaBanners 4 例；e2e 3 例（离线冷启动读取助手记录、manifest/SW、修改 SW 后更新提示并刷新生效）。
+- 首屏 JS 206.36 kB gzip；预缓存 16 项。
+- 证据：[T-043 报告](../../../test/evidence/M2/T-043/verification.md)。
 
 ## 阶段验证
 

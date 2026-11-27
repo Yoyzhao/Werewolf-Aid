@@ -1,0 +1,10 @@
+{
+  "roomCode": "499822",
+  "versionBeforePolling": 1,
+  "versionAfterPollingUpdate": 2,
+  "pollingToViewMs": 5581,
+  "pollingIntervalMs": 5000,
+  "pollingThresholdMs": 7000,
+  "versionAfterReconnect": 2,
+  "connectionAfterReconnect": "实时同步"
+}

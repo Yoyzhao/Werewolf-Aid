@@ -8,6 +8,7 @@ import { RoleAvatar } from '../../components/RoleAvatar';
 import { roleName } from '../../lib/board';
 import { buildHostTimeline } from '../../lib/timeline';
 import { useGameStore } from '../../stores/game-store';
+import { useHostRoomStore } from '../../stores/host-room-store';
 import { Timeline } from './Timeline';
 
 export function ResultScreen() {
@@ -15,6 +16,8 @@ export function ResultScreen() {
   const playAgain = useGameStore((state) => state.playAgain);
   const clearGame = useGameStore((state) => state.clearGame);
   const goHome = useGameStore((state) => state.goHome);
+  const setView = useGameStore((state) => state.setView);
+  const hostBinding = useHostRoomStore((state) => state.binding);
 
   const [againOpen, setAgainOpen] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
@@ -93,6 +96,21 @@ export function ResultScreen() {
         </section>
 
         <Timeline groups={timeline} hint="主持端完整 · 默认展开最近一夜" />
+
+        {hostBinding ? (
+          <section className="card" aria-label="联机房间">
+            <div className="card-head">
+              <h3>联机房间</h3>
+              <span className="hint">进行中</span>
+            </div>
+            <p className="text-sm leading-6 text-muted">
+              最终视图会同步给已绑定玩家；结算房间后玩家将看到“房间已结束”，房间与快照会被删除。
+            </p>
+            <button type="button" className="btn primary mt-3" onClick={() => setView('host-room')}>
+              去结算房间
+            </button>
+          </section>
+        ) : null}
 
         <p className="mt-3 text-xs text-faint">
           结算后不可回退；再来一局会保留当前板子与设置并清空本局记录。

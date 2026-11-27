@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
 
 import { GuideDialog } from './components/GuideDialog';
+import { PwaBanners } from './components/PwaBanners';
 import { TopBar } from './components/TopBar';
 import { AssistantScreen } from './features/assistant/AssistantScreen';
 import { DawnScreen } from './features/dawn/DawnScreen';
@@ -44,7 +45,9 @@ export default function App() {
   const init = useGameStore((state) => state.init);
   const dismissGuide = useGameStore((state) => state.dismissGuide);
   const retrySave = useGameStore((state) => state.retrySave);
+  const setView = useGameStore((state) => state.setView);
   const initHostRoom = useHostRoomStore((state) => state.init);
+  const hostBinding = useHostRoomStore((state) => state.binding);
 
   const [joinRoute, setJoinRoute] = useState<JoinRoute | null>(() =>
     readJoinRoute(window.location.pathname),
@@ -103,6 +106,7 @@ export default function App() {
           onNavigate={navigateJoin}
           onExit={exitJoin}
         />
+        <PwaBanners />
         <Toaster theme="dark" position="top-center" richColors />
       </>
     );
@@ -110,7 +114,11 @@ export default function App() {
 
   return (
     <>
-      <TopBar view={view} />
+      <TopBar
+        view={view}
+        hostRoomCode={hostBinding?.code ?? null}
+        onOpenHostRoom={() => setView('host-room')}
+      />
       <main className="shell">
         {storageError ? (
           <div className="warn-strip strong mt-3" role="alert">
@@ -146,6 +154,7 @@ export default function App() {
       </main>
 
       <GuideDialog open={guideOpen} onDismiss={dismissGuide} />
+      <PwaBanners />
       <Toaster theme="dark" position="top-center" richColors />
     </>
   );

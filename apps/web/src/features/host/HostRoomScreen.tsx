@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getBoard } from '@lrs/game-engine';
+import { getBoard, type BoardId } from '@lrs/game-engine';
 import {
   CheckCheck,
   Copy,
@@ -61,7 +61,12 @@ export function HostRoomScreen() {
 
   const boardId = useGameStore((state) => state.boardId);
   const game = useGameStore((state) => state.game);
+  const resumeRecord = useGameStore((state) => state.resumeRecord);
   const setView = useGameStore((state) => state.setView);
+  const returnToGame = useGameStore((state) => state.returnToGame);
+  const resumeGame = useGameStore((state) => state.resumeGame);
+  const goSetup = useGameStore((state) => state.goSetup);
+  const selectBoard = useGameStore((state) => state.selectBoard);
 
   const [now, setNow] = useState(() => Date.now());
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -79,6 +84,12 @@ export function HostRoomScreen() {
     }, 3000);
     return () => clearInterval(timer);
   }, [binding, refresh]);
+
+  // 进入房间页时立即写一次最新状态，避免结算前最终快照仍在防抖队列中。
+  useEffect(() => {
+    if (!binding || !game) return;
+    retrySnapshot();
+  }, [binding, game, retrySnapshot]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 15_000);
@@ -143,6 +154,13 @@ export function HostRoomScreen() {
     }
   };
 
+  const enterSetup = (): void => {
+    if (binding && binding.boardId !== boardId) {
+      selectBoard(binding.boardId as BoardId);
+    }
+    goSetup();
+  };
+
   if (!initialized) {
     return (
       <div className="screen-body">
@@ -177,6 +195,34 @@ export function HostRoomScreen() {
               重试恢复
             </button>
           ) : null}
+        </div>
+      ) : null}
+
+      {binding && summary ? (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {game ? (
+            <button type="button" className="btn primary" onClick={returnToGame}>
+              {game.status === 'finished' ? '查看本局结算' : '回到当前对局'}
+            </button>
+          ) : resumeRecord ? (
+            <button type="button" className="btn primary" onClick={resumeGame}>
+              {resumeRecord.status === 'active' ? '继续上一局' : '查看上一局结果'}
+            </button>
+          ) : (
+            <button type="button" className="btn primary" onClick={enterSetup}>
+              进入开局设置
+            </button>
+          )}
+          {game?.status === 'finished' ? (
+            <button type="button" className="btn" onClick={enterSetup}>
+              进入下一局设置
+            </button>
+          ) : null}
+          <span className="text-xs text-faint">
+            {game?.status === 'active'
+              ? '主持端会在每个阶段自动同步快照，玩家可在加入页查看进度。'
+              : '联机失败不会阻塞本机主持；可随时返回大厅继续。'}
+          </span>
         </div>
       ) : null}
 

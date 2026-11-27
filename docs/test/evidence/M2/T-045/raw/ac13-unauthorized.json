@@ -1,0 +1,19 @@
+{
+  "roomCode": "002362",
+  "unboundView": 403,
+  "summaryWithoutToken": 403,
+  "snapshotWithoutToken": 403,
+  "snapshotWithWrongToken": 403,
+  "settleWithoutToken": 403,
+  "publicInfoKeys": [
+    "boardId",
+    "code",
+    "expiresAt",
+    "joinExpiresAt",
+    "phase",
+    "status"
+  ],
+  "seatHijack": 409,
+  "moveBoundSeat": 409,
+  "mySeatAfterMove": 9
+}

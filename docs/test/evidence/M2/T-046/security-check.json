@@ -1,0 +1,46 @@
+{
+  "environment": {
+    "base": "http://127.0.0.1:3111",
+    "origin": "http://localhost:5173",
+    "database": "E:\\Desktop\\Workspace2\\Werewolf-Aid\\.artifacts\\p1\\T-046\\db-security\\security.sqlite"
+  },
+  "cookie": {
+    "formatValid": true,
+    "httpOnly": true,
+    "sameSiteLax": true,
+    "pathRoot": true,
+    "value": "c5fd9c97daa62586c647…",
+    "tamperedStatus": 401,
+    "tamperedRejected": true
+  },
+  "csrf": {
+    "missingStatus": 403,
+    "missingRejected": true,
+    "wrongStatus": 403,
+    "wrongRejected": true
+  },
+  "origin": {
+    "apiStatus": 403,
+    "apiMessage": "请求来源不被允许",
+    "apiRejected": true,
+    "joinStatus": 200,
+    "confirmStatus": 200,
+    "wsAllowed": true,
+    "wsEvilRejected": true,
+    "wsEvilMessage": "websocket error",
+    "wsMissingOriginRejected": true
+  },
+  "hostToken": {
+    "hashEqualsSha256": true,
+    "plainNotStored": true,
+    "hashPrefix": "663b3cf4a048…"
+  },
+  "logRedaction": {
+    "containsHostToken": false,
+    "containsCookie": false,
+    "logBytes": 4438
+  },
+  "pass": true,
+  "errors": [],
+  "cleanupStatus": 204
+}

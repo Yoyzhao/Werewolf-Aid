@@ -39,3 +39,15 @@
 
 - 两浏览器会话时序不稳定：用固定夹具与显式等待；必要时补自动化。
 - 数据删除验证：使用 SQLite 查询与 API 复核。
+
+### 完成结果（2026-11-27）
+
+- 新增 [p1-acceptance.spec.ts](../../../tests/e2e/p1-acceptance.spec.ts) 5 条系统验收用例：
+  - AC-12：输码加入确认后 1539ms 看到公开快照（阈值 2000ms）。
+  - AC-12：WS/轮询传输故障注入后降级 5s 刷新；单独运行 4571ms 可见，恢复后“实时同步”且版本补齐。
+  - AC-13：玩家/狼人/未绑定/外部会话直接调 API；越权读取与写入均 403，玩家视图不含原始状态，外部抢占座位 409。
+  - AC-14：结算/解散后 SQLite `rooms/room_seats/game_states/snapshots` 四表计数全部为 0，API 404。
+  - AC-19：旧版本/重复版本 409 `STALE_VERSION`，接受版本 [1,2,3]，重连读取 v3，后续 v4 递增。
+- 回归：340 单测、41 e2e；lint/format/typecheck/build/verify:dist 全部通过；首屏 207.14 kB gzip。
+- 证据：[T-045 报告](../../../test/evidence/M2/T-045/verification.md)。
+- 状态：完成，待用户验收；无 P1 阻断缺陷；下一步 T-046 全量测试与回归。

@@ -156,6 +156,23 @@ describe('联机主持房间状态', () => {
     expect((snapshotCalls[1]?.body as { version: number }).version).toBe(8);
   });
 
+  it('创建房间时不把已结束的上一局写入快照', async () => {
+    vi.useFakeTimers();
+    const { calls } = installFetch(() => jsonResponse(200, { version: 1 }));
+    const finished = {
+      ...createGame(),
+      phase: 'RESULT',
+      status: 'finished',
+      result: { winner: 'good', round: 1 },
+    } as const;
+    useGameStore.setState({ game: finished });
+
+    await createReadyRoom();
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(calls.filter((call) => call.url.endsWith('/snapshot'))).toHaveLength(0);
+  });
+
   it('房间不存在时停止同步并提示房间已结束', async () => {
     installFetch(() => jsonResponse(404, { error: { code: 'NOT_FOUND', message: 'gone' } }));
     await createReadyRoom();

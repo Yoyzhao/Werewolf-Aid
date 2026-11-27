@@ -7,6 +7,8 @@ export interface AIPanelProps {
   readonly result: string;
   readonly errorCode: AiFailureCode | null;
   readonly errorMessage: string;
+  /** 非空时禁止发起 AI 请求（例如自由描述超限）。 */
+  readonly blockReason?: string | null;
   readonly onAnalyze: () => void;
   readonly onCancel: () => void;
 }
@@ -20,7 +22,8 @@ const STATUS_LABEL: Record<AiStatus, string> = {
   cancelled: '已取消',
 };
 
-const PRIVACY_TEXT = '上下文将发往你自配的第三方模型；Key 默认仅本次会话使用。';
+const PRIVACY_TEXT =
+  '上下文将发往你自配的第三方模型；Key 默认仅本次会话使用。请勿填写真实姓名、手机号、身份证号或银行卡号。';
 const BOUNDARY_TEXT = 'AI 分析仅供参考，可能出错，请自行判断。';
 
 export function AIPanel({
@@ -29,10 +32,12 @@ export function AIPanel({
   result,
   errorCode,
   errorMessage,
+  blockReason,
   onAnalyze,
   onCancel,
 }: AIPanelProps) {
   const retryable = errorCode ? isRetryableAiError(errorCode) : true;
+  const blocked = Boolean(blockReason);
 
   return (
     <section className="card" aria-labelledby="ai-panel-title">
@@ -57,7 +62,13 @@ export function AIPanel({
           <p className="text-sm text-muted">
             还没有分析结果。先补全身份、局势和玩家记录，再让军师整理。
           </p>
-          <button type="button" className="btn primary mt-3" onClick={onAnalyze}>
+          <button
+            type="button"
+            className="btn primary mt-3"
+            disabled={blocked}
+            title={blockReason ?? undefined}
+            onClick={onAnalyze}
+          >
             让军师整理
           </button>
         </>
@@ -83,7 +94,13 @@ export function AIPanel({
           >
             {result}
           </div>
-          <button type="button" className="btn mt-3" onClick={onAnalyze}>
+          <button
+            type="button"
+            className="btn mt-3"
+            disabled={blocked}
+            title={blockReason ?? undefined}
+            onClick={onAnalyze}
+          >
             重新整理
           </button>
         </>
@@ -95,7 +112,13 @@ export function AIPanel({
             <span>{errorMessage || AI_ERROR_MESSAGES.NETWORK}</span>
           </div>
           {retryable ? (
-            <button type="button" className="btn mt-3" onClick={onAnalyze}>
+            <button
+              type="button"
+              className="btn mt-3"
+              disabled={blocked}
+              title={blockReason ?? undefined}
+              onClick={onAnalyze}
+            >
               重试
             </button>
           ) : (
@@ -109,7 +132,13 @@ export function AIPanel({
           <p className="text-sm text-muted" role="status">
             {AI_ERROR_MESSAGES.CANCELLED}
           </p>
-          <button type="button" className="btn mt-3" onClick={onAnalyze}>
+          <button
+            type="button"
+            className="btn mt-3"
+            disabled={blocked}
+            title={blockReason ?? undefined}
+            onClick={onAnalyze}
+          >
             重新整理
           </button>
         </>

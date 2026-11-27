@@ -15,6 +15,7 @@ import {
   createEmptyPlayerRecord,
 } from '../../lib/assistant';
 import { buildAssistantContext } from '../../lib/assistant-context';
+import { AI_FREE_TEXT_LIMIT, SENSITIVE_KIND_LABELS, analyzeFreeText } from '../../lib/input-filter';
 import { useAiStore } from '../../stores/ai-store';
 import { useAssistantStore } from '../../stores/assistant-store';
 import { useGameStore } from '../../stores/game-store';
@@ -74,6 +75,13 @@ export function AssistantScreen() {
   );
 
   const preview = useMemo(() => buildAssistantContext(record), [record]);
+  const freeTextAnalysis = useMemo(() => analyzeFreeText(record.freeText), [record.freeText]);
+  const analyzeBlockReason = freeTextAnalysis.overLimit
+    ? `自由描述最多 ${AI_FREE_TEXT_LIMIT} 字，当前 ${freeTextAnalysis.length} 字；请精简后再让 AI 整理。`
+    : null;
+  const sensitiveLabels = freeTextAnalysis.sensitive
+    .map((kind) => SENSITIVE_KIND_LABELS[kind])
+    .join('、');
   const role = record.roleId ? ROLE_DEFINITIONS[record.roleId] : null;
   const guide = record.roleId ? getRoleGuide(record.roleId) : null;
 
@@ -331,21 +339,46 @@ export function AssistantScreen() {
                 </p>
               ) : null}
 
-              <label className="mt-3 block text-[11.5px] text-faint">
-                自由描述
-                <textarea
-                  aria-label="自由描述"
-                  value={record.freeText}
-                  onChange={(event) => setFreeText(event.target.value)}
-                  rows={3}
-                  maxLength={ASSISTANT_FREE_TEXT_LIMIT}
-                  placeholder="补充你想让军师关注的信息"
-                  className={TEXTAREA_CLASS}
-                />
-              </label>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <label htmlFor="assistant-free-text" className="text-[11.5px] text-faint">
+                  自由描述
+                </label>
+                <span
+                  aria-live="polite"
+                  className={`text-[11px] ${
+                    freeTextAnalysis.overLimit ? 'text-danger' : 'text-faint'
+                  }`}
+                >
+                  {freeTextAnalysis.length} / {AI_FREE_TEXT_LIMIT}
+                </span>
+              </div>
+              <textarea
+                id="assistant-free-text"
+                aria-label="自由描述"
+                value={record.freeText}
+                onChange={(event) => setFreeText(event.target.value)}
+                rows={3}
+                maxLength={ASSISTANT_FREE_TEXT_LIMIT}
+                placeholder="补充你想让军师关注的信息"
+                className={TEXTAREA_CLASS}
+              />
 
-              <p className="mt-2 text-[11.5px] text-faint">
-                上下文将发往你自配的第三方模型；Key 默认仅本次会话使用。
+              {freeTextAnalysis.overLimit ? (
+                <div className="warn-strip strong mt-2" role="alert">
+                  <span className="flex-1">{analyzeBlockReason}</span>
+                </div>
+              ) : null}
+
+              {sensitiveLabels ? (
+                <div className="warn-strip mt-2" role="alert">
+                  <span className="flex-1">
+                    检测到疑似{sensitiveLabels}，请勿填写真实个人信息。
+                  </span>
+                </div>
+              ) : null}
+
+              <p className="mt-2 text-[11.5px] leading-5 text-faint">
+                自由描述仅在你点击“让军师整理”后随上下文发送；请勿填写真实姓名、手机号、身份证号或银行卡号。
               </p>
             </section>
 
@@ -362,7 +395,10 @@ export function AssistantScreen() {
               result={aiResult}
               errorCode={aiErrorCode}
               errorMessage={aiErrorMessage}
-              onAnalyze={() => void analyzeAi(preview.text)}
+              blockReason={analyzeBlockReason}
+              onAnalyze={() => {
+                if (!analyzeBlockReason) void analyzeAi(preview.text);
+              }}
               onCancel={cancelAi}
             />
           </div>

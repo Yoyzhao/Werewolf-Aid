@@ -12,6 +12,7 @@ import {
   loadAssistantRecord,
   saveAssistantRecord,
 } from '../lib/assistant-storage';
+import { sanitizeFreeText } from '../lib/input-filter';
 import type { AssistantPlayerRecord, AssistantRecord } from '../lib/types';
 
 const SAVE_DEBOUNCE_MS = 300;
@@ -171,7 +172,7 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
       commit(
         {
           ...get().record,
-          freeText: value.slice(0, ASSISTANT_FREE_TEXT_LIMIT),
+          freeText: sanitizeFreeText(value).slice(0, ASSISTANT_FREE_TEXT_LIMIT),
           updatedAt: Date.now(),
         },
         false,

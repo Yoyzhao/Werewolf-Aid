@@ -1,6 +1,6 @@
 import { ArrowLeft, ChevronRight, Users } from 'lucide-react';
-import { useState } from 'react';
-import { getBoard } from '@lrs/game-engine';
+import { useEffect, useState } from 'react';
+import { getBoard, type BoardId } from '@lrs/game-engine';
 import { CapabilityBanner } from '../../components/CapabilityBanner';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { FlowBar } from '../../components/FlowBar';
@@ -15,6 +15,7 @@ import {
   roleName,
 } from '../../lib/board';
 import { useGameStore } from '../../stores/game-store';
+import { useHostRoomStore } from '../../stores/host-room-store';
 
 const SEATS = Array.from({ length: 12 }, (_, index) => ({
   no: index + 1,
@@ -33,9 +34,18 @@ export function SetupScreen() {
   const startDeal = useGameStore((state) => state.startDeal);
   const goHome = useGameStore((state) => state.goHome);
   const dismissCapability = useGameStore((state) => state.dismissCapability);
+  const hostBinding = useHostRoomStore((state) => state.binding);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const board = getBoard(boardId);
+
+  // 联机房间创建后板子固定；无论从大厅还是房间页进入设置，都对齐房间板子。
+  useEffect(() => {
+    if (!hostBinding) return;
+    if (hostBinding.boardId !== boardId) {
+      selectBoard(hostBinding.boardId as BoardId);
+    }
+  }, [boardId, hostBinding, selectBoard]);
 
   return (
     <>
@@ -65,9 +75,10 @@ export function SetupScreen() {
                     <button
                       key={id}
                       type="button"
-                      className="board-opt"
+                      className={`board-opt ${hostBinding ? 'opacity-70' : ''}`}
                       data-board={id}
                       aria-pressed={selected}
+                      disabled={Boolean(hostBinding)}
                       onClick={() => selectBoard(id)}
                     >
                       <span className="board-badge">
@@ -98,6 +109,11 @@ export function SetupScreen() {
                   </span>
                 ))}
               </div>
+              {hostBinding ? (
+                <p className="mt-2.5 text-xs text-gold-soft">
+                  联机房间已锁定板子“{board.name}”；如需更换，请先在房间页解散房间。
+                </p>
+              ) : null}
             </section>
 
             <section className="card">

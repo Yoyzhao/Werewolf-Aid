@@ -125,6 +125,7 @@ export interface GameStoreActions {
   playAgain: () => void;
   clearGame: () => void;
   resumeGame: () => void;
+  returnToGame: () => void;
   discardResume: () => void;
   retrySave: () => void;
   dismissGuide: () => void;
@@ -430,6 +431,13 @@ export const useGameStore = create<GameStore>((set, get) => {
         resumeIncompatible: false,
         storageError: false,
       });
+    },
+
+    /** 从联机房间等页面回到当前对局，按阶段恢复视图。 */
+    returnToGame: () => {
+      const { game } = get();
+      if (!game) return;
+      set({ view: viewForPhase(game) });
     },
 
     discardResume: () => {
