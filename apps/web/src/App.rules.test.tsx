@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -59,5 +59,45 @@ describe('规则页', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /返回大厅/ }));
     expect(await screen.findByRole('heading', { name: '狼人杀助手' })).toBeInTheDocument();
+  });
+
+  it('术语表 Tab 按分类展示词条', async () => {
+    await openRules();
+
+    await userEvent.click(screen.getByRole('tab', { name: '术语表' }));
+
+    expect(screen.getByRole('tab', { name: '术语表' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('同守同救')).toBeInTheDocument();
+    expect(screen.getByText('连守')).toBeInTheDocument();
+    expect(screen.getByText('悍跳')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '判定' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '口语' })).toBeInTheDocument();
+  });
+
+  it('搜索跨板子、角色与术语并高亮关键词', async () => {
+    await openRules();
+
+    await userEvent.type(screen.getByLabelText('搜索规则与术语'), '金水');
+
+    const results = screen.getByRole('region', { name: '搜索结果' });
+    expect(within(results).getByRole('heading', { name: '金水' })).toBeInTheDocument();
+    expect(within(results).getByText('预言家')).toBeInTheDocument();
+    expect(results.querySelectorAll('mark').length).toBeGreaterThan(0);
+    expect(
+      [...results.querySelectorAll('mark')].every((mark) => mark.textContent?.includes('金水')),
+    ).toBe(true);
+
+    await userEvent.clear(screen.getByLabelText('搜索规则与术语'));
+    expect(screen.queryByRole('region', { name: '搜索结果' })).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: '规则内容' })).toBeInTheDocument();
+  });
+
+  it('搜索无命中显示空态', async () => {
+    await openRules();
+
+    await userEvent.type(screen.getByLabelText('搜索规则与术语'), '完全不存在的词');
+
+    expect(screen.getByText('没有找到相关术语，试试更短的关键词')).toBeInTheDocument();
+    expect(screen.getByText('0 条')).toBeInTheDocument();
   });
 });

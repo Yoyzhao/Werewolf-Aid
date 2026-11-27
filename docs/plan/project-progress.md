@@ -2,7 +2,7 @@
 
 - 项目：狼人杀助手 Web 应用
 - **开发版本**：Web 应用（移动端优先 H5），**不是微信小程序版本**；唯一基线 PRD v1.3.2（v1.3.1 + CHG-20261125-02）。
-- **当前主阶段**：M2 P1 实现（T-033/T-035/T-036/T-037 已验收；T-038/T-039 已完成，待验收；T-040～T-043 待启动）
+- **当前主阶段**：M2 P1 实现（T-033/T-035/T-036/T-037/T-038/T-039 已验收；T-040/T-041 已完成，待验收；T-042/T-043 待启动）
 - 拓扑：前后端分离 monorepo；React + Vite 前端；Fastify 后端；P1 Socket.IO + SQLite
 - **当前里程碑**：M2 v1.4（P1 联机与 PWA；M1 已验收 2026-11-26）
 - 最近更新：2026-11-26
@@ -26,7 +26,7 @@
 ## 里程碑概览
 
 - [x] **M1** v1.3.1 P0 单机主持闭环 — 已完成（2026-11-26 验收通过）
-- [ ] **M2** v1.4 P1 联机与 PWA — 进行中（T-033/T-035/T-036/T-037 已验收；T-038/T-039 完成待验收）
+- [ ] **M2** v1.4 P1 联机与 PWA — 进行中（T-033/T-035/T-036/T-037/T-038/T-039 已验收；T-040/T-041 完成待验收）
 - [ ] **M3** P2 扩展能力 — 后续
 
 ## 阶段推进概览
@@ -51,8 +51,8 @@
 | --- | --- | --- | --- | --- | --- |
 | M2-规划 | P1 规划与任务拆解 | T-010 | 已完成 | 已通过（2026-11-26） | [M2 STEP-4](tasks/M2/STEP-4.md)；[dev-plan](project-dev-plan.md) |
 | M2-5A | P1 交互与页面设计 | T-035 | 已完成 | 已通过（2026-11-26） | [M2 STEP-5A](tasks/M2/STEP-5A.md)；[T-035 报告](../test/evidence/M2/T-035/verification.md) |
-| M2-5D | P1 数据层/房间 API/视图/WS | T-033/T-036/T-037 | 已完成 | T-033 已通过；T-036/T-037 待验收（2026-11-26） | [M2 STEP-5D](tasks/M2/STEP-5D.md)；[T-033 报告](../test/evidence/M2/T-033/verification.md)、[T-036 报告](../test/evidence/M2/T-036/verification.md)、[T-037 报告](../test/evidence/M2/T-037/verification.md) |
-| M2-5C | P1 主持端/玩家端/时间线/术语/笔记/过滤/PWA | T-038～T-043 | 进行中 | T-038/T-039 待验收；其余待启动 | [M2 STEP-5C](tasks/M2/STEP-5C.md)；[T-038 报告](../test/evidence/M2/T-038/verification.md)、[T-039 报告](../test/evidence/M2/T-039/verification.md) |
+| M2-5D | P1 数据层/房间 API/视图/WS | T-033/T-036/T-037 | 已完成 | 已通过（2026-11-26） | [M2 STEP-5D](tasks/M2/STEP-5D.md)；[T-033 报告](../test/evidence/M2/T-033/verification.md)、[T-036 报告](../test/evidence/M2/T-036/verification.md)、[T-037 报告](../test/evidence/M2/T-037/verification.md) |
+| M2-5C | P1 主持端/玩家端/时间线/术语/笔记/过滤/PWA | T-038～T-043 | 进行中 | T-038/T-039 已验收；T-040/T-041 完成待验收；T-042/T-043 待启动 | [M2 STEP-5C](tasks/M2/STEP-5C.md)；[T-038 报告](../test/evidence/M2/T-038/verification.md)、[T-039 报告](../test/evidence/M2/T-039/verification.md)、[T-040 报告](../test/evidence/M2/T-040/verification.md)、[T-041 报告](../test/evidence/M2/T-041/verification.md) |
 | M2-6 | P1 整合 | T-044 | 待启动 | 未提交 | [M2 STEP-6](tasks/M2/STEP-6.md) |
 | M2-7 | P1 系统联调与验收 | T-045 | 待启动 | 未提交 | [M2 STEP-7](tasks/M2/STEP-7.md) |
 | M2-8 | P1 测试与全量回归 | T-046 | 待启动 | 未提交 | [M2 STEP-8](tasks/M2/STEP-8.md) |
@@ -82,6 +82,7 @@
 | 2026-11-26 | T-010 验收 / 启动 T-033、T-035 | 基线 | 确认 | 用户“验收 T-010，启动 T-033 和 T-035”；设计5A与服务端视图并行 |
 | 2026-11-26 | T-033/T-035 验收 / 启动 T-036、T-037 | 基线 | 确认 | 用户“验收通过，启动 T-036 和 T-037”；P1 设计冻结，进入数据层与实时推送 |
 | 2026-11-26 | T-036/T-037 验收 / 启动 T-038、T-039 | 基线 | 确认 | 用户“验收通过，启动 T-038 和 T-039”；进入 P1 主持端与玩家端 UI |
+| 2026-11-26 | T-038/T-039 验收 / 启动 T-040、T-041 | 基线 | 确认 | 用户“验收通过，启动 T-040 和 T-041”；进入 P1 复盘时间线、术语搜索与私人笔记 |
 
 ## 任务池
 
@@ -124,12 +125,12 @@
 | T-024 | 部署与上线准备 | M1/9 | 已完成 | P0 | T-023 | [STEP-9](tasks/M1/STEP-9.md#t-024) | [部署文档](../deploy/项目部署文档.md)；[T-024 报告](../test/evidence/M1/T-024/verification.md) | 已验收（2026-11-26） |
 | T-033 | 服务端状态校验与视图生成（`buildViews`） | M2/5D | 已完成 | P1 | T-010 | [M2 STEP-5D](tasks/M2/STEP-5D.md#t-033) | [T-033 报告](../test/evidence/M2/T-033/verification.md) | 已验收（2026-11-26） |
 | T-035 | P1 交互与页面设计（联机/时间线/术语/笔记/PWA） | M2/5A | 已完成 | P1 | T-010 | [M2 STEP-5A](tasks/M2/STEP-5A.md#t-035) | [interaction-spec v1.2](../tech/interaction-spec.md)；[M2 原型](../prototype/M2/index.html)；[T-035 报告](../test/evidence/M2/T-035/verification.md) | 已验收（2026-11-26） |
-| T-036 | P1 数据层与房间 API（SQLite/Drizzle/绑定/快照/TTL） | M2/5D | 已完成 | P1 | T-033/T-035 | [M2 STEP-5D](tasks/M2/STEP-5D.md#t-036) | [T-036 报告](../test/evidence/M2/T-036/verification.md)；16 个房间 API 测试 | 待验收 |
-| T-037 | Socket.IO 推送与轮询降级 | M2/5D | 已完成 | P1 | T-036 | [M2 STEP-5D](tasks/M2/STEP-5D.md#t-037) | [T-037 报告](../test/evidence/M2/T-037/verification.md)；6 个 WS 集成测试 | 待验收 |
-| T-038 | 联机主持端 UI（配对码/确认/解绑/恢复/快照写入） | M2/5C | 已完成 | P1 | T-035/T-036 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-038) | [T-038 报告](../test/evidence/M2/T-038/verification.md)；主持组件 3 例 + 状态 4 例 | 待验收 |
-| T-039 | 联机玩家端 UI（加入/身份/公开进度/重连） | M2/5C | 已完成 | P1 | T-035/T-037 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-039) | [T-039 报告](../test/evidence/M2/T-039/verification.md)；玩家组件 3 例 + 状态 5 例 + e2e 2 例 | 待验收 |
-| T-040 | 复盘时间线 | M2/5C | 待开始 | P1 | T-035/T-031 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-040) | 未产生 | 待 M2 启动 |
-| T-041 | 术语表/搜索与私人笔记 | M2/5C | 待开始 | P1 | T-035/T-032/T-018 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-041) | 未产生 | 待 M2 启动 |
+| T-036 | P1 数据层与房间 API（SQLite/Drizzle/绑定/快照/TTL） | M2/5D | 已完成 | P1 | T-033/T-035 | [M2 STEP-5D](tasks/M2/STEP-5D.md#t-036) | [T-036 报告](../test/evidence/M2/T-036/verification.md)；16 个房间 API 测试 | 已验收（2026-11-26） |
+| T-037 | Socket.IO 推送与轮询降级 | M2/5D | 已完成 | P1 | T-036 | [M2 STEP-5D](tasks/M2/STEP-5D.md#t-037) | [T-037 报告](../test/evidence/M2/T-037/verification.md)；6 个 WS 集成测试 | 已验收（2026-11-26） |
+| T-038 | 联机主持端 UI（配对码/确认/解绑/恢复/快照写入） | M2/5C | 已完成 | P1 | T-035/T-036 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-038) | [T-038 报告](../test/evidence/M2/T-038/verification.md)；主持组件 3 例 + 状态 4 例 | 已验收（2026-11-26） |
+| T-039 | 联机玩家端 UI（加入/身份/公开进度/重连） | M2/5C | 已完成 | P1 | T-035/T-037 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-039) | [T-039 报告](../test/evidence/M2/T-039/verification.md)；玩家组件 3 例 + 状态 5 例 + e2e 2 例 | 已验收（2026-11-26） |
+| T-040 | 复盘时间线 | M2/5C | 已完成 | P1 | T-035/T-031 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-040) | [T-040 报告](../test/evidence/M2/T-040/verification.md)；timeline 3 例 + views 13 例 + e2e 3 例 | 待用户验收 |
+| T-041 | 术语表/搜索与私人笔记 | M2/5C | 已完成 | P1 | T-035/T-032/T-018 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-041) | [T-041 报告](../test/evidence/M2/T-041/verification.md)；rules-content 8 例 + 搜索 7 例 + 规则页 6 例 + 笔记 3 例 + e2e 2 例 | 待用户验收 |
 | T-042 | AI 输入基础过滤与内容提示 | M2/5C | 待开始 | P1 | T-035/T-020 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-042) | 未产生 | 待 M2 启动 |
 | T-043 | PWA 离线壳 | M2/5C | 待开始 | P1 | T-035/T-015 | [M2 STEP-5C](tasks/M2/STEP-5C.md#t-043) | 未产生 | 待 M2 启动 |
 | T-044 | P1 整合（主持端/玩家端/后端/视图/WS/降级） | M2/6 | 待开始 | P1 | T-038/T-039/T-037 | [M2 STEP-6](tasks/M2/STEP-6.md#t-044) | 未产生 | 待 M2 启动 |
@@ -139,7 +140,7 @@
 
 > M1 实现任务共 19 项（T-013、T-025、T-014、T-015、T-026～T-032、T-018、T-021、T-034、T-019、T-020、T-022～T-024），当前完成 19 项（T-013/T-025/T-014/T-015/T-026/T-027/T-028/T-029/T-030/T-031/T-032/T-018/T-021/T-034/T-019/T-020/T-022/T-023/T-024）；前置阶段任务 T-001～T-012 已完成（T-010 属 M2）。
 >
-> M2 任务共 15 项：T-010 规划 + 14 项实现（T-033、T-035～T-047）；当前 T-010/T-033/T-035/T-036/T-037 已验收，T-038/T-039 完成待验收，其余待启动。T-034 已被 M1 规则页占用，M2 不使用该编号。
+> M2 任务共 15 项：T-010 规划 + 14 项实现（T-033、T-035～T-047）；当前 T-010/T-033/T-035/T-036/T-037/T-038/T-039 已验收，T-040/T-041 完成待验收，T-042～T-047 待启动。T-034 已被 M1 规则页占用，M2 不使用该编号。
 
 ## 步骤 4 产出
 
@@ -180,7 +181,7 @@
 | 2026-11-26 | 匿名会话 Cookie 未签名，P1 房间身份存在 Cookie 固定风险 | M2 | P1 上线前增加 Cookie 签名或会话轮换，M2 安全设计核查 | 已解决（T-036：`lrs_anon=<id>.<hmac>`，未签名/篡改 Cookie 视为无会话） |
 | 2026-11-26 | 幂等键仅存于单实例内存，进程重启后失效 | T-036 | 单实例部署；重复创建只产生新房间，不破坏既有数据；如需跨重启幂等再评估持久化 | 接受（P1 单实例） |
 | 2026-11-26 | SQLite 文件备份/磁盘权限尚未纳入部署流程 | T-047 | T-047 补充备份、WAL 检查点、目录权限与恢复演练 | 待处理（T-047） |
-| 2026-11-26 | P1 客户端引入 socket.io-client/qrcode，首屏包体上升 | T-039/T-043 | 当前 198.98 kB gzip，仍低于 250 kB；PWA 阶段继续监控，必要时按路由拆分 | 监控中 |
+| 2026-11-26 | P1 客户端引入 socket.io-client/qrcode，首屏包体上升 | T-039/T-043 | 当前 203.88 kB gzip，仍低于 250 kB；PWA 阶段继续监控，必要时按路由拆分 | 监控中 |
 | 2026-11-26 | P0-1 规则页 UI 未纳入 5C 任务池（T-032 仅内容） | T-021/阶段验收 | 新增 T-034 规则页 UI 并补齐 | 已解决（2026-11-26） |
 | 2026-11-26 | AC-5 断网后路由懒加载 chunk 不可用，页面空白 | T-022/AC-5 | P0 页面改为静态打包 | 已修复（2026-11-26，首屏 136.45 kB gzip） |
 
@@ -188,7 +189,7 @@
 
 ### 2026-11-26 进度快照
 
-**当前进度**：M1 已全部验收（2026-11-26，含 T-024）；M2 T-010/T-033/T-035/T-036/T-037 已验收；T-038（联机主持端）与 T-039（玩家端）已完成、待验收；T-040～T-043 待启动。
+**当前进度**：M1 已全部验收（2026-11-26，含 T-024）；M2 T-010/T-033/T-035/T-036/T-037/T-038/T-039 已验收；T-040（复盘时间线）与 T-041（术语/笔记）已完成并提交报告，待验收；T-042/T-043 待启动。
 
 **已完成**：
 - PRD v1.3.1 验收、技术方案 v1.2 验收、步骤 4 任务拆解验收。
@@ -214,13 +215,15 @@
 - T-037 Socket.IO：`/ws/rooms` 握手校验会话/Origin/绑定；`room.view`/`room.closed`/`room.error`；64KB 上限；版本只增不减；未发牌保持连接、发牌后首推；解绑/结算/过期即时通知；6 个 WS 集成测试（连接/未发牌/推送/关闭/越权/Origin）；[T-037 报告](../test/evidence/M2/T-037/verification.md)。
 - T-038 联机主持端：[HostRoomScreen.tsx](../../apps/web/src/features/host/HostRoomScreen.tsx) 提供配对码/二维码/链接、座位绑定（逐个/批量确认/解绑）、房间状态、快照同步状态、结算/解散；[host-room-store.ts](../../apps/web/src/stores/host-room-store.ts) 管理 hostToken 本机恢复、3s 摘要刷新、300ms 合并快照、失败退避与 409 补写；后端补充摘要 `seats` 与 `GET /public`、`POST /leave`；主持组件 3 例 + 状态 4 例；[T-038 报告](../test/evidence/M2/T-038/verification.md)。
 - T-039 联机玩家端：`/join`、`/join/:code` 路由；[PlayerRoot.tsx](../../apps/web/src/features/player/PlayerRoot.tsx) 加入/等待/绑定/结束状态、身份遮罩、公开进度与本人私有信息；[player-room-store.ts](../../apps/web/src/stores/player-room-store.ts) 1.5s 确认轮询、WS、3 次重连失败后 5s 轮询、版本单调；玩家组件 3 例 + 状态 5 例 + 双上下文 e2e 2 例（真实 WS 推送、320/430 无横向滚动、结算关闭）；[T-039 报告](../test/evidence/M2/T-039/verification.md)。
-- 回归：298 单测（26 文件）、26 e2e；首屏 JS 198.98 kB gzip（仍低于 250 kB）。
+- T-040 复盘时间线：`game-engine` 新增 `PlayerView.privateActions`（仅本人夜间动作，狼队共享刀人，预言家带结果）；[timeline.ts](../../apps/web/src/lib/timeline.ts) 统一按夜/白天分组，[Timeline.tsx](../../apps/web/src/features/result/Timeline.tsx) 折叠/公开私密标记/空态；结算页与玩家端接入；timeline 3 例 + views 13 例 + e2e 3 例（主持端完整事件与默认展开、空态、玩家 9 号狼人仅见狼队刀人，320/390/430 无横向滚动）；[T-040 报告](../test/evidence/M2/T-040/verification.md)。
+- T-041 术语/搜索与笔记：`rules-content` 新增 14 条术语与 5 类分类；[rules-search.ts](../../apps/web/src/lib/rules-search.ts) 统一搜索板子/角色/流程/术语并高亮；规则页新增“术语表”Tab 与空态；助手新增“笔记”Tab，独立 `lrs.notes.v1` IndexedDB、500ms 防抖、保存状态、清空确认、“引用到自由描述”，不自动进入 AI 上下文；rules-content 8 例 + 搜索 7 例 + 规则页 6 例 + 笔记 3 例 + e2e 2 例；[T-041 报告](../test/evidence/M2/T-041/verification.md)。
+- 回归：316 单测（29 文件）、31 e2e；首屏 JS 203.88 kB gzip（仍低于 250 kB）。
 
 **进行中**：
-- T-038/T-039 已完成并提交报告，待用户验收；T-040～T-043 未启动。
+- T-040/T-041 已完成并提交报告，待用户验收；T-042/T-043 未启动。
 
 **下一步**：
-- 用户验收后启动 T-040（复盘时间线）、T-041（术语/笔记）、T-042（AI 过滤）、T-043（PWA），随后 T-044 整合。
+- 用户验收后启动 T-042（AI 输入过滤）、T-043（PWA），随后 T-044 整合。
 
 **风险与阻塞**：
 - M2：`better-sqlite3` Node 24 兼容、匿名 Cookie 签名、WS 单实例、PWA 在 iOS/微信的限制、AC-13 越权测试。

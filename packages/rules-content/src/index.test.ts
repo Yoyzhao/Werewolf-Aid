@@ -10,6 +10,9 @@ import {
   RULES_CONTENT,
   RULES_FLOWS,
   RULES_FOOTER,
+  TERM_CATEGORIES,
+  TERM_CATEGORY_LABELS,
+  TERMS,
 } from './index.js';
 
 describe('规则内容', () => {
@@ -87,6 +90,41 @@ describe('规则内容', () => {
     expect(RULES_CONTENT.boards).toBe(RULE_BOARDS);
     expect(RULES_CONTENT.roles).toBe(ROLE_GUIDES);
     expect(RULES_CONTENT.flows).toBe(RULES_FLOWS);
+    expect(RULES_CONTENT.terms).toBe(TERMS);
+  });
+
+  it('术语覆盖设计稿示例，分类、别名与解释完整', () => {
+    const required = [
+      '同守同救',
+      '连守',
+      '警徽流',
+      '悍跳',
+      '自爆',
+      '金水',
+      '查杀',
+      '银水',
+      '倒钩',
+      '冲锋狼',
+    ];
+    const termNames = new Set(TERMS.map((term) => term.term));
+
+    for (const name of required) {
+      expect(termNames.has(name), `缺少术语：${name}`).toBe(true);
+    }
+
+    expect(new Set(TERMS.map((term) => term.id)).size).toBe(TERMS.length);
+    expect(new Set(TERMS.map((term) => term.term)).size).toBe(TERMS.length);
+
+    for (const term of TERMS) {
+      expect(TERM_CATEGORIES).toContain(term.category);
+      expect(TERM_CATEGORY_LABELS[term.category].trim().length).toBeGreaterThan(0);
+      expect(term.summary.trim().length).toBeGreaterThan(0);
+      expect(term.detail.trim().length).toBeGreaterThan(0);
+
+      for (const alias of term.aliases) {
+        expect(alias.trim().length).toBeGreaterThan(0);
+      }
+    }
   });
 
   it('查询函数返回对应板子与角色', () => {

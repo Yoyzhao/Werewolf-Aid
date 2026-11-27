@@ -48,11 +48,23 @@ export interface RulesFooter {
   readonly sources: readonly string[];
 }
 
+export type TermCategory = 'board' | 'role' | 'flow' | 'verdict' | 'slang';
+
+export interface TermEntry {
+  readonly id: string;
+  readonly term: string;
+  readonly aliases: readonly string[];
+  readonly category: TermCategory;
+  readonly summary: string;
+  readonly detail: string;
+}
+
 export interface RulesContent {
   readonly version: string;
   readonly boards: readonly RuleBoard[];
   readonly roles: readonly RoleGuide[];
   readonly flows: readonly RulesFlow[];
+  readonly terms: readonly TermEntry[];
   readonly footer: RulesFooter;
 }
 
@@ -278,6 +290,143 @@ export const RULES_FLOWS: readonly RulesFlow[] = [
   },
 ];
 
+export const TERM_CATEGORIES: readonly TermCategory[] = [
+  'board',
+  'role',
+  'flow',
+  'verdict',
+  'slang',
+];
+
+export const TERM_CATEGORY_LABELS: Readonly<Record<TermCategory, string>> = {
+  board: '板子',
+  role: '角色',
+  flow: '流程',
+  verdict: '判定',
+  slang: '口语',
+};
+
+export const TERMS: readonly TermEntry[] = [
+  {
+    id: 'same-guard-save',
+    term: '同守同救',
+    aliases: ['同守同救规则'],
+    category: 'verdict',
+    summary: '守卫守护与女巫解药同时作用于同一名玩家时，该玩家仍然死亡。',
+    detail:
+      '结算顺序为守护 → 狼刀 → 女巫 → 同守同救。守卫只能挡狼刀，解药只能救刀口；两者叠加不产生额外保护，反而会让目标死亡。主持端会在夜间结算时自动判定。',
+  },
+  {
+    id: 'consecutive-guard',
+    term: '连守',
+    aliases: ['连续守护'],
+    category: 'flow',
+    summary: '守卫不能连续两夜守护同一名玩家。',
+    detail:
+      '例如第 1 夜守护 5 号，第 2 夜不能再次选择 5 号；空守不占用守护记录。系统会对连守操作直接拦截。',
+  },
+  {
+    id: 'badge-flow',
+    term: '警徽流',
+    aliases: ['警徽流向'],
+    category: 'flow',
+    summary: '预言家或警长提前约定的警徽移交顺序与后续验人安排。',
+    detail:
+      '常见写法如“警徽流 3、7”：先验 3 号，出局后警徽给 7 号。清晰的警徽流能减少好人因警徽去向产生分歧。',
+  },
+  {
+    id: 'fake-claim',
+    term: '悍跳',
+    aliases: ['悍跳狼', '悍跳预言家'],
+    category: 'slang',
+    summary: '狼人白天主动冒充预言家等神职，用假验人争夺警徽与话语权。',
+    detail: '悍跳通常配合狼队友冲票与倒钩；好人应对比验人逻辑、警徽流与票型，而不是只看语气。',
+  },
+  {
+    id: 'self-explode',
+    term: '自爆',
+    aliases: ['白天自爆'],
+    category: 'flow',
+    summary: '狼人白天主动亮明身份出局，中止当前发言或投票流程。',
+    detail: '自爆后直接进入黑夜；白狼王自爆可带走一名玩家。主持端会记录自爆事件并检查胜负。',
+  },
+  {
+    id: 'gold-water',
+    term: '金水',
+    aliases: ['验金'],
+    category: 'verdict',
+    summary: '被预言家查验为“好人”的玩家。',
+    detail:
+      '金水只代表预言家视角下的好人，不等于绝对安全；若预言家是悍跳狼，金水也可能是被利用的好人。',
+  },
+  {
+    id: 'check-kill',
+    term: '查杀',
+    aliases: ['验杀'],
+    category: 'verdict',
+    summary: '被预言家查验为“狼人”的玩家。',
+    detail: '真预言家的查杀通常优先放逐；若出现双查杀，需要结合警徽流、票型与发言判断谁在悍跳。',
+  },
+  {
+    id: 'silver-water',
+    term: '银水',
+    aliases: ['被救'],
+    category: 'verdict',
+    summary: '被女巫用解药救起的玩家。',
+    detail: '银水说明该玩家当夜是狼刀目标，通常狼面较低；但狼人自刀骗药时也会产生银水。',
+  },
+  {
+    id: 'hook-wolf',
+    term: '倒钩',
+    aliases: ['倒钩狼'],
+    category: 'slang',
+    summary: '狼人站边真预言家或好人阵营，以骗取信任、后期带偏节奏。',
+    detail: '倒钩狼往往发言积极、票型“正确”；好人需要观察其在关键轮次的归票是否真正有利于好人。',
+  },
+  {
+    id: 'charge-wolf',
+    term: '冲锋狼',
+    aliases: ['冲锋'],
+    category: 'slang',
+    summary: '主动带节奏、冲票或强推对跳的狼人。',
+    detail: '冲锋狼常与悍跳狼配合，一明一暗；若冲锋过猛露出破绽，狼队也可能让其自爆止损。',
+  },
+  {
+    id: 'empty-kill',
+    term: '空刀',
+    aliases: ['狼人空刀'],
+    category: 'flow',
+    summary: '狼人当夜不选择击杀目标。',
+    detail: '狼人意见不一致时按空刀处理；空刀可用于迷惑好人或配合自刀战术。',
+  },
+  {
+    id: 'empty-guard',
+    term: '空守',
+    aliases: ['守卫空守'],
+    category: 'flow',
+    summary: '守卫当夜不守护任何玩家。',
+    detail: '空守不占用守护记录，不会触发连守限制；常用于没有明确保护目标时保留选择空间。',
+  },
+  {
+    id: 'slaughter-edge',
+    term: '屠边',
+    aliases: ['屠边胜利'],
+    category: 'verdict',
+    summary: '狼人让神职全部出局或平民全部出局即获胜的规则。',
+    detail:
+      '当前两套板子均采用屠边；因此狼人刀口会优先打穿神职或平民的一侧，好人需要平衡两侧存活。',
+  },
+  {
+    id: 'sheriff-badge',
+    term: '警长',
+    aliases: ['警徽'],
+    category: 'flow',
+    summary: '白天竞选出的一人，拥有 1.5 票与发言顺序决定权。',
+    detail:
+      '首日竞选：报名 → 发言 → 退水 → 警下投票 → 平票 PK；也可无人上警。警长出局后可移交或撕毁警徽。',
+  },
+];
+
 export const RULES_FOOTER: RulesFooter = {
   text: '依据规则资料整理，以开局约定为准',
   sources: ['PRD 附录 A 规则口径表', 'PRD 附录 B 板子配置', '《狼人杀》规则资料汇编'],
@@ -288,6 +437,7 @@ export const RULES_CONTENT: RulesContent = {
   boards: RULE_BOARDS,
   roles: ROLE_GUIDES,
   flows: RULES_FLOWS,
+  terms: TERMS,
   footer: RULES_FOOTER,
 };
 
